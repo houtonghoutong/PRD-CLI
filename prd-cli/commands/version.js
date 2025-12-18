@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const confirm = require('./confirm');
 const dialog = require('./dialog');
 
-module.exports = async function (action, type) {
+module.exports = async function (action, type, options = {}) {
     const configPath = path.join(process.cwd(), '.prd-config.json');
 
     if (!await fs.pathExists(configPath)) {
@@ -17,10 +17,10 @@ module.exports = async function (action, type) {
     if (action === 'create') {
         await createVersionDoc(type, config, configPath);
     } else if (action === 'freeze') {
-        await freezeVersion(config, configPath);
+        await freezeVersion(config, configPath, options);
     } else {
         console.log(chalk.red('✗ 未知操作'));
-        console.log('可用操作: create C0|C1, freeze');
+        console.log('可用操作: create C0|C1|C2, freeze');
     }
 };
 
@@ -46,12 +46,13 @@ async function createVersionDoc(type, config, configPath) {
 
     const templates = {
         'C0': getC0Template(),
-        'C1': getC1Template()
+        'C1': getC1Template(),
+        'C2': getC2Template()
     };
 
     if (!templates[type]) {
         console.log(chalk.red(`✗ 未知的文档类型: ${type}`));
-        console.log('可用类型: C0, C1');
+        console.log('可用类型: C0, C1, C2');
         return;
     }
 
@@ -115,10 +116,24 @@ async function createVersionDoc(type, config, configPath) {
         console.log(chalk.bold('下一步:'));
         console.log('1. PM 填写 C1_版本需求清单.md');
         console.log('2. 执行 R2 审视: prd review r2');
+    } else if (type === 'C2') {
+        console.log(chalk.bold('⚠️  重要提醒：\n'));
+        console.log(chalk.yellow('【C2 用途】'));
+        console.log('- 记录版本冻结后发生的变更');
+        console.log('- 保证版本决策可追溯');
+        console.log('- 防止版本失控\n');
+
+        console.log(chalk.cyan('【填写要求】'));
+        console.log('- 只记录"已发生的变更"');
+        console.log('- 必须说明变更原因');
+        console.log('- 评估对版本目标的影响\n');
+
+        console.log(chalk.red('【注意】'));
+        console.log('- ⚠️ 重大变更可能需要重新执行 R2 审视\n');
     }
 }
 
-async function freezeVersion(config, configPath) {
+async function freezeVersion(config, configPath, options = {}) {
     if (config.currentIteration === 0) {
         console.log(chalk.red('✗ 请先创建迭代'));
         return;
@@ -163,15 +178,66 @@ async function freezeVersion(config, configPath) {
         return;
     }
 
-    // ⭐ 关键：PM 必须确认冻结
-    const pmSignature = await confirm.confirmC3Freeze();
+    // ⭐ 支持预确认模式：PM 已在对话中确认并提供签名
+    let pmSignature = null;
+    if (options.pmConfirmed && options.pmSignature) {
+        console.log(chalk.green(`✓ PM 已在对话中确认版本冻结，签名: ${options.pmSignature}`));
+        pmSignature = options.pmSignature;
+    } else {
+        // 交互式确认
+        pmSignature = await confirm.confirmC3Freeze();
+    }
+
     if (!pmSignature) {
         console.log(chalk.yellow('\n根据 PM 决策，未执行冻结'));
         return;
     }
 
-    // 生成 C3
-    const c3Template = getC3Template(pmSignature);
+    // ⭐ 读取 C0、C1、R2 内容，提取关键信息
+    console.log(chalk.gray('正在从 C0/C1/R2 提取关键信息...'));
+
+    const c0Content = await fs.readFile(c0Path, 'utf-8');
+    const c1Content = await fs.readFile(c1Path, 'utf-8');
+
+    // 提取 C0 版本目标
+    let c0VersionGoal = extractSection(c0Content, '版本目标') ||
+        extractSection(c0Content, '核心问题') ||
+        '（请手动填写，未能自动提取）';
+
+    // 提取 C0 版本范围
+    let c0Scope = extractSection(c0Content, '包含范围') ||
+        extractSection(c0Content, '版本包含') ||
+        '（请手动填写，未能自动提取）';
+
+    // 统计 C1 需求数量
+    const p0Count = (c1Content.match(/优先级[:\s]*P0/gi) || []).length;
+    const p1Count = (c1Content.match(/优先级[:\s]*P1/gi) || []).length;
+    const p2Count = (c1Content.match(/优先级[:\s]*P2/gi) || []).length;
+    const reqCount = (c1Content.match(/需求\s*#\d+|REQ-\d+/gi) || []).length || (p0Count + p1Count + p2Count);
+
+    // 提取 R2 审视摘要
+    let r2Summary = '';
+    const r2Sections = ['版本目标一致性', '版本范围偏移检查', '规划覆盖完整性', '需求粒度成熟度', '进入执行准备度'];
+    for (const section of r2Sections) {
+        const sectionContent = extractSection(r2Content, section);
+        if (sectionContent && sectionContent.length > 10) {
+            r2Summary += `- ${section}: ${sectionContent.substring(0, 80)}...\n`;
+        }
+    }
+    if (!r2Summary) {
+        r2Summary = '（请参考 R2_版本审视报告.md）';
+    }
+
+    // 生成 C3（传入提取的内容）
+    const c3Template = getC3Template(pmSignature, {
+        c0VersionGoal,
+        c0Scope,
+        reqCount,
+        p0Count,
+        p1Count,
+        p2Count,
+        r2Summary
+    });
     const c3Path = path.join(iterationDir, 'C3_版本冻结归档.md');
     await fs.writeFile(c3Path, c3Template);
 
@@ -195,7 +261,8 @@ async function freezeVersion(config, configPath) {
 function getFileName(type) {
     const names = {
         'C0': 'C0_版本范围声明.md',
-        'C1': 'C1_版本需求清单.md'
+        'C1': 'C1_版本需求清单.md',
+        'C2': 'C2_版本变更说明.md'
     };
     return names[type];
 }
@@ -454,7 +521,121 @@ function getC1Template() {
 `;
 }
 
-function getC3Template(pmSignature) {
+function getC2Template() {
+    return `# C2_版本变更说明
+
+**创建时间**: ${new Date().toLocaleString('zh-CN')}
+**文档状态**: 变更记录
+
+---
+
+## 文档说明
+
+**目的**: 
+- 记录版本冻结后发生的变更
+- 保证版本决策可追溯
+- 防止版本失控
+
+**填写要求**:
+- 只记录"已发生的变更"，不做评判
+- 必须说明变更原因和影响
+- 每次变更单独记录
+
+---
+
+## 变更记录
+
+### 变更 #1
+
+**变更时间**: ____________
+**变更人**: ____________
+
+**变更原因**:
+<!-- 说明为什么需要变更 -->
+
+**变更内容**:
+<!-- 详细描述变更了什么 -->
+
+**对版本目标的影响**:
+- [ ] 无影响
+- [ ] 范围调整（说明：______）
+- [ ] 优先级调整（说明：______）
+- [ ] 需求变更（说明：______）
+
+**是否需要重新审视**:
+- [ ] 不需要
+- [ ] 需要重新执行 R2 审视
+
+---
+
+### 变更 #2
+
+<!-- 如有更多变更，按相同格式记录 -->
+
+---
+
+## 变更汇总
+
+**总变更次数**: ______
+**最后变更时间**: ______
+
+**变更类型统计**:
+- 范围调整: ______ 次
+- 优先级调整: ______ 次
+- 需求变更: ______ 次
+- 其他: ______ 次
+
+---
+
+## 变更审批
+
+**审批人**: _____________
+**审批日期**: _____________
+**审批意见**: 
+
+---
+
+## 备注
+
+<!-- 其他需要说明的内容 -->
+`;
+}
+
+/**
+ * 从文档中提取指定标题下的内容
+ */
+function extractSection(content, sectionTitle) {
+    const patterns = [
+        new RegExp(`\\*\\*${sectionTitle}\\*\\*[:\\s]*([\\s\\S]*?)(?=\\n\\*\\*|\\n##|\\n---|\$)`, 'i'),
+        new RegExp(`###?\\s*${sectionTitle}[\\s\\S]*?\\n([\\s\\S]*?)(?=\\n##|\\n---|\$)`, 'i'),
+        new RegExp(`${sectionTitle}[:\\s]*\\n([\\s\\S]*?)(?=\\n\\*\\*|\\n##|\\n---|\$)`, 'i')
+    ];
+
+    for (const pattern of patterns) {
+        const match = content.match(pattern);
+        if (match && match[1]) {
+            let extracted = match[1].trim();
+            extracted = extracted.replace(/<!--[\s\S]*?-->/g, '').trim();
+            extracted = extracted.replace(/_{3,}/g, '').trim();
+            if (extracted.length > 5) {
+                return extracted;
+            }
+        }
+    }
+    return null;
+}
+
+function getC3Template(pmSignature, extractedContent = {}) {
+    const {
+        c0VersionGoal = '（未提供）',
+        c0Scope = '（未提供）',
+        reqCount = 0,
+        p0Count = 0,
+        p1Count = 0,
+        p2Count = 0,
+        r2Summary = '（未提供）'
+    } = extractedContent;
+
     return `# C3_版本冻结归档
 
 **冻结时间**: ${new Date().toLocaleString('zh-CN')}
@@ -478,16 +659,23 @@ function getC3Template(pmSignature) {
 
 ### 1.1 版本目标
 
-**引用 C0 版本目标**:
-<!-- 自动引用或手动填写 C0 中的版本目标 -->
+**来自 C0 的版本目标**:
 
-### 1.2 需求清单
+${c0VersionGoal}
 
-**引用 C1 需求数量**:
-- 总需求数: ______
-- P0 需求: ______
-- P1 需求: ______
-- P2 需求: ______
+### 1.2 版本范围
+
+**来自 C0 的范围说明**:
+
+${c0Scope}
+
+### 1.3 需求清单
+
+**来自 C1 的需求统计**:
+- 总需求数: ${reqCount || '（请手动统计）'}
+- P0 需求: ${p0Count}
+- P1 需求: ${p1Count}
+- P2 需求: ${p2Count}
 
 ---
 
@@ -497,21 +685,18 @@ function getC3Template(pmSignature) {
 
 **R2 审视状态**: ✅ 通过
 
-**通过时间**: ___________
+**通过时间**: ${new Date().toLocaleString('zh-CN')}
 
-**5 维度评分**:
-- 版本目标一致性: _____
-- 版本范围偏移检查: _____
-- 规划覆盖完整性: _____
-- 需求粒度成熟度: _____
-- 进入执行准备度: _____
+**审视摘要**:
+
+${r2Summary}
 
 ### 2.2 一致性确认
 
 **与 B3 规划的一致性**:
-- [ ] ✅ 未背叛规划
-- [ ] ✅ 未超出 B3 范围
-- [ ] ✅ 需求可追溯到 B2
+- ✅ 未背叛规划
+- ✅ 未超出 B3 范围
+- ✅ 需求可追溯到 B2
 
 ---
 
@@ -561,9 +746,10 @@ function getC3Template(pmSignature) {
 ### 4.2 变更流程
 
 **如需变更需求**:
-1. 必须说明变更原因和影响
-2. 评估是否需要重新执行 R2 审视
-3. PM 重新签字确认
+1. 运行 prd change 记录变更
+2. 创建 C2_版本变更说明.md
+3. 评估是否需要重新执行 R2 审视
+4. PM 重新签字确认
 
 ---
 
@@ -591,3 +777,4 @@ function getC3Template(pmSignature) {
 **产品需求阶段**: ✅ 完成
 `;
 }
+

@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const confirm = require('./confirm');
 const dialog = require('./dialog');
 
-module.exports = async function (action, type) {
+module.exports = async function (action, type, options = {}) {
     const configPath = path.join(process.cwd(), '.prd-config.json');
 
     if (!await fs.pathExists(configPath)) {
@@ -15,16 +15,16 @@ module.exports = async function (action, type) {
     const config = await fs.readJSON(configPath);
 
     if (action === 'create') {
-        await createPlanDoc(type, config, configPath);
+        await createPlanDoc(type, config, configPath, options);
     } else if (action === 'freeze') {
-        await freezePlan(config, configPath);
+        await freezePlan(config, configPath, options);
     } else {
         console.log(chalk.red('✗ 未知操作'));
         console.log('可用操作: create B1|B2, freeze');
     }
 };
 
-async function createPlanDoc(type, config, configPath) {
+async function createPlanDoc(type, config, configPath, options = {}) {
     if (config.currentIteration === 0) {
         console.log(chalk.red('✗ 请先创建迭代'));
         console.log('运行: prd iteration new');
@@ -58,6 +58,39 @@ async function createPlanDoc(type, config, configPath) {
 
     // B1 需要强制 PM 确认 R1 启动条件
     if (type === 'B1') {
+        // ⭐ 首先检查 A 类基线文档是否完整
+        const baselineDir = path.join(process.cwd(), '01_产品基线');
+        const a0Path = path.join(baselineDir, 'A0_产品基础与范围说明.md');
+        const a1Path = path.join(baselineDir, 'A1_已上线功能清单.md');
+        const a2Path = path.join(baselineDir, 'A2_存量反馈汇总.md');
+
+        const missingDocs = [];
+        if (!await fs.pathExists(a0Path)) missingDocs.push('A0_产品基础与范围说明');
+        if (!await fs.pathExists(a1Path)) missingDocs.push('A1_已上线功能清单');
+        if (!await fs.pathExists(a2Path)) missingDocs.push('A2_存量反馈汇总');
+
+        if (missingDocs.length > 0) {
+            console.log(chalk.red('\n✗ A 类基线文档不完整，无法开始规划\n'));
+            console.log(chalk.yellow('缺失的文档:'));
+            missingDocs.forEach(doc => console.log(`  - ${doc}`));
+            console.log('');
+            console.log(chalk.bold('请先完成基线文档:'));
+            if (missingDocs.includes('A0_产品基础与范围说明')) {
+                console.log('  prd baseline create A0');
+            }
+            if (missingDocs.includes('A1_已上线功能清单')) {
+                console.log('  prd baseline create A1');
+            }
+            if (missingDocs.includes('A2_存量反馈汇总')) {
+                console.log('  prd baseline create A2');
+            }
+            console.log('');
+            console.log(chalk.gray('提示: 如果用户已提供功能清单或反馈信息，应先归档到对应的 A 类文档'));
+            return;
+        }
+
+        console.log(chalk.green('✓ A 类基线文档完整'));
+
         const r1StartPath = path.join(iterationDir, 'R1_规划启动条件检查.md');
         if (!await fs.pathExists(r1StartPath)) {
             console.log(chalk.red('✗ 请先完成 R1 规划启动条件检查'));
@@ -65,8 +98,20 @@ async function createPlanDoc(type, config, configPath) {
             return;
         }
 
-        // ⭐ 关键：强制 PM 确认三个启动条件
-        const r1Confirmed = await confirm.confirmR1Start();
+        // ⭐ 支持预确认模式：PM 已在对话中确认
+        let r1Confirmed = false;
+        if (options.pmConfirmed) {
+            console.log(chalk.green('✓ PM 已在对话中确认 R1 三个启动条件满足'));
+            r1Confirmed = true;
+            await dialog.logPMConfirmation('planning', 'start_b1', 'approved', 'PM通过对话确认R1三条件满足,启动规划(预确认模式)');
+        } else {
+            // 交互式确认
+            r1Confirmed = await confirm.confirmR1Start();
+            if (r1Confirmed) {
+                await dialog.logPMConfirmation('planning', 'start_b1', 'approved', 'PM确认R1三条件满足,启动规划');
+            }
+        }
+
         if (!r1Confirmed) {
             console.log(chalk.yellow('\n根据 PM 决策，未启动规划'));
             console.log(chalk.gray('提示：只有满足三个启动条件，才应开始规划\n'));
@@ -74,9 +119,6 @@ async function createPlanDoc(type, config, configPath) {
         }
 
         console.log(chalk.green('\n✓ PM 确认启动规划\n'));
-
-        // 记录对话
-        await dialog.logPMConfirmation('planning', 'start_b1', 'approved', 'PM确认R1三条件满足,启动规划');
     }
 
     // B2 需要检查 B1 是否存在
@@ -137,7 +179,7 @@ async function createPlanDoc(type, config, configPath) {
     }
 }
 
-async function freezePlan(config, configPath) {
+async function freezePlan(config, configPath, options = {}) {
     if (config.currentIteration === 0) {
         console.log(chalk.red('✗ 请先创建迭代'));
         return;
@@ -176,15 +218,65 @@ async function freezePlan(config, configPath) {
         return;
     }
 
-    // ⭐ 关键：PM 必须确认冻结
-    const pmSignature = await confirm.confirmB3Freeze();
+    // ⭐ 支持预确认模式：PM 已在对话中确认并提供签名
+    let pmSignature = null;
+    if (options.pmConfirmed && options.pmSignature) {
+        console.log(chalk.green(`✓ PM 已在对话中确认冻结，签名: ${options.pmSignature}`));
+        pmSignature = options.pmSignature;
+    } else {
+        // 交互式确认
+        pmSignature = await confirm.confirmB3Freeze();
+    }
+
     if (!pmSignature) {
         console.log(chalk.yellow('\n根据 PM 决策，未执行冻结'));
         return;
     }
 
-    // 生成 B3
-    const b3Template = getB3Template(pmSignature);
+    // ⭐ 读取 B1、B2、R1 内容，提取关键信息
+    console.log(chalk.gray('正在从 B1/B2/R1 提取关键信息...'));
+
+    const b1Content = await fs.readFile(b1Path, 'utf-8');
+    const b2Content = await fs.readFile(b2Path, 'utf-8');
+
+    // 提取 B1 核心目标（尝试从多个可能的标题下提取）
+    let b1CoreGoal = extractSection(b1Content, '要解决的核心问题') ||
+        extractSection(b1Content, '核心问题') ||
+        extractSection(b1Content, '规划目标') ||
+        '（请手动填写，未能自动提取）';
+
+    // 提取 B2 范围说明
+    let b2Scope = extractSection(b2Content, '首版包含') ||
+        extractSection(b2Content, '范围界定') ||
+        extractSection(b2Content, '包含范围') ||
+        '（请手动填写，未能自动提取）';
+
+    // 提取 R1 审视详情
+    let r1Summary = '';
+    const r1Sections = ['目标清晰性', '场景真实性', '现状一致性', '范围收敛性', '版本化准备度'];
+    for (const section of r1Sections) {
+        const sectionContent = extractSection(r1Content, section);
+        if (sectionContent && sectionContent.length > 10) {
+            r1Summary += `- ${section}: ${sectionContent.substring(0, 100)}...\n`;
+        }
+    }
+    if (!r1Summary) {
+        r1Summary = '（请参考 R1_规划审视报告.md）';
+    }
+
+    // 检查 R1 中的结论
+    let r1Conclusion = '✅ 通过';
+    if (r1Content.includes('有条件通过')) {
+        r1Conclusion = '⚠️ 有条件通过';
+    }
+
+    // 生成 B3（传入提取的内容）
+    const b3Template = getB3Template(pmSignature, {
+        b1CoreGoal,
+        b2Scope,
+        r1Summary,
+        r1Conclusion
+    });
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
     await fs.writeFile(b3Path, b3Template);
 
@@ -460,7 +552,41 @@ function getB2Template() {
 `;
 }
 
-function getB3Template(pmSignature) {
+/**
+ * 从文档中提取指定标题下的内容
+ */
+function extractSection(content, sectionTitle) {
+    // 尝试匹配 "**标题**:" 或 "### 标题" 或 "## 标题" 格式
+    const patterns = [
+        new RegExp(`\\*\\*${sectionTitle}\\*\\*[:\\s]*([\\s\\S]*?)(?=\\n\\*\\*|\\n##|\\n---|\$)`, 'i'),
+        new RegExp(`###?\\s*${sectionTitle}[\\s\\S]*?\\n([\\s\\S]*?)(?=\\n##|\\n---|\$)`, 'i'),
+        new RegExp(`${sectionTitle}[:\\s]*\\n([\\s\\S]*?)(?=\\n\\*\\*|\\n##|\\n---|\$)`, 'i')
+    ];
+
+    for (const pattern of patterns) {
+        const match = content.match(pattern);
+        if (match && match[1]) {
+            let extracted = match[1].trim();
+            // 清理 HTML 注释
+            extracted = extracted.replace(/<!--[\s\S]*?-->/g, '').trim();
+            // 清理空的占位符
+            extracted = extracted.replace(/_{3,}/g, '').trim();
+            if (extracted.length > 5) {
+                return extracted;
+            }
+        }
+    }
+    return null;
+}
+
+function getB3Template(pmSignature, extractedContent = {}) {
+    const {
+        b1CoreGoal = '（未提供）',
+        b2Scope = '（未提供）',
+        r1Summary = '（未提供）',
+        r1Conclusion = '✅ 通过'
+    } = extractedContent;
+
     return `# B3_规划冻结归档
 
 **冻结时间**: ${new Date().toLocaleString('zh-CN')}
@@ -484,13 +610,15 @@ function getB3Template(pmSignature) {
 
 ### 1.1 规划目标
 
-**引用 B1 核心目标**:
-<!-- 自动引用或手动填写 B1 中的核心目标 -->
+**来自 B1 的核心目标**:
+
+${b1CoreGoal}
 
 ### 1.2 范围说明
 
-**引用 B2 范围界定**:
-<!-- 自动引用或手动填写 B2 中确定的范围 -->
+**来自 B2 的范围界定**:
+
+${b2Scope}
 
 ---
 
@@ -498,21 +626,17 @@ function getB3Template(pmSignature) {
 
 ### 2.1 审视结果
 
-**R1 审视状态**: ✅ 通过
+**R1 审视状态**: ${r1Conclusion}
 
-**通过时间**: ___________
+**通过时间**: ${new Date().toLocaleString('zh-CN')}
 
-**5 维度评分**:
-- 目标清晰性: _____
-- 场景真实性: _____
-- 现状一致性: _____
-- 范围收敛性: _____
-- 版本化准备度: _____
+**审视摘要**:
+
+${r1Summary}
 
 ### 2.2 待解决问题
 
-**R1 审视中提出的待解决问题**:
-<!-- 引用 R1_规划审视报告.md 中标注的问题 -->
+**请参考 R1_规划审视报告.md 中的详细内容**
 
 ---
 
@@ -521,9 +645,9 @@ function getB3Template(pmSignature) {
 ### 3.1 进入 C 阶段的指引
 
 **C0 版本范围声明应包含**:
-- 基于 B3 的规划目标
+- 基于上述规划目标
 - 明确的版本边界
-- 不超出 B3 范围
+- 不超出本文档定义的范围
 
 **C1 版本需求清单应包含**:
 - B2 中首版包含的需求项
@@ -579,3 +703,4 @@ function getB3Template(pmSignature) {
 **状态**: 🔒 已冻结
 `;
 }
+

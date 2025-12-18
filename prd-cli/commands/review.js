@@ -5,7 +5,7 @@ const inquirer = require('inquirer');
 const confirm = require('./confirm');
 const dialog = require('./dialog');
 
-module.exports = async function (type) {
+module.exports = async function (type, options = {}) {
     const configPath = path.join(process.cwd(), '.prd-config.json');
 
     if (!await fs.pathExists(configPath)) {
@@ -17,16 +17,16 @@ module.exports = async function (type) {
     const config = await fs.readJSON(configPath);
 
     if (type === 'r1') {
-        await performR1Review(config);
+        await performR1Review(config, options);
     } else if (type === 'r2') {
-        await performR2Review(config);
+        await performR2Review(config, options);
     } else {
         console.log(chalk.red('✗ 未知的审视类型'));
         console.log('可用类型: r1, r2');
     }
 };
 
-async function performR1Review(config) {
+async function performR1Review(config, options = {}) {
     console.log(chalk.bold.blue('\n=== R1 规划审视 ===\n'));
 
     const iterationDir = path.join(
@@ -44,10 +44,15 @@ async function performR1Review(config) {
         return;
     }
 
-    // ⭐ 关键：PM 确认角色分工
-    const canProceed = await confirm.confirmR1Review();
-    if (!canProceed) {
-        return;
+    // ⭐ 支持预确认模式
+    if (options.pmConfirmed) {
+        console.log(chalk.green('✓ PM 已在对话中确认 B1B2 已填写完成，理解角色分工'));
+    } else {
+        // 交互式确认
+        const canProceed = await confirm.confirmR1Review();
+        if (!canProceed) {
+            return;
+        }
     }
 
     // 显示审视指令
@@ -154,15 +159,21 @@ async function performR1Review(config) {
 
     console.log(chalk.green('✓ R1 审视报告模板已生成'));
     console.log(chalk.cyan(`\n文件位置: ${r1Path}\n`));
-    console.log(chalk.bold('下一步:'));
-    console.log('1. 请 AI 按照上述指令完成审视');
-    console.log('2. 在 R1 报告中填写审视结果');
-    console.log('3. PM 查看审视结果，做最终决策');
-    console.log('4. 如果通过，运行: prd plan freeze');
+    console.log(chalk.bold.yellow('━━━ 下一步操作 ━━━\n'));
+    console.log(chalk.bold('请回到 AI 对话中，发送以下消息：'));
+    console.log(chalk.cyan('  "请帮我执行 R1 审视，项目路径是 [当前目录]"'));
+    console.log('');
+    console.log('AI 将会：');
+    console.log('  1. 读取 B1、B2 文档');
+    console.log('  2. 按 5 维度审视');
+    console.log('  3. 填写 R1 报告');
+    console.log('  4. 展示结论让你决策');
+    console.log('');
+    console.log(chalk.gray('审视通过后，回到终端运行: prd plan freeze'));
     console.log('');
 }
 
-async function performR2Review(config) {
+async function performR2Review(config, options = {}) {
     console.log(chalk.bold.blue('\n=== R2 版本审视 ===\n'));
 
     const iterationDir = path.join(
@@ -181,10 +192,15 @@ async function performR2Review(config) {
         return;
     }
 
-    // ⭐ 关键：PM 确认角色分工
-    const canProceed = await confirm.confirmR2Review();
-    if (!canProceed) {
-        return;
+    // ⭐ 支持预确认模式
+    if (options.pmConfirmed) {
+        console.log(chalk.green('✓ PM 已在对话中确认 C0C1 已填写完成，理解角色分工'));
+    } else {
+        // 交互式确认
+        const canProceed = await confirm.confirmR2Review();
+        if (!canProceed) {
+            return;
+        }
     }
 
     // 显示审视指令
@@ -292,11 +308,17 @@ async function performR2Review(config) {
 
     console.log(chalk.green('✓ R2 审视报告模板已生成'));
     console.log(chalk.cyan(`\n文件位置: ${r2Path}\n`));
-    console.log(chalk.bold('下一步:'));
-    console.log('1. 请 AI 按照上述指令完成审视');
-    console.log('2. 在 R2 报告中填写审视结果');
-    console.log('3. PM 查看审视结果，做最终决策');
-    console.log('4. 如果通过，运行: prd version freeze');
+    console.log(chalk.bold.yellow('━━━ 下一步操作 ━━━\n'));
+    console.log(chalk.bold('请回到 AI 对话中，发送以下消息：'));
+    console.log(chalk.cyan('  "请帮我执行 R2 审视，项目路径是 [当前目录]"'));
+    console.log('');
+    console.log('AI 将会：');
+    console.log('  1. 读取 B3、C0、C1 文档');
+    console.log('  2. 检查版本是否偏离规划');
+    console.log('  3. 填写 R2 报告');
+    console.log('  4. 展示结论让你决策');
+    console.log('');
+    console.log(chalk.gray('审视通过后，回到终端运行: prd version freeze'));
     console.log('');
 }
 

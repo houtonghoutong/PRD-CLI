@@ -39,24 +39,37 @@ program
 program
   .command('plan <action> [type]')
   .description('管理 B 类规划文档 (create B1|B2, freeze)')
-  .action((action, type) => {
-    require('../commands/planning')(action, type);
+  .option('--pm-confirmed', 'PM 已在对话中确认，跳过交互式确认')
+  .option('--pm-signature <name>', 'PM 签名（用于冻结操作）')
+  .action((action, type, options) => {
+    require('../commands/planning')(action, type, options);
   });
 
 // 审视命令
 program
   .command('review <type>')
   .description('执行审视 (r1|r2)')
-  .action((type) => {
-    require('../commands/review')(type);
+  .option('--pm-confirmed', 'PM 已在对话中确认，跳过交互式确认')
+  .action((type, options) => {
+    require('../commands/review')(type, options);
   });
 
 // 版本文档命令
 program
   .command('version <action> [type]')
   .description('管理 C 类版本文档 (create C0|C1, freeze)')
-  .action((action, type) => {
-    require('../commands/version')(action, type);
+  .option('--pm-confirmed', 'PM 已在对话中确认，跳过交互式确认')
+  .option('--pm-signature <name>', 'PM 签名（用于冻结操作）')
+  .action((action, type, options) => {
+    require('../commands/version')(action, type, options);
+  });
+
+// 需求变更命令
+program
+  .command('change')
+  .description('记录需求变更（自动判断当前状态）')
+  .action(() => {
+    require('../commands/change')();
   });
 
 // 状态查看命令

@@ -80,8 +80,36 @@ module.exports = {
             md += `**动作**: ${record.action}\n`;
             md += `**迭代轮次**: ${record.iteration}\n\n`;
 
+            // 根据不同类型生成不同格式
             if (record.data) {
-                md += `**详细信息**:\n\`\`\`json\n${JSON.stringify(record.data, null, 2)}\n\`\`\`\n\n`;
+                if (record.data.type === 'conversation') {
+                    // 对话轮次格式
+                    md += `### 💬 对话内容\n\n`;
+                    if (record.data.topic) {
+                        md += `**讨论主题**: ${record.data.topic}\n\n`;
+                    }
+                    if (record.data.pmSaid) {
+                        md += `**🧑 PM**: ${record.data.pmSaid}\n\n`;
+                    }
+                    if (record.data.aiResponse) {
+                        md += `**🤖 AI**: ${record.data.aiResponse}\n\n`;
+                    }
+                    if (record.data.pmDecision) {
+                        md += `**✅ PM 决策**: ${record.data.pmDecision}\n\n`;
+                    }
+                    if (record.data.context) {
+                        md += `**📋 背景**: ${record.data.context}\n\n`;
+                    }
+                } else if (record.data.type === 'decision') {
+                    // 决策格式
+                    md += `### ✅ PM 决策\n\n`;
+                    md += `- **决策项**: ${record.data.action}\n`;
+                    md += `- **结果**: ${record.data.decision}\n`;
+                    md += `- **原因**: ${record.data.reason}\n\n`;
+                } else {
+                    // 默认 JSON 格式
+                    md += `**详细信息**:\n\`\`\`json\n${JSON.stringify(record.data, null, 2)}\n\`\`\`\n\n`;
+                }
             }
 
             md += `---\n\n`;
@@ -124,5 +152,76 @@ module.exports = {
             filePath,
             type: 'document'
         });
+    },
+
+    /**
+     * 记录一轮对话（包含完整对话内容）
+     * @param {string} stage - 阶段
+     * @param {string} topic - 讨论主题
+     * @param {string} pmSaid - PM 说的内容
+     * @param {string} aiResponse - AI 的回复
+     * @param {string} pmDecision - PM 的决策（可选）
+     * @param {string} context - 背景信息（可选）
+     */
+    async logConversationRound(stage, topic, pmSaid, aiResponse, pmDecision = null, context = null) {
+        await this.logDialog(stage, 'conversation_round', {
+            type: 'conversation',
+            topic,
+            pmSaid,
+            aiResponse,
+            pmDecision,
+            context
+        });
+    },
+
+    /**
+     * 记录需求讨论
+     * @param {string} requirementId - 需求项编号
+     * @param {string} pmInput - PM 的输入
+     * @param {string} aiSummary - AI 的总结
+     * @param {boolean} confirmed - PM 是否确认
+     */
+    async logRequirementDiscussion(stage, requirementId, pmInput, aiSummary, confirmed) {
+        await this.logDialog(stage, 'requirement_discussion', {
+            type: 'conversation',
+            topic: `需求项 ${requirementId} 讨论`,
+            pmSaid: pmInput,
+            aiResponse: aiSummary,
+            pmDecision: confirmed ? '确认' : '需修改'
+        });
+    },
+
+    /**
+     * 记录优先级决策
+     * @param {string} stage - 阶段
+     * @param {object} priorities - 优先级决策 { P0: [...], P1: [...], P2: [...] }
+     * @param {string} pmReason - PM 的决策理由
+     */
+    async logPriorityDecision(stage, priorities, pmReason) {
+        await this.logDialog(stage, 'priority_decision', {
+            type: 'conversation',
+            topic: '优先级排序决策',
+            pmSaid: pmReason,
+            aiResponse: `已记录优先级：P0=${priorities.P0?.length || 0}项, P1=${priorities.P1?.length || 0}项, P2=${priorities.P2?.length || 0}项`,
+            pmDecision: JSON.stringify(priorities)
+        });
+    },
+
+    /**
+     * 记录范围决策
+     * @param {string} stage - 阶段
+     * @param {array} included - 首版包含
+     * @param {array} excluded - 延后的
+     * @param {string} pmReason - PM 的决策理由
+     */
+    async logScopeDecision(stage, included, excluded, pmReason) {
+        await this.logDialog(stage, 'scope_decision', {
+            type: 'conversation',
+            topic: '范围界定决策',
+            pmSaid: pmReason,
+            aiResponse: `首版包含 ${included.length} 项，延后 ${excluded.length} 项`,
+            pmDecision: `包含: ${included.join(', ')} | 延后: ${excluded.join(', ')}`
+        });
     }
 };
+
