@@ -1,0 +1,48 @@
+{
+  "name": "prd-workflow-cli",
+  "version": "1.1.1",
+  "description": "产品需求管理规范 CLI 工具 - 基于 A→R→B→C 流程，集成 PM 确认机制和对话归档的需求管理命令行工具",
+  "main": "prd-cli/index.js",
+  "bin": {
+    "prd": "./prd-cli/bin/prd-cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "prd",
+    "product",
+    "requirements",
+    "workflow",
+    "ai-assisted",
+    "okr",
+    "product-management",
+    "cli"
+  ],
+  "author": "Hou Tong",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/houtonghoutong/PRD-CLI"
+  },
+  "homepage": "https://github.com/houtonghoutong/PRD-CLI#readme",
+  "bugs": {
+    "url": "https://github.com/houtonghoutong/PRD-CLI/issues"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.5",
+    "fs-extra": "^11.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "prd-cli/bin/",
+    "prd-cli/commands/",
+    "prd-cli/.agent/",
+    "prd-cli/README.md",
+    "prd-cli/GUIDE.md"
+  ]
+}
