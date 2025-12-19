@@ -278,9 +278,18 @@ prd plan freeze
 
         console.log(chalk.green('✓ 项目创建成功!'));
         console.log('');
-        console.log(chalk.bold('下一步操作:'));
+        console.log(chalk.bold('📋 下一步操作（请按顺序执行）:'));
+        console.log('');
+        console.log(chalk.cyan('第 1 步: 进入项目目录'));
         console.log(`  cd ${projectName}`);
-        console.log('  prd baseline create A0  # 开始创建基线文档');
+        console.log('');
+        console.log(chalk.cyan('第 2 步: 完善 P0_项目基本信息.md'));
+        console.log(chalk.gray('  文件位置: 00_项目总览/P0_项目基本信息.md'));
+        console.log(chalk.gray('  填写内容: 项目目标、干系人、约束条件等'));
+        console.log(chalk.yellow('  ⚠️  必须完成 P0 填写后才能开始创建 A 类基线文档'));
+        console.log('');
+        console.log(chalk.cyan('第 3 步: 创建 A0 基线文档'));
+        console.log('  prd baseline create A0  # P0 填写完成后执行');
         console.log('');
 
     } catch (error) {
