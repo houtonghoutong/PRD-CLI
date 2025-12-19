@@ -199,6 +199,15 @@ module.exports = async function (projectName) {
             );
         }
 
+        // 复制对话归档模板
+        const dialogTemplateSource = path.join(__dirname, '../templates/dialog-template.md');
+        if (await fs.pathExists(dialogTemplateSource)) {
+            await fs.copy(
+                dialogTemplateSource,
+                path.join(projectPath, '98_对话归档/AI_对话归档模板.md')
+            );
+        }
+
         // 创建 README
         const readme = `# ${projectName}
 
