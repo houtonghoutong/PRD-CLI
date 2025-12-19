@@ -55,17 +55,37 @@ C3(版本冻结)
 
 ## 🚀 安装
 
-### 全局安装
+### 方式1：从 GitHub 安装（推荐）
 
 ```bash
+# 全局安装
+npm install -g github:houtonghoutong/PRD-CLI#main
+
+# 或使用 yarn
+yarn global add github:houtonghoutong/PRD-CLI#main
+```
+
+### 方式2：从源码安装
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/houtonghoutong/PRD-CLI.git
+cd PRD-CLI/prd-cli
+
+# 2. 安装依赖
+npm install
+
+# 3. 全局链接
+npm link
+```
+
+### 方式3：npm 安装（即将上线）
+
+```bash
+# 稍后可用
 npm install -g prd-workflow-cli
 ```
 
-### 本地安装(用于项目)
-
-```bash
-npm install prd-workflow-cli
-```
 
 ## 📝 快速开始
 

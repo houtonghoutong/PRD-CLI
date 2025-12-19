@@ -19,15 +19,15 @@
     "product-management",
     "cli"
   ],
-  "author": "PRD Team",
+  "author": "Hou Tong",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/prd-workflow-cli"
+    "url": "https://github.com/houtonghoutong/PRD-CLI"
   },
-  "homepage": "https://github.com/yourusername/prd-workflow-cli#readme",
+  "homepage": "https://github.com/houtonghoutong/PRD-CLI#readme",
   "bugs": {
-    "url": "https://github.com/yourusername/prd-workflow-cli/issues"
+    "url": "https://github.com/houtonghoutong/PRD-CLI/issues"
   },
   "dependencies": {
     "commander": "^11.1.0",
