@@ -80,6 +80,14 @@ program
     require('../commands/status')();
   });
 
+// 迭代索引命令
+program
+  .command('index')
+  .description('生成/更新 P1 迭代索引')
+  .action(() => {
+    require('../commands/index')();
+  });
+
 // 帮助信息增强
 program.on('--help', () => {
   console.log('');
