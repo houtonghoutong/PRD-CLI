@@ -42,6 +42,10 @@
     "bin/",
     "commands/",
     ".agent/",
+    ".antigravity/",
+    "templates/",
+    ".cursorrules",
+    "AI-GUIDE.md",
     "README.md",
     "GUIDE.md"
   ]
