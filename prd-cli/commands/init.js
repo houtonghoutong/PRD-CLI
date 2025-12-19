@@ -208,6 +208,34 @@ module.exports = async function (projectName) {
             );
         }
 
+        // 复制 AI 规则文件
+        // .cursorrules (Cursor IDE)
+        const cursorrules = path.join(__dirname, '../.cursorrules');
+        if (await fs.pathExists(cursorrules)) {
+            await fs.copy(
+                cursorrules,
+                path.join(projectPath, '.cursorrules')
+            );
+        }
+
+        // .antigravity/rules.md (Antigravity)
+        const antigravityDir = path.join(__dirname, '../.antigravity');
+        if (await fs.pathExists(antigravityDir)) {
+            await fs.copy(
+                antigravityDir,
+                path.join(projectPath, '.antigravity')
+            );
+        }
+
+        // AI-GUIDE.md (通用 AI 指引)
+        const aiGuide = path.join(__dirname, '../AI-GUIDE.md');
+        if (await fs.pathExists(aiGuide)) {
+            await fs.copy(
+                aiGuide,
+                path.join(projectPath, 'AI-GUIDE.md')
+            );
+        }
+
         // 创建 README
         const readme = `# ${projectName}
 
