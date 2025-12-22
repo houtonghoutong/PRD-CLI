@@ -116,6 +116,20 @@ async function createVersionDoc(type, config, configPath) {
         console.log(chalk.bold('下一步:'));
         console.log('1. PM 填写 C1_版本需求清单.md');
         console.log('2. 执行 R2 审视: prd review r2');
+        console.log('');
+        console.log(chalk.bold.red('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        console.log(chalk.bold.red('🚨 关键步骤：C1 填写完成后必须执行 R2 审视'));
+        console.log(chalk.bold.red('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        console.log('');
+        console.log(chalk.yellow('  R2 审视将检查：'));
+        console.log('  1. ✅ 一致性检查：C1 是否忠实于 B3/B2/C0');
+        console.log('  2. ✅ 范围检查：是否有超出当前版本的需求');
+        console.log('  3. ✅ 用户视角审查：站在用户角度评估需求');
+        console.log('     - 用户感知是否良好？');
+        console.log('     - 是否解决了用户真正的问题？');
+        console.log('     - 用户使用时会满意吗？');
+        console.log('');
+        console.log(chalk.gray('提示：没有 R2 审视报告，无法执行 prd version freeze'));
     } else if (type === 'C2') {
         console.log(chalk.bold('⚠️  重要提醒：\n'));
         console.log(chalk.yellow('【C2 用途】'));
