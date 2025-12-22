@@ -61,13 +61,13 @@ async function createPlanDoc(type, config, configPath, options = {}) {
         // ⭐ 首先检查 A 类基线文档是否完整
         const baselineDir = path.join(process.cwd(), '01_产品基线');
         const a0Path = path.join(baselineDir, 'A0_产品基础与范围说明.md');
-        const a1Path = path.join(baselineDir, 'A1_已上线功能清单.md');
-        const a2Path = path.join(baselineDir, 'A2_存量反馈汇总.md');
+        const a1Path = path.join(baselineDir, 'A1_已上线功能与流程清单.md'); // 修正文件名
+        const a2Path = path.join(baselineDir, 'A2_存量反馈与数据汇总.md'); // 修正文件名
 
         const missingDocs = [];
         if (!await fs.pathExists(a0Path)) missingDocs.push('A0_产品基础与范围说明');
-        if (!await fs.pathExists(a1Path)) missingDocs.push('A1_已上线功能清单');
-        if (!await fs.pathExists(a2Path)) missingDocs.push('A2_存量反馈汇总');
+        if (!await fs.pathExists(a1Path)) missingDocs.push('A1_已上线功能与流程清单'); // 修正显示名
+        if (!await fs.pathExists(a2Path)) missingDocs.push('A2_存量反馈与数据汇总'); // 修正显示名
 
         if (missingDocs.length > 0) {
             console.log(chalk.red('\n✗ A 类基线文档不完整，无法开始规划\n'));
@@ -104,6 +104,10 @@ async function createPlanDoc(type, config, configPath, options = {}) {
             console.log(chalk.green('✓ PM 已在对话中确认 R1 三个启动条件满足'));
             r1Confirmed = true;
             await dialog.logPMConfirmation('planning', 'start_b1', 'approved', 'PM通过对话确认R1三条件满足,启动规划(预确认模式)');
+        } else if (process.env.PRD_TEST_MODE === 'true') {
+            // 测试模式：自动确认
+            console.log(chalk.yellow('⚠️ 测试模式：自动确认 R1 启动条件'));
+            r1Confirmed = true;
         } else {
             // 交互式确认
             r1Confirmed = await confirm.confirmR1Start();

@@ -35,23 +35,43 @@ async function performR1Review(config, options = {}) {
         `第${String(config.currentIteration).padStart(2, '0')}轮迭代`
     );
 
+    // 检查迭代目录是否存在
+    if (!await fs.pathExists(iterationDir)) {
+        console.log(chalk.red('✗ 第一轮迭代尚未创建'));
+        console.log('请先执行：prd iteration new');
+        if (process.env.PRD_TEST_MODE === 'true') {
+            throw new Error('第一轮迭代尚未创建');
+        }
+        process.exit(1);
+    }
+
     // 检查必需文档
     const b1Path = path.join(iterationDir, 'B1_需求规划草案.md');
     const b2Path = path.join(iterationDir, 'B2_规划拆解与范围界定.md');
 
     if (!await fs.pathExists(b1Path) || !await fs.pathExists(b2Path)) {
         console.log(chalk.red('✗ 缺少必需的 B1 或 B2 文档'));
-        return;
+        console.log('请先创建：');
+        console.log('  prd plan create B1');
+        console.log('  prd plan create B2');
+        if (process.env.PRD_TEST_MODE === 'true') {
+            throw new Error('缺少必需的 B1 或 B2 文档');
+        }
+        process.exit(1);
     }
 
-    // ⭐ 支持预确认模式
+    // ⭐ 支持预确认模式和非交互模式（用于测试）
     if (options.pmConfirmed) {
         console.log(chalk.green('✓ PM 已在对话中确认 B1B2 已填写完成，理解角色分工'));
+    } else if (process.env.PRD_TEST_MODE === 'true') {
+        // 测试模式：跳过交互式确认
+        console.log(chalk.yellow('⚠️ 测试模式：跳过交互式确认'));
     } else {
         // 交互式确认
         const canProceed = await confirm.confirmR1Review();
         if (!canProceed) {
-            return;
+            console.log(chalk.yellow('已取消 R1 审视'));
+            process.exit(0);
         }
     }
 
@@ -182,6 +202,16 @@ async function performR2Review(config, options = {}) {
         `第${String(config.currentIteration).padStart(2, '0')}轮迭代`
     );
 
+    // 检查迭代目录是否存在
+    if (!await fs.pathExists(iterationDir)) {
+        console.log(chalk.red('✗ 第一轮迭代尚未创建'));
+        console.log('请先执行：prd iteration new');
+        if (process.env.PRD_TEST_MODE === 'true') {
+            throw new Error('第一轮迭代尚未创建');
+        }
+        process.exit(1);
+    }
+
     // 检查必需文档
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
     const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
@@ -189,17 +219,28 @@ async function performR2Review(config, options = {}) {
 
     if (!await fs.pathExists(b3Path) || !await fs.pathExists(c0Path) || !await fs.pathExists(c1Path)) {
         console.log(chalk.red('✗ 缺少必需的 B3、C0 或 C1 文档'));
-        return;
+        console.log('请先创建：');
+        console.log('  prd plan freeze  (生成 B3)');
+        console.log('  prd version create C0');
+        console.log('  prd version create C1');
+        if (process.env.PRD_TEST_MODE === 'true') {
+            throw new Error('缺少必需的 B3、C0 或 C1 文档');
+        }
+        process.exit(1);
     }
 
-    // ⭐ 支持预确认模式
+    // ⭐ 支持预确认模式和非交互模式（用于测试）
     if (options.pmConfirmed) {
         console.log(chalk.green('✓ PM 已在对话中确认 C0C1 已填写完成，理解角色分工'));
+    } else if (process.env.PRD_TEST_MODE === 'true') {
+        // 测试模式：跳过交互式确认
+        console.log(chalk.yellow('⚠️ 测试模式：跳过交互式确认'));
     } else {
         // 交互式确认
         const canProceed = await confirm.confirmR2Review();
         if (!canProceed) {
-            return;
+            console.log(chalk.yellow('已取消 R2 审视'));
+            process.exit(0);
         }
     }
 

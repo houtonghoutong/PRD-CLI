@@ -1,0 +1,20 @@
+{
+  "projectName": "test-project",
+  "createdAt": "2025-12-22T06:44:44.254Z",
+  "currentIteration": 1,
+  "workflow": "A → R → B → C",
+  "stages": {
+    "baseline": {
+      "completed": false,
+      "documents": []
+    },
+    "planning": {
+      "completed": false,
+      "documents": []
+    },
+    "version": {
+      "completed": false,
+      "documents": []
+    }
+  }
+}

@@ -1,13 +1,18 @@
 {
   "name": "prd-workflow-cli",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "产品需求管理规范 CLI 工具 - 基于 A→R→B→C 流程，集成 PM 确认机制和对话归档的需求管理命令行工具",
   "main": "index.js",
   "bin": {
     "prd": "./bin/prd-cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:cn": "jest --reporters=./tests/reporters/chinese-reporter.js",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "prd",
@@ -30,10 +35,10 @@
     "url": "https://github.com/houtonghoutong/PRD-CLI/issues"
   },
   "dependencies": {
-    "commander": "^11.1.0",
     "chalk": "^4.1.2",
-    "inquirer": "^8.2.5",
-    "fs-extra": "^11.2.0"
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^8.2.5"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -48,5 +53,20 @@
     "AI-GUIDE.md",
     "README.md",
     "GUIDE.md"
-  ]
+  ],
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "testTimeout": 30000,
+    "coverageDirectory": "coverage",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/"
+    ]
+  }
 }
