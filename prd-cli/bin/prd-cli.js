@@ -23,8 +23,9 @@ program
 program
   .command('baseline <action> [type]')
   .description('管理 A 类基线文档 (create A0|A1|A2|R0)')
-  .action((action, type) => {
-    require('../commands/baseline')(action, type);
+  .option('--pm-confirmed', 'PM 已在对话中确认，跳过交互式确认（仅用于 R0）')
+  .action((action, type, options) => {
+    require('../commands/baseline')(action, type, options);
   });
 
 // 迭代管理命令

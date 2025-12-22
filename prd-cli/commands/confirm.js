@@ -38,6 +38,57 @@ module.exports = {
     },
 
     /**
+     * R0 基线审视创建确认
+     * ⚠️ 重要：必须由 PM 确认才能创建 R0
+     */
+    async confirmR0Creation() {
+        console.log(chalk.bold.yellow('\n━━━ PM 决策点：R0 基线审视创建 ━━━\n'));
+
+        console.log(chalk.cyan('【权责说明】'));
+        console.log('- PM 职责: ');
+        console.log('  1. 确认 A0/A1 已填写完成且内容准确');
+        console.log('  2. 确认需要进行基线审视');
+        console.log('  3. 对基线内容负责\n');
+
+        console.log('- AI 职责: ');
+        console.log('  1. 辅助执行审视');
+        console.log('  2. 梳理用户路径');
+        console.log('  3. 识别问题和机会\n');
+
+        console.log(chalk.red('- AI 禁止: '));
+        console.log('  ❌ 在未经 PM 确认的情况下创建 R0');
+        console.log('  ❌ R0 完成后自动创建后续文档\n');
+
+        const checks = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'baselineReady',
+                message: '确认 A0、A1 基线文档已填写完成？',
+                default: false
+            },
+            {
+                type: 'confirm',
+                name: 'proceedR0',
+                message: 'PM 确认：现在开始 R0 基线审视？',
+                default: false
+            }
+        ]);
+
+        if (!checks.baselineReady || !checks.proceedR0) {
+            await dialog.logPMConfirmation('r0_baseline', 'create_r0', 'rejected',
+                `基线就绪:${checks.baselineReady}, PM确认:${checks.proceedR0}`
+            );
+            return false;
+        }
+
+        await dialog.logPMConfirmation('r0_baseline', 'create_r0', 'approved',
+            'PM确认基线文档已完成，开始R0审视'
+        );
+
+        return true;
+    },
+
+    /**
      * R1 启动条件确认
      */
     async confirmR1Start() {

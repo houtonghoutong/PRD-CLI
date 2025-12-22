@@ -1,8 +1,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 const chalk = require('chalk');
+const confirm = require('./confirm');
 
-module.exports = async function (action, type) {
+module.exports = async function (action, type, options = {}) {
     const configPath = path.join(process.cwd(), '.prd-config.json');
 
     if (!await fs.pathExists(configPath)) {
@@ -14,13 +15,13 @@ module.exports = async function (action, type) {
     const baselineDir = path.join(process.cwd(), '01_产品基线');
 
     if (action === 'create') {
-        await createBaselineDoc(type, baselineDir, config, configPath);
+        await createBaselineDoc(type, baselineDir, config, configPath, options);
     } else {
         console.log(chalk.red('✗ 未知操作'));
     }
 };
 
-async function createBaselineDoc(type, baselineDir, config, configPath) {
+async function createBaselineDoc(type, baselineDir, config, configPath, options = {}) {
     const templates = {
         'A0': getA0Template(),
         'A1': getA1Template(),
@@ -40,6 +41,73 @@ async function createBaselineDoc(type, baselineDir, config, configPath) {
     if (await fs.pathExists(filePath)) {
         console.log(chalk.yellow(`⚠ 文件已存在: ${fileName}`));
         return;
+    }
+
+    // ⭐ R0 创建需要特殊处理：前置条件检查 + PM 确认
+    if (type === 'R0') {
+        console.log(chalk.bold.blue('\n=== R0 基线审视创建 ===\n'));
+
+        // 1. 前置条件检查
+        const projectDir = path.join(process.cwd(), '00_项目总览');
+        const p0Path = path.join(projectDir, 'P0_项目基本信息.md');
+        const a0Path = path.join(baselineDir, 'A0_产品基础与范围说明.md');
+        const a1Path = path.join(baselineDir, 'A1_已上线功能与流程清单.md');
+        const a2Path = path.join(baselineDir, 'A2_存量反馈与数据汇总.md');
+
+        console.log(chalk.yellow('📋 前置条件检查：\n'));
+
+        const p0Exists = await fs.pathExists(p0Path);
+        const a0Exists = await fs.pathExists(a0Path);
+        const a1Exists = await fs.pathExists(a1Path);
+        const a2Exists = await fs.pathExists(a2Path);
+
+        console.log(`   ${p0Exists ? '✅' : '❌'} P0_项目基本信息.md`);
+        console.log(`   ${a0Exists ? '✅' : '❌'} A0_产品基础与范围说明.md`);
+        console.log(`   ${a1Exists ? '✅' : '❌'} A1_已上线功能与流程清单.md`);
+        console.log(`   ${a2Exists ? '✅' : '⚠️ (可选)'} A2_存量反馈与数据汇总.md`);
+        console.log('');
+
+        // P0、A0、A1 是必需的
+        if (!p0Exists || !a0Exists || !a1Exists) {
+            console.log(chalk.red('❌ 前置条件检查未通过！\n'));
+            console.log(chalk.yellow('R0 基线审视必须基于完整的 A 类基线文档。\n'));
+            console.log(chalk.bold('请先完成缺失的文档：'));
+            if (!p0Exists) console.log('  - 完善 P0（00_项目总览/P0_项目基本信息.md）');
+            if (!a0Exists) console.log('  - 创建 A0：prd baseline create A0');
+            if (!a1Exists) console.log('  - 创建 A1：prd baseline create A1');
+            console.log('');
+            console.log(chalk.gray('提示：A2 是可选的，但建议创建'));
+
+            // 在测试模式下抛出错误
+            if (process.env.PRD_TEST_MODE === 'true') {
+                throw new Error('R0 前置条件检查未通过');
+            }
+            process.exit(1);
+        }
+
+        console.log(chalk.green('✅ 前置条件检查通过！\n'));
+
+        // 2. PM 确认
+        if (options.pmConfirmed) {
+            console.log(chalk.green('✓ PM 已在对话中确认创建 R0 基线审视'));
+        } else if (process.env.PRD_TEST_MODE === 'true') {
+            // 测试模式：跳过交互式确认
+            console.log(chalk.yellow('⚠️ 测试模式：跳过交互式确认'));
+        } else {
+            // 交互式确认
+            console.log(chalk.yellow('⚠️ R0 基线审视将：'));
+            console.log('   1. 系统性审视产品基线（基于 A0/A1/A2）');
+            console.log('   2. 梳理用户路径和问题');
+            console.log('   3. 识别关键成功因素');
+            console.log('   4. 给出基线稳定性判定\n');
+
+            const confirmed = await confirm.confirmR0Creation();
+            if (!confirmed) {
+                console.log(chalk.yellow('\n已取消创建 R0'));
+                return;
+            }
+            console.log(chalk.green('\n✓ PM 确认创建 R0\n'));
+        }
     }
 
     await fs.writeFile(filePath, templates[type]);
@@ -66,8 +134,12 @@ async function createBaselineDoc(type, baselineDir, config, configPath) {
         console.log('2. 创建 R0 基线审视: prd baseline create R0');
     } else if (type === 'R0') {
         console.log(chalk.bold('下一步建议:'));
-        console.log('1. 完成 R0 基线审视');
+        console.log('1. 完成 R0 基线审视（与 AI 协作填写）');
         console.log('2. 开始第一轮迭代: prd iteration new');
+        console.log('');
+        console.log(chalk.yellow('⚠️ 重要提醒：'));
+        console.log('   R0 完成后，请勿自动创建后续文档！');
+        console.log('   必须由 PM 明确指示才能进入下一阶段。');
     }
     console.log('');
 }
@@ -257,6 +329,36 @@ function getA2Template() {
 
 ---
 
+## 五、待下版事项（C 阶段产生的新需求）
+
+**用途说明**：
+当 C1/C2 讨论过程中产生了新需求，但超出当前版本（B3）的规划范围时，
+应记录在此章节，等待下一轮迭代时纳入 B1 规划。
+
+### 待下版事项 #1: [需求标题]
+
+**来源**：C1/C2 讨论过程（第 XX 轮迭代，YYYY-MM-DD）
+**原因**：超出 B3 首版范围，延后处理
+
+**优先级**：
+- [ ] P0 - 紧急
+- [ ] P1 - 重要  
+- [ ] P2 - 一般
+
+**详细描述**：
+<!-- 需求的详细说明 -->
+
+**PM 补充说明**：
+<!-- 保留 PM 原话 -->
+
+**关联需求**：
+<!-- 与现有需求的关联 -->
+
+**记录时间**：
+**记录人**：
+
+---
+
 ## 填写说明
 
 ⚠️ **重要约束**:
@@ -268,6 +370,26 @@ function getA2Template() {
 - 为 B 规划提供动因素材
 - 防止规划"拍脑袋"
 - 为 R 审视提供"现实校验"
+- **暂存 C 阶段产生的超范围需求（待下版处理）**
+
+---
+
+## 📋 使用流程
+
+### 何时写入本文档？
+
+| 场景 | 写入章节 |
+|------|----------|
+| 收到用户反馈 | 一、用户反馈摘要 |
+| 发现数据异常 | 二、数据异常或指标变化 |
+| 内部发现问题 | 三、内部问题/投诉 |
+| 已知但未解决的问题 | 四、已知未解决事项 |
+| **C1/C2 讨论中产生的新需求** | **五、待下版事项** |
+
+### 何时从本文档提取？
+
+- **开始新一轮迭代时**：从第四、五章节提取问题/需求到 B1
+- **B1 规划时**：引用第一~三章节作为需求来源依据
 `;
 }
 

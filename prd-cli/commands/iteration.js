@@ -126,10 +126,24 @@ async function createNewIteration(config, configPath) {
 
     console.log(chalk.green(`✓ ${iterationName} 创建成功!`));
     console.log(chalk.cyan(`\n目录位置: ${iterationDir}\n`));
+
+    // 检查 A2 是否有待下版事项
+    const a2Path = path.join(process.cwd(), '01_产品基线', 'A2_存量反馈与数据汇总.md');
+    if (await fs.pathExists(a2Path)) {
+        const a2Content = await fs.readFile(a2Path, 'utf-8');
+        if (a2Content.includes('待下版事项') && !a2Content.includes('待下版事项 #1: [需求标题]')) {
+            console.log(chalk.yellow.bold('📌 提醒：A2 中有待下版事项！\n'));
+            console.log(chalk.yellow('   请检查 01_产品基线/A2_存量反馈与数据汇总.md'));
+            console.log(chalk.yellow('   的"五、待下版事项"章节，'));
+            console.log(chalk.yellow('   将需要处理的事项纳入本轮 B1 规划。\n'));
+        }
+    }
+
     console.log(chalk.bold('下一步:'));
-    console.log('1. 填写 R1_规划启动条件检查.md');
-    console.log('2. 确认三个条件全部满足');
-    console.log('3. 创建 B1: prd plan create B1');
+    console.log('1. 检查 A2 的"待下版事项"（如有）');
+    console.log('2. 填写 R1_规划启动条件检查.md');
+    console.log('3. 确认三个条件全部满足');
+    console.log('4. 创建 B1: prd plan create B1');
     console.log('');
 
     console.log(chalk.yellow('📌 R1 启动条件快速参考:'));

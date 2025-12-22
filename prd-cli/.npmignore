@@ -1,0 +1,29 @@
+# 测试相关
+tests/
+coverage/
+*.test.js
+__snapshots__/
+
+# 开发文件
+*.tgz
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 文档（这些不需要发布）
+R0-R1流程跳跃问题修复完成报告.md
+R0-R1流程跳跃问题分析与修复方案.md
+R0流程跳跃问题修复-最终总结.md
+R0流程跳跃问题修复说明.md
+测试验证方案.md
+版本更新指南.md
+publish-to-npm.sh
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
