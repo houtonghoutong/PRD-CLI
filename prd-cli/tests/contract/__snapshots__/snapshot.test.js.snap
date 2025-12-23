@@ -344,5 +344,6 @@ exports[`Snapshot Tests - 快照测试 文档结构快照 完整项目结构应�
   "  历史参考与废弃文档/",
   "AI-GUIDE.md",
   "README.md",
+  "package.json",
 ]
 `;

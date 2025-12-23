@@ -47,6 +47,28 @@ module.exports = async function (projectName) {
             { spaces: 2 }
         );
 
+        // 创建 package.json（让其他用户可以通过 npm install 安装 CLI）
+        const packageJson = {
+            name: projectName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            version: '1.0.0',
+            description: `${projectName} - PRD 需求管理项目`,
+            private: true,
+            scripts: {
+                prd: 'prd',
+                status: 'prd status',
+                help: 'prd --help'
+            },
+            dependencies: {
+                'prd-workflow-cli': '^1.1.12'
+            }
+        };
+
+        await fs.writeJSON(
+            path.join(projectPath, 'package.json'),
+            packageJson,
+            { spaces: 2 }
+        );
+
         // 创建 P0 项目基本信息模板
         const p0Template = `# P0_项目基本信息
 
