@@ -206,13 +206,27 @@ C 阶段（版本）
 
 需要详细指导时，查看 `.agent/workflows/` 目录：
 
-| 阶段 | 文件 |
-|------|------|
-| B1 | `prd-b1-planning-draft.md` |
-| B2 | `prd-b2-planning-breakdown.md` |
-| C1 | `prd-c1-requirement-list.md` |
-| R1 | `prd-r1-review.md` |
-| R2 | `prd-r2-review.md` |
+| 阶段 | 主文件 | 辅助文件 | 使用场景 |
+|------|--------|----------|----------|
+| P0 | `prd-p0-project-info.md` | - | 项目初始化时 |
+| B1 | `prd-b1-planning-draft.md` | - | 填写规划草案时 |
+| B2 | `prd-b2-planning-breakdown.md` | - | 规划拆解时 |
+| C1 | `prd-c1-requirement-list.md` | `prd-c1-a2ui-guide.md` | 填写需求清单时 |
+| R0 | `prd-r0-baseline-review.md` | - | 基线审视时 |
+| R1 | `prd-r1-review.md` | - | 规划审视时 |
+| R2 | `prd-r2-review.md` | - | 版本审视时 |
+
+### C1 阶段的文件使用规则
+
+| 场景 | 使用文件 |
+|------|----------|
+| C1 整体流程、红线、9 个维度 | `prd-c1-requirement-list.md` |
+| 界面示意 (A2UI) 详细操作 | `prd-c1-a2ui-guide.md` |
+
+**AI 行为**：
+1. 进入 C1 阶段时，先读取 `prd-c1-requirement-list.md` 了解核心规则
+2. 当需要生成界面示意时，参考 `prd-c1-a2ui-guide.md` 的详细指导
+3. A2UI 是 C1 的第 6 个维度（推荐），不是必须，但强烈建议执行
 
 ---
 
