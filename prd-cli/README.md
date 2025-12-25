@@ -55,45 +55,62 @@ C3(版本冻结)
 
 ## 🚀 安装
 
-### 方式1：从 GitHub 安装（推荐）
+### 方式1：一键初始化（推荐）✨
+
+只需一个命令，**自动完成初始化并配置 AI 规则文件**：
 
 ```bash
-# 全局安装
-npm install -g github:houtonghoutong/PRD-CLI#main
+# 1. 创建并进入项目目录
+mkdir 我的项目 && cd 我的项目
 
-# 或使用 yarn
-yarn global add github:houtonghoutong/PRD-CLI#main
+# 2. 一键初始化（自动配置一切！）
+npx prd-workflow-cli
 ```
 
-### 方式2：从源码安装
+就这样！运行后你会看到：
+- ✅ `.agent/workflows/` - PRD 工作流指引
+- ✅ `.cursorrules` - Cursor AI 规则
+- ✅ `.antigravity/` - Antigravity AI 规则
+
+> 💡 **现在你的 AI 助手已经知道如何协助你完成 PRD 流程了！**
+> 例如：直接告诉 AI "我要创建一个新项目的需求文档"
+
+### 方式2：全局安装
+
+如果你经常使用，可以全局安装：
 
 ```bash
-# 1. 克隆仓库
+npm install -g prd-workflow-cli
+
+# 然后使用
+prd init 我的项目
+cd 我的项目
+npm install   # 重要！这一步会安装 AI 规则文件
+```
+
+### 方式3：从源码安装
+
+```bash
 git clone https://github.com/houtonghoutong/PRD-CLI.git
 cd PRD-CLI/prd-cli
-
-# 2. 安装依赖
 npm install
-
-# 3. 全局链接
 npm link
 ```
-
-### 方式3：npm 安装（即将上线）
-
-```bash
-# 稍后可用
-npm install -g prd-workflow-cli
-```
-
 
 ## 📝 快速开始
 
 ### 1. 初始化项目
 
 ```bash
+# 使用 npx（推荐）
+npx prd-workflow-cli init my-product
+cd my-product
+npm install
+
+# 或者全局安装后使用
 prd init my-product
 cd my-product
+npm install
 ```
 
 这将创建标准的目录结构:

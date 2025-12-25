@@ -1,6 +1,6 @@
 {
   "name": "prd-workflow-cli",
-  "version": "1.1.24",
+  "version": "1.1.31",
   "description": "产品需求管理规范 CLI 工具 - 基于 A→R→B→C 流程，集成 PM 确认机制和对话归档的需求管理命令行工具",
   "main": "index.js",
   "bin": {
@@ -12,7 +12,8 @@
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "postinstall": "node scripts/postinstall.js"
   },
   "keywords": [
     "prd",
@@ -46,11 +47,11 @@
   "files": [
     "bin/",
     "commands/",
+    "scripts/",
     ".agent/",
     ".antigravity/",
     "templates/",
     ".cursorrules",
-    "AI-GUIDE.md",
     "README.md",
     "GUIDE.md"
   ],

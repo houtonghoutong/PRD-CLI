@@ -89,6 +89,17 @@ program
     require('../commands/index')();
   });
 
+// 升级命令
+program
+  .command('upgrade')
+  .description('更新项目中的 workflows 和 AI 规则文件到最新版本')
+  .option('--force', '强制更新所有文件，即使内容相同')
+  .option('--dry-run', '预览模式，不实际更新文件')
+  .option('-v, --verbose', '显示详细信息，包括跳过的文件')
+  .action((options) => {
+    require('../commands/upgrade')(options);
+  });
+
 // 帮助信息增强
 program.on('--help', () => {
   console.log('');
@@ -109,11 +120,34 @@ program.on('--help', () => {
   console.log('  C 类 - 版本需求文档 (C0, C1, C3)');
   console.log('  R 类 - 审视报告 (R1, R2)');
   console.log('');
+  console.log(chalk.bold('维护命令:'));
+  console.log('  ' + chalk.cyan('prd upgrade') + '                 # 更新 workflows 和 AI 规则到最新版本');
+  console.log('  ' + chalk.cyan('prd upgrade --dry-run') + '       # 预览将要更新的文件');
+  console.log('');
 });
 
-program.parse(process.argv);
+// 智能处理：无参数时自动初始化
+if (process.argv.length === 2) {
+  const fs = require('fs');
+  const path = require('path');
+  const configPath = path.join(process.cwd(), '.prd-config.json');
 
-// 如果没有参数，显示帮助
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
+  if (!fs.existsSync(configPath)) {
+    // 不是 PRD 项目，自动初始化
+    console.log(chalk.blue('📦 检测到当前目录尚未初始化 PRD 项目'));
+    console.log(chalk.blue('🚀 正在自动初始化...'));
+    console.log('');
+    require('../commands/init')('.').then(() => {
+      process.exit(0);
+    }).catch((err) => {
+      console.error(chalk.red('初始化失败:'), err.message);
+      process.exit(1);
+    });
+  } else {
+    // 已经是 PRD 项目，显示帮助
+    program.parse(process.argv);
+    program.outputHelp();
+  }
+} else {
+  program.parse(process.argv);
 }

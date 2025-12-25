@@ -3,16 +3,25 @@ const path = require('path');
 const chalk = require('chalk');
 
 module.exports = async function (projectName) {
-    const projectPath = path.join(process.cwd(), projectName);
+    // 支持 "." 表示在当前目录初始化
+    const isCurrentDir = projectName === '.';
+    const projectPath = isCurrentDir ? process.cwd() : path.join(process.cwd(), projectName);
+    const displayName = isCurrentDir ? path.basename(process.cwd()) : projectName;
 
     try {
-        // 检查目录是否已存在
-        if (await fs.pathExists(projectPath)) {
+        // 检查目录是否已存在（仅当创建新目录时）
+        if (!isCurrentDir && await fs.pathExists(projectPath)) {
             console.log(chalk.red(`✗ 目录 ${projectName} 已存在`));
             return;
         }
 
-        console.log(chalk.blue(`正在创建项目: ${projectName}...`));
+        // 检查当前目录是否已经是 PRD 项目
+        if (isCurrentDir && await fs.pathExists(path.join(projectPath, '.prd-config.json'))) {
+            console.log(chalk.red('✗ 当前目录已经是 PRD 项目'));
+            return;
+        }
+
+        console.log(chalk.blue(`正在${isCurrentDir ? '在当前目录' : '创建项目: ' + projectName}初始化...`));
 
         // 创建项目目录结构
         const directories = [
@@ -30,7 +39,7 @@ module.exports = async function (projectName) {
 
         // 创建项目配置文件
         const config = {
-            projectName,
+            projectName: displayName,
             createdAt: new Date().toISOString(),
             currentIteration: 0,
             workflow: 'A → R → B → C',
@@ -49,9 +58,9 @@ module.exports = async function (projectName) {
 
         // 创建 package.json（让其他用户可以通过 npm install 安装 CLI）
         const packageJson = {
-            name: projectName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            name: displayName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
             version: '1.0.0',
-            description: `${projectName} - PRD 需求管理项目`,
+            description: `${displayName} - PRD 需求管理项目`,
             private: true,
             scripts: {
                 prd: 'prd',
@@ -59,7 +68,7 @@ module.exports = async function (projectName) {
                 help: 'prd --help'
             },
             dependencies: {
-                'prd-workflow-cli': '^1.1.12'
+                'prd-workflow-cli': '^1.1.29'
             }
         };
 
@@ -73,7 +82,7 @@ module.exports = async function (projectName) {
         const p0Template = `# P0_项目基本信息
 
 **创建时间**: ${new Date().toLocaleString('zh-CN')}
-**项目名称**: ${projectName}
+**项目名称**: ${displayName}
 **文档状态**: 草案
 
 ---
@@ -96,7 +105,7 @@ module.exports = async function (projectName) {
 
 ### 1.1 项目定位
 
-**项目全称**: ${projectName}
+**项目全称**: ${displayName}
 
 **项目简述**:
 <!-- 一句话说明这个项目是什么 -->
@@ -259,14 +268,14 @@ module.exports = async function (projectName) {
         }
 
         // 创建 README
-        const readme = `# ${projectName}
+        const readme = `# ${displayName}
 
 本项目采用规范化的产品需求管理流程
 
 ## 📁 目录结构
 
 \`\`\`
-${projectName}/
+${displayName}/
 ├── 00_项目总览/          # 项目基本信息
 ├── 01_产品基线/          # A 类文档：现状基线
 ├── 02_迭代记录/          # 各轮迭代的 B、C 类文档
@@ -337,17 +346,32 @@ prd plan freeze
 
         console.log(chalk.green('✓ 项目创建成功!'));
         console.log('');
+
+        // 显示 AI 集成信息
+        console.log(chalk.bold('🤖 AI 集成已配置:'));
+        console.log(chalk.gray('   ✓ .agent/workflows/  - PRD 工作流指引（包含所有阶段的详细步骤）'));
+        console.log(chalk.gray('   ✓ .cursorrules       - Cursor AI 规则'));
+        console.log(chalk.gray('   ✓ .antigravity/      - Antigravity AI 规则'));
+        console.log('');
+        console.log(chalk.yellow('   💡 现在你可以直接与 AI 助手对话，AI 已经知道如何协助你完成 PRD 流程！'));
+        console.log(chalk.gray('   例如：告诉 AI "我要创建一个新项目的需求文档"'));
+        console.log('');
+
         console.log(chalk.bold('📋 下一步操作（请按顺序执行）:'));
         console.log('');
-        console.log(chalk.cyan('第 1 步: 进入项目目录'));
-        console.log(`  cd ${projectName}`);
-        console.log('');
-        console.log(chalk.cyan('第 2 步: 完善 P0_项目基本信息.md'));
+        if (!isCurrentDir) {
+            console.log(chalk.cyan('第 1 步: 进入项目目录'));
+            console.log(`  cd ${displayName}`);
+            console.log('');
+            console.log(chalk.cyan('第 2 步: 完善 P0_项目基本信息.md'));
+        } else {
+            console.log(chalk.cyan('第 1 步: 完善 P0_项目基本信息.md'));
+        }
         console.log(chalk.gray('  文件位置: 00_项目总览/P0_项目基本信息.md'));
         console.log(chalk.gray('  填写内容: 项目目标、干系人、约束条件等'));
         console.log(chalk.yellow('  ⚠️  必须完成 P0 填写后才能开始创建 A 类基线文档'));
         console.log('');
-        console.log(chalk.cyan('第 3 步: 创建 A0 基线文档'));
+        console.log(chalk.cyan(`第 ${isCurrentDir ? '2' : '3'} 步: 创建 A0 基线文档`));
         console.log('  prd baseline create A0  # P0 填写完成后执行');
         console.log('');
 
