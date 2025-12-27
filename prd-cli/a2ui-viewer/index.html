@@ -110,6 +110,117 @@
             font-size: 0.8rem;
             opacity: 0.8;
         }
+
+        /* ========== 架构图组件样式 ========== */
+
+        /* 图表容器 */
+        .component-diagram {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 24px;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .diagram-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .diagram-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* 模块方框 */
+        .component-box {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            min-width: 120px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .component-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .box-desc {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        /* 分组容器 */
+        .component-group-diagram {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+        }
+
+        .group-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .group-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* 连接线/箭头 */
+        .component-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.5rem;
+            padding: 8px 0;
+        }
+
+        .arrow-label {
+            font-size: 0.75rem;
+            margin-left: 8px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 层级容器 */
+        .component-layer {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            padding: 12px 0;
+        }
+
+        .layer-title {
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
@@ -191,6 +302,77 @@
                         el.className = 'layout-col';
                         return el;
 
+                    // ========== 架构图组件 ==========
+
+                    case 'Diagram':
+                        el.className = 'component-diagram';
+                        if (props.title) {
+                            const title = document.createElement('div');
+                            title.className = 'diagram-title';
+                            title.textContent = props.title;
+                            el.appendChild(title);
+                        }
+                        const content = document.createElement('div');
+                        content.className = 'diagram-content';
+                        el.appendChild(content);
+                        el._content = content; // 用于子元素渲染
+                        return el;
+
+                    case 'Box':
+                        el.className = 'component-box';
+                        if (props.color) {
+                            el.style.borderLeft = `4px solid ${props.color}`;
+                        }
+                        const boxTitle = document.createElement('div');
+                        boxTitle.className = 'box-title';
+                        boxTitle.textContent = props.title || props.text || '';
+                        el.appendChild(boxTitle);
+                        if (props.desc) {
+                            const boxDesc = document.createElement('div');
+                            boxDesc.className = 'box-desc';
+                            boxDesc.textContent = props.desc;
+                            el.appendChild(boxDesc);
+                        }
+                        return el;
+
+                    case 'Arrow':
+                        el.className = 'component-arrow';
+                        const arrowSymbol = props.direction === 'up' ? '↑' :
+                            props.direction === 'left' ? '←' :
+                                props.direction === 'right' ? '→' : '↓';
+                        el.textContent = arrowSymbol;
+                        if (props.label) {
+                            const arrowLabel = document.createElement('span');
+                            arrowLabel.className = 'arrow-label';
+                            arrowLabel.textContent = props.label;
+                            el.appendChild(arrowLabel);
+                        }
+                        return el;
+
+                    case 'Layer':
+                        el.className = 'component-layer';
+                        if (props.title) {
+                            const layerTitle = document.createElement('div');
+                            layerTitle.className = 'layer-title';
+                            layerTitle.textContent = props.title;
+                            el.appendChild(layerTitle);
+                        }
+                        return el;
+
+                    case 'DiagramGroup':
+                        el.className = 'component-group-diagram';
+                        if (props.title) {
+                            const groupTitle = document.createElement('div');
+                            groupTitle.className = 'group-title';
+                            groupTitle.textContent = props.title;
+                            el.appendChild(groupTitle);
+                        }
+                        const groupContent = document.createElement('div');
+                        groupContent.className = 'group-content';
+                        el.appendChild(groupContent);
+                        el._content = groupContent;
+                        return el;
+
                     default:
                         console.warn('Unknown component type:', type);
                         el.textContent = `Unknown Component: ${type}`;
@@ -209,10 +391,13 @@
                     const el = this.create(node.type || 'Unknown', node);
 
                     // 容器只有在非叶子节点时才去递归渲染 children
-                    // Input, Button, Text 等通常不包含 children
-                    if (['Page', 'Panel', 'Row', 'Col'].includes(node.type)) {
+                    // Input, Button, Text, Box, Arrow 等通常不包含 children
+                    const containerTypes = ['Page', 'Panel', 'Row', 'Col', 'Diagram', 'Layer', 'DiagramGroup'];
+                    if (containerTypes.includes(node.type)) {
                         if (node.children && Array.isArray(node.children)) {
-                            node.children.forEach(child => this.renderNode(child, el));
+                            // Diagram 和 DiagramGroup 有特殊的内容容器
+                            const targetContainer = el._content || el;
+                            node.children.forEach(child => this.renderNode(child, targetContainer));
                         }
                     }
 
