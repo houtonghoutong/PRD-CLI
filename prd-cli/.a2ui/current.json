@@ -1,0 +1,78 @@
+{
+    "type": "Page",
+    "title": "A2UI 功能演示",
+    "children": [
+        {
+            "type": "Row",
+            "children": [
+                {
+                    "type": "Col",
+                    "children": [
+                        {
+                            "type": "Panel",
+                            "title": "基本信息表单",
+                            "children": [
+                                {
+                                    "type": "Input",
+                                    "label": "项目名称",
+                                    "placeholder": "请输入项目名称"
+                                },
+                                {
+                                    "type": "Input",
+                                    "label": "负责人",
+                                    "placeholder": "选择负责人"
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": "注：以上信息将用于生成立项文档。"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Col",
+                    "children": [
+                        {
+                            "type": "Panel",
+                            "title": "操作区域",
+                            "children": [
+                                {
+                                    "type": "Button",
+                                    "text": "✅ 保存草稿"
+                                },
+                                {
+                                    "type": "Button",
+                                    "text": "🚀 提交审核"
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": "状态：等待输入..."
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Panel",
+            "title": "数据列表预览",
+            "children": [
+                {
+                    "type": "Row",
+                    "children": [
+                        {
+                            "type": "Text",
+                            "content": "ID: 1001 | 任务: 需求分析 | 状态: 进行中"
+                        },
+                        {
+                            "type": "Button",
+                            "text": "查看详情"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

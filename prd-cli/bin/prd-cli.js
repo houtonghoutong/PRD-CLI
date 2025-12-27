@@ -100,6 +100,17 @@ program
     require('../commands/upgrade')(options);
   });
 
+// A2UI 预览服务
+program
+  .command('ui')
+  .description('启动 A2UI 界面预览服务')
+  .option('-p, --port <number>', '指定端口号', '3333')
+  .action((options) => {
+    const A2UIServer = require('../commands/a2ui-server');
+    const server = new A2UIServer(options.port);
+    server.start();
+  });
+
 // 帮助信息增强
 program.on('--help', () => {
   console.log('');

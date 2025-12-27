@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRD A2UI 预览器</title>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --panel-bg: #ffffff;
+            --text-primary: #1f2937;
+            --border-color: #e5e7eb;
+            --primary-color: #2563eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* 基础组件样式 */
+        .component-page {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .component-panel {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .component-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .component-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .component-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .component-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+
+        .component-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .component-group {
+            margin-bottom: 16px;
+        }
+
+        /* 布局组件 */
+        .layout-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .layout-col {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* 状态提示 */
+        #status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div style="text-align: center; padding: 50px;">
+            <h2>等待 A2UI 数据...</h2>
+            <p>请在 CLI 中生成界面数据</p>
+        </div>
+    </div>
+    <div id="status">连接中...</div>
+
+    <script>
+        // A2UI 渲染引擎
+        const Renderer = {
+            create(type, props) {
+                console.log('Creating component:', type, props);
+                const el = document.createElement('div');
+                el.className = `component-${type.toLowerCase()}`;
+
+                // 处理通用属性
+                if (props.id) el.id = props.id;
+                if (props.style) Object.assign(el.style, props.style);
+
+                // 特定组件渲染逻辑
+                switch (type) {
+                    case 'Page':
+                        if (props.title) {
+                            const title = document.createElement('div');
+                            title.className = 'component-header'; // 复用 header 样式
+                            title.style.borderBottom = 'none';
+                            title.style.fontSize = '2rem';
+                            title.textContent = props.title;
+                            el.appendChild(title);
+                        }
+                        return el;
+
+                    case 'Panel':
+                        if (props.title) {
+                            const title = document.createElement('div');
+                            title.className = 'component-header';
+                            title.textContent = props.title;
+                            el.appendChild(title);
+                        }
+                        return el;
+
+                    case 'Button':
+                        const btn = document.createElement('button');
+                        btn.className = 'component-button';
+                        btn.textContent = props.text || 'Button';
+                        return btn;
+
+                    case 'Input':
+                        const group = document.createElement('div');
+                        group.className = 'component-group';
+                        if (props.label) {
+                            const label = document.createElement('label');
+                            label.className = 'component-label';
+                            label.textContent = props.label;
+                            group.appendChild(label);
+                        }
+                        const input = document.createElement('input');
+                        input.className = 'component-input';
+                        input.placeholder = props.placeholder || '';
+                        group.appendChild(input);
+                        return group;
+
+                    case 'Text':
+                        const p = document.createElement('p');
+                        p.style.margin = '8px 0';
+                        p.textContent = props.content || '';
+                        return p;
+
+                    case 'Row':
+                        el.className = 'layout-row';
+                        return el;
+
+                    case 'Col':
+                        el.className = 'layout-col';
+                        return el;
+
+                    default:
+                        console.warn('Unknown component type:', type);
+                        el.textContent = `Unknown Component: ${type}`;
+                        el.style.border = '1px dashed red';
+                        el.style.padding = '10px';
+                        el.style.color = 'red';
+                        return el;
+                }
+            },
+
+            // 递归渲染树
+            renderNode(node, container) {
+                if (!node) return;
+
+                try {
+                    const el = this.create(node.type || 'Unknown', node);
+
+                    // 容器只有在非叶子节点时才去递归渲染 children
+                    // Input, Button, Text 等通常不包含 children
+                    if (['Page', 'Panel', 'Row', 'Col'].includes(node.type)) {
+                        if (node.children && Array.isArray(node.children)) {
+                            node.children.forEach(child => this.renderNode(child, el));
+                        }
+                    }
+
+                    container.appendChild(el);
+                } catch (err) {
+                    console.error('Render Error:', err, node);
+                    const errEl = document.createElement('div');
+                    errEl.style.color = 'red';
+                    errEl.textContent = `渲染错误: ${err.message}`;
+                    container.appendChild(errEl);
+                }
+            },
+
+            render(data) {
+                console.log('Rendering data:', data);
+                const app = document.getElementById('app');
+                app.innerHTML = ''; // 清空当前视图
+
+                if (!data) {
+                    app.innerHTML = '<div style="text-align: center; padding: 50px;">无数据</div>';
+                    return;
+                }
+
+                this.renderNode(data, app);
+            }
+        };
+
+        // 模拟数据轮询 (真实环境应该用 WebSocket 或 SSE)
+        let lastDataStr = '';
+
+        async function checkUpdate() {
+            try {
+                const res = await fetch('/ui.json');
+                if (res.ok) {
+                    const data = await res.json();
+                    const currentDataStr = JSON.stringify(data);
+
+                    // 只有数据变化时才重新渲染
+                    if (currentDataStr !== lastDataStr) {
+                        lastDataStr = currentDataStr;
+                        Renderer.render(data);
+                    }
+
+                    document.getElementById('status').textContent = '已连接: 实时预览中';
+                    document.getElementById('status').style.background = '#059669';
+                }
+            } catch (e) {
+                console.log('Waiting for data...', e);
+                document.getElementById('status').textContent = `连接失败: ${e.message}`;
+                document.getElementById('status').style.background = '#dc2626';
+            }
+        }
+
+        // 初始化
+        setInterval(checkUpdate, 1000); // 每秒轮询一次
+        checkUpdate();
+    </script>
+</body>
+
+</html>
