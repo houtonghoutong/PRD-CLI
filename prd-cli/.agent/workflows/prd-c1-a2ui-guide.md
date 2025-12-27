@@ -166,6 +166,22 @@ AI: "明白了，这个用户详情页需要包含基本信息表单和操作按
 | REQ-001 | 登录页 | [.html](./REQ-001-登录页.html) | [.json](./REQ-001-登录页.json) | 2025-12-27 |
 ```
 
+#### 在 Markdown 文档中嵌入预览
+
+**AI 可以在 B1/B2/C1 文档中直接嵌入 HTML 预览，让用户无需切换文件夹：**
+
+```markdown
+## 系统架构图
+
+<iframe src="./架构图/系统架构.html" width="100%" height="400" frameborder="0"></iframe>
+
+> 💡 如果 iframe 无法显示，请直接打开 [系统架构.html](./架构图/系统架构.html)
+```
+
+**注意**：不是所有 Markdown 编辑器都支持 iframe。如果不支持，AI 应该：
+1. 提供 HTML 文件的链接
+2. 或者将关键内容以 ASCII 图的形式展示在 Markdown 中
+
 ---
 
 ## 💻 完整示例：用户注册页
