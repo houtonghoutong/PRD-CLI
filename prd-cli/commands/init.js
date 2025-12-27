@@ -267,6 +267,18 @@ module.exports = async function (projectName) {
             );
         }
 
+        // 复制 A2UI 预览器
+        const a2uiViewerDir = path.join(__dirname, '../a2ui-viewer');
+        if (await fs.pathExists(a2uiViewerDir)) {
+            await fs.copy(
+                a2uiViewerDir,
+                path.join(projectPath, 'a2ui-viewer')
+            );
+        }
+
+        // 创建 .a2ui 目录（用于临时预览数据）
+        await fs.ensureDir(path.join(projectPath, '.a2ui'));
+
         // 创建 README
         const readme = `# ${displayName}
 
@@ -352,9 +364,12 @@ prd plan freeze
         console.log(chalk.gray('   ✓ .agent/workflows/  - PRD 工作流指引（包含所有阶段的详细步骤）'));
         console.log(chalk.gray('   ✓ .cursorrules       - Cursor AI 规则'));
         console.log(chalk.gray('   ✓ .antigravity/      - Antigravity AI 规则'));
+        console.log(chalk.gray('   ✓ a2ui-viewer/       - A2UI 界面预览器'));
+        console.log(chalk.gray('   ✓ .a2ui/             - A2UI 临时数据目录'));
         console.log('');
         console.log(chalk.yellow('   💡 现在你可以直接与 AI 助手对话，AI 已经知道如何协助你完成 PRD 流程！'));
         console.log(chalk.gray('   例如：告诉 AI "我要创建一个新项目的需求文档"'));
+        console.log(chalk.gray('   启动界面预览：运行 prd ui'));
         console.log('');
 
         console.log(chalk.bold('📋 下一步操作（请按顺序执行）:'));
