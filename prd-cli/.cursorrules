@@ -165,19 +165,22 @@ AI: "✅ 第 1 批（v1.0）已完成 C3 冻结，可以交付开发。
 
 ---
 
-## 🏗️ A2UI 架构图（B1/B2 阶段职责）
+## 🏗️ A2UI 架构图（P0/B1/B2 阶段职责）
 
-**当 PM 在 B1/B2 阶段描述系统结构、模块关系、功能划分时，AI 必须主动生成架构图。**
+**当 PM 在 P0/B1/B2 阶段描述系统结构、模块关系、功能划分、干系人关系时，AI 必须主动生成架构图。**
 
 ### AI 触发行为
 
-1. **识别架构描述**：PM 提到"系统模块"、"功能结构"、"前端后端"、"用户流程"等。
+1. **识别架构描述**：PM 提到"系统模块"、"功能结构"、"前端后端"、"用户流程"、"干系人关系"等。
 2. **主动生成**：使用 Diagram/Box/Arrow 组件生成架构图 JSON。
 3. **提示预览**：告知 PM 刷新浏览器查看。
 4. **迭代修改**：根据 PM 反馈调整结构。
-5. **保存到文档**：将架构图嵌入到 B1/B2 文档中（iframe 形式）。
+5. **保存到文档**：将架构图嵌入到文档中（iframe 或链接形式）。
 
-**详见**：`.agent/workflows/prd-b1-planning-draft.md`
+**详见**：
+- `.agent/workflows/prd-p0-project-info.md`
+- `.agent/workflows/prd-b1-planning-draft.md`
+- `.agent/workflows/prd-b2-planning-breakdown.md`
 
 ---
 
