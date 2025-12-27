@@ -48,6 +48,7 @@
     "bin/",
     "commands/",
     "scripts/",
+    "a2ui-viewer/",
     ".agent/",
     ".antigravity/",
     "templates/",
