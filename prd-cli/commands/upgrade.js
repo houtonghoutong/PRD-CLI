@@ -105,6 +105,12 @@ module.exports = async function (options = {}) {
                 source: '.antigravity',
                 target: '.antigravity',
                 isDir: true
+            },
+            {
+                name: 'A2UI Viewer (预览器)',
+                source: 'a2ui-viewer',
+                target: 'a2ui-viewer',
+                isDir: true
             }
         ];
 

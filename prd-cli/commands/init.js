@@ -18,6 +18,21 @@ module.exports = async function (projectName) {
         // 检查当前目录是否已经是 PRD 项目
         if (isCurrentDir && await fs.pathExists(path.join(projectPath, '.prd-config.json'))) {
             console.log(chalk.red('✗ 当前目录已经是 PRD 项目'));
+            console.log(chalk.yellow('   如需更新规则文件，请运行: prd upgrade'));
+            return;
+        }
+
+        // ⚠️ 检查是否在已有 PRD 项目中创建子项目（常见错误）
+        if (!isCurrentDir && await fs.pathExists(path.join(process.cwd(), '.prd-config.json'))) {
+            console.log(chalk.yellow('⚠️ 警告：当前目录已经是一个 PRD 项目！'));
+            console.log(chalk.yellow(`   你正在尝试在 PRD 项目中创建子项目 "${projectName}"。`));
+            console.log('');
+            console.log(chalk.cyan('   建议操作：'));
+            console.log(chalk.gray('   1. 如果要在当前项目工作，直接使用 prd baseline create A0 等命令'));
+            console.log(chalk.gray('   2. 如果确实要创建独立新项目，请先 cd 到其他目录'));
+            console.log(chalk.gray('   3. 如果要更新规则文件，请运行: prd upgrade'));
+            console.log('');
+            console.log(chalk.red('   已取消操作。'));
             return;
         }
 
@@ -388,6 +403,11 @@ prd plan freeze
         console.log('');
         console.log(chalk.cyan(`第 ${isCurrentDir ? '2' : '3'} 步: 创建 A0 基线文档`));
         console.log('  prd baseline create A0  # P0 填写完成后执行');
+        console.log('');
+
+        console.log(chalk.bold('🔄 后续更新:'));
+        console.log(chalk.gray('   当 CLI 包有新版本时，运行以下命令同步更新项目规则:'));
+        console.log(chalk.cyan('   npm update -g prd-workflow-cli && prd upgrade'));
         console.log('');
 
     } catch (error) {
