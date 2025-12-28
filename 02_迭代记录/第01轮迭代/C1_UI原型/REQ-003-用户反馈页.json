@@ -1,0 +1,85 @@
+{
+    "type": "Page",
+    "title": "用户反馈",
+    "children": [
+        {
+            "type": "Row",
+            "children": [
+                {
+                    "type": "Col",
+                    "children": [
+                        {
+                            "type": "Panel",
+                            "title": "提交反馈",
+                            "children": [
+                                {
+                                    "type": "Input",
+                                    "label": "问题类型",
+                                    "placeholder": "请选择：功能异常 / 体验建议 / 其他"
+                                },
+                                {
+                                    "type": "Input",
+                                    "label": "问题描述（多行）",
+                                    "placeholder": "请详细描述您遇到的问题...\n\n可以分多行输入",
+                                    "style": {
+                                        "minHeight": "120px"
+                                    }
+                                },
+                                {
+                                    "type": "Input",
+                                    "label": "上传截图（可选）",
+                                    "placeholder": "点击上传图片"
+                                },
+                                {
+                                    "type": "Button",
+                                    "text": "提交反馈"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Col",
+                    "children": [
+                        {
+                            "type": "Panel",
+                            "title": "常见问题",
+                            "children": [
+                                {
+                                    "type": "Text",
+                                    "content": "💡 如何描述问题更清晰？"
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": "1. 说明操作步骤"
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": "2. 描述预期结果"
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": "3. 附上截图更好"
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": ""
+                                },
+                                {
+                                    "type": "Text",
+                                    "content": "📞 紧急问题请联系：400-xxx-xxxx"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "_meta": {
+        "reqId": "REQ-003",
+        "name": "用户反馈页",
+        "confirmedAt": "2025-12-27T20:43:00+08:00",
+        "confirmedBy": "PM"
+    }
+}

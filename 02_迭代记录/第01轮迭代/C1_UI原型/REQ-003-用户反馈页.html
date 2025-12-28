@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REQ-003 用户反馈页 - UI 原型</title>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --panel-bg: #ffffff;
+            --text-primary: #1f2937;
+            --border-color: #e5e7eb;
+            --primary-color: #2563eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .component-page {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .component-panel {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .component-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .component-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .component-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+
+        .component-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .component-group {
+            margin-bottom: 16px;
+        }
+
+        .layout-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .layout-col {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .meta-info {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="meta-info">
+            📋 <strong>需求编号</strong>: REQ-003 |
+            <strong>界面名称</strong>: 用户反馈页 |
+            <strong>确认时间</strong>: 2025-12-27
+        </div>
+        <div class="page-title">用户反馈</div>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        // 内嵌的 UI 数据
+        const uiData = {
+            "type": "Page",
+            "title": "用户反馈",
+            "children": [
+                {
+                    "type": "Row",
+                    "children": [
+                        {
+                            "type": "Col",
+                            "children": [
+                                {
+                                    "type": "Panel",
+                                    "title": "提交反馈",
+                                    "children": [
+                                        { "type": "Input", "label": "问题类型", "placeholder": "请选择：功能异常 / 体验建议 / 其他" },
+                                        { "type": "Input", "label": "问题描述（多行）", "placeholder": "请详细描述您遇到的问题...", "style": { "minHeight": "120px" } },
+                                        { "type": "Input", "label": "上传截图（可选）", "placeholder": "点击上传图片" },
+                                        { "type": "Button", "text": "提交反馈" }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Col",
+                            "children": [
+                                {
+                                    "type": "Panel",
+                                    "title": "常见问题",
+                                    "children": [
+                                        { "type": "Text", "content": "💡 如何描述问题更清晰？" },
+                                        { "type": "Text", "content": "1. 说明操作步骤" },
+                                        { "type": "Text", "content": "2. 描述预期结果" },
+                                        { "type": "Text", "content": "3. 附上截图更好" },
+                                        { "type": "Text", "content": "" },
+                                        { "type": "Text", "content": "📞 紧急问题请联系：400-xxx-xxxx" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // 渲染引擎
+        const Renderer = {
+            create(type, props) {
+                const el = document.createElement('div');
+                el.className = `component-${type.toLowerCase()}`;
+
+                if (props.style) Object.assign(el.style, props.style);
+
+                switch (type) {
+                    case 'Page':
+                        return el;
+
+                    case 'Panel':
+                        if (props.title) {
+                            const title = document.createElement('div');
+                            title.className = 'component-header';
+                            title.textContent = props.title;
+                            el.appendChild(title);
+                        }
+                        return el;
+
+                    case 'Button':
+                        const btn = document.createElement('button');
+                        btn.className = 'component-button';
+                        btn.textContent = props.text || 'Button';
+                        return btn;
+
+                    case 'Input':
+                        const group = document.createElement('div');
+                        group.className = 'component-group';
+                        if (props.label) {
+                            const label = document.createElement('label');
+                            label.className = 'component-label';
+                            label.textContent = props.label;
+                            group.appendChild(label);
+                        }
+                        const input = document.createElement('input');
+                        input.className = 'component-input';
+                        input.placeholder = props.placeholder || '';
+                        if (props.style) Object.assign(input.style, props.style);
+                        group.appendChild(input);
+                        return group;
+
+                    case 'Text':
+                        const p = document.createElement('p');
+                        p.style.margin = '8px 0';
+                        p.textContent = props.content || '';
+                        return p;
+
+                    case 'Row':
+                        el.className = 'layout-row';
+                        return el;
+
+                    case 'Col':
+                        el.className = 'layout-col';
+                        return el;
+
+                    default:
+                        el.textContent = `[${type}]`;
+                        return el;
+                }
+            },
+
+            renderNode(node, container) {
+                if (!node) return;
+                const el = this.create(node.type || 'Unknown', node);
+                if (['Page', 'Panel', 'Row', 'Col'].includes(node.type)) {
+                    if (node.children && Array.isArray(node.children)) {
+                        node.children.forEach(child => this.renderNode(child, el));
+                    }
+                }
+                container.appendChild(el);
+            },
+
+            render(data, containerId) {
+                const container = document.getElementById(containerId);
+                if (data.children) {
+                    data.children.forEach(child => this.renderNode(child, container));
+                }
+            }
+        };
+
+        // 渲染界面
+        Renderer.render(uiData, 'content');
+    </script>
+</body>
+
+</html>

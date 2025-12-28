@@ -1,0 +1,88 @@
+{
+    "type": "Page",
+    "title": "系统架构概览",
+    "children": [
+        {
+            "type": "Diagram",
+            "title": "产品管理系统架构",
+            "children": [
+                {
+                    "type": "Layer",
+                    "title": "用户层",
+                    "children": [
+                        {
+                            "type": "Box",
+                            "title": "产品经理",
+                            "desc": "需求规划",
+                            "color": "#3b82f6"
+                        },
+                        {
+                            "type": "Box",
+                            "title": "开发团队",
+                            "desc": "技术实现",
+                            "color": "#10b981"
+                        },
+                        {
+                            "type": "Box",
+                            "title": "测试团队",
+                            "desc": "质量保障",
+                            "color": "#f59e0b"
+                        }
+                    ]
+                },
+                {
+                    "type": "Arrow",
+                    "direction": "down",
+                    "label": "需求流转"
+                },
+                {
+                    "type": "DiagramGroup",
+                    "title": "核心模块",
+                    "children": [
+                        {
+                            "type": "Box",
+                            "title": "需求管理",
+                            "desc": "A→B→C 流程",
+                            "color": "#8b5cf6"
+                        },
+                        {
+                            "type": "Box",
+                            "title": "版本规划",
+                            "desc": "迭代管理",
+                            "color": "#8b5cf6"
+                        },
+                        {
+                            "type": "Box",
+                            "title": "审视机制",
+                            "desc": "R0/R1/R2",
+                            "color": "#8b5cf6"
+                        }
+                    ]
+                },
+                {
+                    "type": "Arrow",
+                    "direction": "down",
+                    "label": "数据存储"
+                },
+                {
+                    "type": "Layer",
+                    "title": "数据层",
+                    "children": [
+                        {
+                            "type": "Box",
+                            "title": "Markdown 文档",
+                            "desc": "结构化存储",
+                            "color": "#6b7280"
+                        },
+                        {
+                            "type": "Box",
+                            "title": "对话归档",
+                            "desc": "沟通记录",
+                            "color": "#6b7280"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
