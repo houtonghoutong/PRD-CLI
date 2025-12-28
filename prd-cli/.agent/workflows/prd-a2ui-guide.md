@@ -100,15 +100,41 @@ description: A2UI 可视化指南 - 架构图与界面原型
 
 ### 组件列表
 
+#### 布局组件
+
 | 组件 | 说明 | 属性 |
 |------|------|------|
 | **Page** | 根节点/页面 | `title`, `children` |
 | **Panel** | 带边框面板 | `title`, `children` |
 | **Row** | 水平布局 | `children` |
 | **Col** | 垂直/列布局 | `children` |
-| **Input** | 输入框 | `label`, `placeholder` |
-| **Button** | 按钮 | `text` |
+| **Divider** | 分隔线 | - |
+
+#### 表单组件
+
+| 组件 | 说明 | 属性 |
+|------|------|------|
+| **Input** | 输入框 | `label`, `placeholder`, `type`, `required` |
+| **Textarea** | 多行输入 | `label`, `placeholder`, `rows` |
+| **Select** | 下拉选择 | `label`, `options` (数组) |
+| **Button** | 按钮 | `text`, `variant` (primary/secondary/success/danger) |
+
+#### 展示组件
+
+| 组件 | 说明 | 属性 |
+|------|------|------|
 | **Text** | 纯文本 | `content` |
+| **Badge** | 徽章标签 | `text`, `variant` (primary/success/warning/danger) |
+| **Alert** | 提示信息框 | `content`, `variant` (info/success/warning/danger) |
+
+#### 数据组件
+
+| 组件 | 说明 | 属性 |
+|------|------|------|
+| **Table** | 表格 | `columns`, `data` |
+| **Card** | 卡片列表项 | `title`, `desc`, `actions` |
+| **Tabs** | 标签页导航 | `items` (字符串数组) |
+| **Upload** | 文件上传区 | `text` |
 
 ### 基础 JSON 结构
 

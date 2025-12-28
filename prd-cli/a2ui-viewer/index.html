@@ -5,119 +5,498 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRD A2UI 预览器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f3f4f6;
-            --panel-bg: #ffffff;
-            --text-primary: #1f2937;
-            --border-color: #e5e7eb;
-            --primary-color: #2563eb;
+            /* 主色调 */
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+
+            /* 中性色 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+
+            /* 文字色 */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+
+            /* 边框色 */
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+
+            /* 状态色 */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+
+            /* 阴影 */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+            /* 圆角 */
+            --radius-sm: 6px;
+            --radius: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fdf2f8 100%);
+            min-height: 100vh;
             color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+            line-height: 1.6;
+            padding: 24px;
         }
 
         #app {
-            width: 100%;
             max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* 基础组件样式 */
+        /* ========== 页面组件 ========== */
         .component-page {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
         }
 
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        /* ========== 面板组件 ========== */
         .component-panel {
-            background: var(--panel-bg);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: box-shadow 0.2s ease;
         }
 
-        .component-header {
-            font-size: 1.5rem;
+        .component-panel:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .panel-header {
+            font-size: 1.125rem;
             font-weight: 600;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 12px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .component-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
+        .panel-header::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 2px;
         }
 
-        .component-button:hover {
-            background-color: #1d4ed8;
-        }
-
-        .component-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-top: 4px;
-        }
-
-        .component-label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
-
-        .component-group {
-            margin-bottom: 16px;
-        }
-
-        /* 布局组件 */
+        /* ========== 布局组件 ========== */
         .layout-row {
             display: flex;
-            gap: 16px;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
         .layout-col {
             flex: 1;
-            min-width: 300px;
+            min-width: 280px;
         }
 
-        /* 状态提示 */
-        #status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
+        /* ========== 表单组件 ========== */
+        .component-group {
+            margin-bottom: 20px;
+        }
+
+        .component-label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .component-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .component-input:hover {
+            border-color: var(--border-hover);
+        }
+
+        .component-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .component-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* 多行输入框 */
+        .component-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+            outline: none;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .component-textarea:hover {
+            border-color: var(--border-hover);
+        }
+
+        .component-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* ========== 按钮组件 ========== */
+        .component-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            opacity: 0.8;
+            box-shadow: var(--shadow-sm);
         }
 
-        /* ========== 架构图组件样式 ========== */
+        .component-button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
 
-        /* 图表容器 */
+        .component-button:active {
+            transform: translateY(0);
+        }
+
+        .component-button.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .component-button.secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-hover);
+        }
+
+        .component-button.success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+
+        .component-button.danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        }
+
+        /* ========== 文本组件 ========== */
+        .component-text {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            margin: 8px 0;
+        }
+
+        /* ========== 选择框组件 ========== */
+        .component-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+
+        .component-select:hover {
+            border-color: var(--border-hover);
+        }
+
+        .component-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* ========== 表格组件 ========== */
+        .component-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin: 16px 0;
+        }
+
+        .component-table th {
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .component-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .component-table tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        /* ========== 标签页组件 ========== */
+        .component-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .component-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .component-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .component-tab.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ========== 徽章组件 ========== */
+        .component-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .component-badge.primary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .component-badge.success {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .component-badge.warning {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .component-badge.danger {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        /* ========== 卡片列表组件 ========== */
+        .component-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .component-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-content {
+            flex: 1;
+        }
+
+        .card-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .card-action-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-hover);
+        }
+
+        .card-action-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .card-action-btn.danger {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* ========== 文件上传组件 ========== */
+        .component-upload {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .component-upload:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* ========== 分隔线组件 ========== */
+        .component-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        /* ========== 提示信息组件 ========== */
+        .component-alert {
+            padding: 16px;
+            border-radius: var(--radius);
+            margin: 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .component-alert.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+
+        .component-alert.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .component-alert.warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+
+        .component-alert.danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        /* ========== 架构图组件 ========== */
         .component-diagram {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: var(--radius-xl);
+            padding: 32px;
             min-height: 300px;
             position: relative;
         }
@@ -125,9 +504,10 @@
         .diagram-title {
             color: white;
             font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
             text-align: center;
+            letter-spacing: -0.025em;
         }
 
         .diagram-content {
@@ -137,79 +517,77 @@
             align-items: center;
         }
 
-        /* 模块方框 */
         .component-box {
             background: white;
-            border-radius: 8px;
+            border-radius: var(--radius);
             padding: 16px 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-lg);
             text-align: center;
-            min-width: 120px;
+            min-width: 140px;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .component-box:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
         }
 
         .box-title {
             font-weight: 600;
             font-size: 1rem;
-            color: #1f2937;
+            color: var(--text-primary);
             margin-bottom: 4px;
         }
 
         .box-desc {
-            font-size: 0.8rem;
-            color: #6b7280;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
         }
 
-        /* 分组容器 */
         .component-group-diagram {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-lg);
+            padding: 20px;
             width: 100%;
+            backdrop-filter: blur(10px);
         }
 
         .group-title {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 16px;
         }
 
         .group-content {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 16px;
             justify-content: center;
         }
 
-        /* 连接线/箭头 */
         .component-arrow {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.75rem;
             padding: 8px 0;
         }
 
         .arrow-label {
-            font-size: 0.75rem;
-            margin-left: 8px;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8125rem;
+            margin-left: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
         }
 
-        /* 层级容器 */
         .component-layer {
             width: 100%;
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 16px;
             justify-content: center;
             padding: 12px 0;
         }
@@ -217,59 +595,126 @@
         .layer-title {
             width: 100%;
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        /* ========== 状态提示 ========== */
+        #status {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(15, 23, 42, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* ========== 加载状态 ========== */
+        .loading {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
         }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <div style="text-align: center; padding: 50px;">
-            <h2>等待 A2UI 数据...</h2>
-            <p>请在 CLI 中生成界面数据</p>
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">等待 A2UI 数据...</p>
         </div>
     </div>
-    <div id="status">连接中...</div>
+    <div id="status">
+        <span class="status-dot"></span>
+        连接中...
+    </div>
 
     <script>
-        // A2UI 渲染引擎
+        // A2UI 渲染引擎 v2.0
         const Renderer = {
             create(type, props) {
-                console.log('Creating component:', type, props);
                 const el = document.createElement('div');
                 el.className = `component-${type.toLowerCase()}`;
 
-                // 处理通用属性
                 if (props.id) el.id = props.id;
                 if (props.style) Object.assign(el.style, props.style);
 
-                // 特定组件渲染逻辑
                 switch (type) {
                     case 'Page':
+                        el.className = 'component-page';
                         if (props.title) {
-                            const title = document.createElement('div');
-                            title.className = 'component-header'; // 复用 header 样式
-                            title.style.borderBottom = 'none';
-                            title.style.fontSize = '2rem';
+                            const title = document.createElement('h1');
+                            title.className = 'page-title';
                             title.textContent = props.title;
                             el.appendChild(title);
                         }
                         return el;
 
                     case 'Panel':
+                        el.className = 'component-panel';
                         if (props.title) {
-                            const title = document.createElement('div');
-                            title.className = 'component-header';
-                            title.textContent = props.title;
-                            el.appendChild(title);
+                            const header = document.createElement('div');
+                            header.className = 'panel-header';
+                            header.textContent = props.title;
+                            el.appendChild(header);
                         }
                         return el;
 
                     case 'Button':
                         const btn = document.createElement('button');
                         btn.className = 'component-button';
+                        if (props.variant) btn.classList.add(props.variant);
                         btn.textContent = props.text || 'Button';
                         return btn;
 
@@ -280,19 +725,159 @@
                             const label = document.createElement('label');
                             label.className = 'component-label';
                             label.textContent = props.label;
+                            if (props.required) label.textContent += ' *';
                             group.appendChild(label);
                         }
                         const input = document.createElement('input');
                         input.className = 'component-input';
                         input.placeholder = props.placeholder || '';
+                        input.type = props.type || 'text';
                         group.appendChild(input);
                         return group;
 
+                    case 'Textarea':
+                        const taGroup = document.createElement('div');
+                        taGroup.className = 'component-group';
+                        if (props.label) {
+                            const label = document.createElement('label');
+                            label.className = 'component-label';
+                            label.textContent = props.label;
+                            taGroup.appendChild(label);
+                        }
+                        const textarea = document.createElement('textarea');
+                        textarea.className = 'component-textarea';
+                        textarea.placeholder = props.placeholder || '';
+                        textarea.rows = props.rows || 4;
+                        taGroup.appendChild(textarea);
+                        return taGroup;
+
+                    case 'Select':
+                        const selGroup = document.createElement('div');
+                        selGroup.className = 'component-group';
+                        if (props.label) {
+                            const label = document.createElement('label');
+                            label.className = 'component-label';
+                            label.textContent = props.label;
+                            selGroup.appendChild(label);
+                        }
+                        const select = document.createElement('select');
+                        select.className = 'component-select';
+                        if (props.options) {
+                            props.options.forEach(opt => {
+                                const option = document.createElement('option');
+                                option.value = opt.value || opt;
+                                option.textContent = opt.label || opt;
+                                select.appendChild(option);
+                            });
+                        }
+                        selGroup.appendChild(select);
+                        return selGroup;
+
                     case 'Text':
                         const p = document.createElement('p');
-                        p.style.margin = '8px 0';
+                        p.className = 'component-text';
                         p.textContent = props.content || '';
                         return p;
+
+                    case 'Table':
+                        const table = document.createElement('table');
+                        table.className = 'component-table';
+                        if (props.columns && props.data) {
+                            const thead = document.createElement('thead');
+                            const headerRow = document.createElement('tr');
+                            props.columns.forEach(col => {
+                                const th = document.createElement('th');
+                                th.textContent = col.title || col;
+                                headerRow.appendChild(th);
+                            });
+                            thead.appendChild(headerRow);
+                            table.appendChild(thead);
+
+                            const tbody = document.createElement('tbody');
+                            props.data.forEach(row => {
+                                const tr = document.createElement('tr');
+                                props.columns.forEach(col => {
+                                    const td = document.createElement('td');
+                                    td.textContent = row[col.key || col] || '';
+                                    tr.appendChild(td);
+                                });
+                                tbody.appendChild(tr);
+                            });
+                            table.appendChild(tbody);
+                        }
+                        return table;
+
+                    case 'Tabs':
+                        const tabs = document.createElement('div');
+                        tabs.className = 'component-tabs';
+                        if (props.items) {
+                            props.items.forEach((item, i) => {
+                                const tab = document.createElement('button');
+                                tab.className = 'component-tab';
+                                if (i === 0) tab.classList.add('active');
+                                tab.textContent = item;
+                                tabs.appendChild(tab);
+                            });
+                        }
+                        return tabs;
+
+                    case 'Badge':
+                        const badge = document.createElement('span');
+                        badge.className = 'component-badge';
+                        if (props.variant) badge.classList.add(props.variant);
+                        badge.textContent = props.text || '';
+                        return badge;
+
+                    case 'Card':
+                        const card = document.createElement('div');
+                        card.className = 'component-card';
+                        const cardContent = document.createElement('div');
+                        cardContent.className = 'card-content';
+                        if (props.title) {
+                            const cardTitle = document.createElement('div');
+                            cardTitle.className = 'card-title';
+                            cardTitle.textContent = props.title;
+                            cardContent.appendChild(cardTitle);
+                        }
+                        if (props.desc) {
+                            const cardDesc = document.createElement('div');
+                            cardDesc.className = 'card-desc';
+                            cardDesc.textContent = props.desc;
+                            cardContent.appendChild(cardDesc);
+                        }
+                        card.appendChild(cardContent);
+                        if (props.actions) {
+                            const actions = document.createElement('div');
+                            actions.className = 'card-actions';
+                            props.actions.forEach(action => {
+                                const actionBtn = document.createElement('button');
+                                actionBtn.className = 'card-action-btn';
+                                if (action.variant) actionBtn.classList.add(action.variant);
+                                actionBtn.textContent = action.text;
+                                actions.appendChild(actionBtn);
+                            });
+                            card.appendChild(actions);
+                        }
+                        return card;
+
+                    case 'Upload':
+                        const upload = document.createElement('div');
+                        upload.className = 'component-upload';
+                        upload.innerHTML = `
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">${props.text || '点击或拖拽文件到此处上传'}</div>
+                        `;
+                        return upload;
+
+                    case 'Divider':
+                        el.className = 'component-divider';
+                        return el;
+
+                    case 'Alert':
+                        el.className = 'component-alert';
+                        if (props.variant) el.classList.add(props.variant);
+                        el.textContent = props.content || props.text || '';
+                        return el;
 
                     case 'Row':
                         el.className = 'layout-row';
@@ -302,8 +887,7 @@
                         el.className = 'layout-col';
                         return el;
 
-                    // ========== 架构图组件 ==========
-
+                    // 架构图组件
                     case 'Diagram':
                         el.className = 'component-diagram';
                         if (props.title) {
@@ -315,7 +899,7 @@
                         const content = document.createElement('div');
                         content.className = 'diagram-content';
                         el.appendChild(content);
-                        el._content = content; // 用于子元素渲染
+                        el._content = content;
                         return el;
 
                     case 'Box':
@@ -375,27 +959,24 @@
 
                     default:
                         console.warn('Unknown component type:', type);
-                        el.textContent = `Unknown Component: ${type}`;
-                        el.style.border = '1px dashed red';
-                        el.style.padding = '10px';
-                        el.style.color = 'red';
+                        el.textContent = `Unknown: ${type}`;
+                        el.style.border = '2px dashed #ef4444';
+                        el.style.padding = '16px';
+                        el.style.color = '#ef4444';
+                        el.style.borderRadius = '8px';
                         return el;
                 }
             },
 
-            // 递归渲染树
             renderNode(node, container) {
                 if (!node) return;
 
                 try {
                     const el = this.create(node.type || 'Unknown', node);
-
-                    // 容器只有在非叶子节点时才去递归渲染 children
-                    // Input, Button, Text, Box, Arrow 等通常不包含 children
                     const containerTypes = ['Page', 'Panel', 'Row', 'Col', 'Diagram', 'Layer', 'DiagramGroup'];
+
                     if (containerTypes.includes(node.type)) {
                         if (node.children && Array.isArray(node.children)) {
-                            // Diagram 和 DiagramGroup 有特殊的内容容器
                             const targetContainer = el._content || el;
                             node.children.forEach(child => this.renderNode(child, targetContainer));
                         }
@@ -405,19 +986,18 @@
                 } catch (err) {
                     console.error('Render Error:', err, node);
                     const errEl = document.createElement('div');
-                    errEl.style.color = 'red';
+                    errEl.style.cssText = 'color: #ef4444; padding: 16px; border: 2px solid #ef4444; border-radius: 8px;';
                     errEl.textContent = `渲染错误: ${err.message}`;
                     container.appendChild(errEl);
                 }
             },
 
             render(data) {
-                console.log('Rendering data:', data);
                 const app = document.getElementById('app');
-                app.innerHTML = ''; // 清空当前视图
+                app.innerHTML = '';
 
                 if (!data) {
-                    app.innerHTML = '<div style="text-align: center; padding: 50px;">无数据</div>';
+                    app.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p class="loading-text">无数据</p></div>';
                     return;
                 }
 
@@ -425,7 +1005,6 @@
             }
         };
 
-        // 模拟数据轮询 (真实环境应该用 WebSocket 或 SSE)
         let lastDataStr = '';
 
         async function checkUpdate() {
@@ -435,24 +1014,21 @@
                     const data = await res.json();
                     const currentDataStr = JSON.stringify(data);
 
-                    // 只有数据变化时才重新渲染
                     if (currentDataStr !== lastDataStr) {
                         lastDataStr = currentDataStr;
                         Renderer.render(data);
                     }
 
-                    document.getElementById('status').textContent = '已连接: 实时预览中';
-                    document.getElementById('status').style.background = '#059669';
+                    document.getElementById('status').innerHTML = '<span class="status-dot"></span>已连接 · 实时预览';
+                    document.getElementById('status').style.background = 'rgba(16, 185, 129, 0.9)';
                 }
             } catch (e) {
-                console.log('Waiting for data...', e);
-                document.getElementById('status').textContent = `连接失败: ${e.message}`;
-                document.getElementById('status').style.background = '#dc2626';
+                document.getElementById('status').innerHTML = '连接失败';
+                document.getElementById('status').style.background = 'rgba(239, 68, 68, 0.9)';
             }
         }
 
-        // 初始化
-        setInterval(checkUpdate, 1000); // 每秒轮询一次
+        setInterval(checkUpdate, 1000);
         checkUpdate();
     </script>
 </body>
