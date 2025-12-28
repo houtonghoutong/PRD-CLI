@@ -399,7 +399,8 @@
 
         async function checkUpdate() {
             try {
-                const res = await fetch('/ui.json');
+                // 获取数据
+                const res = await fetch('/ui.json' + window.location.search);
                 if (res.ok) {
                     const data = await res.json();
                     const dataStr = JSON.stringify(data);
@@ -412,6 +413,21 @@
 
                     document.getElementById('status-text').textContent = '已连接';
                     document.querySelector('.status-dot').style.background = '#52c41a';
+
+                    // 如果有 file 参数，显示当前文件
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('file')) {
+                        document.title = `预览: ${params.get('file')} - PRD A2UI`;
+                        // 可以在页面上也显示一下
+                        const statusBar = document.querySelector('.status-bar');
+                        if (!document.getElementById('status-file-info')) {
+                            const fileInfo = document.createElement('span');
+                            fileInfo.id = 'status-file-info';
+                            fileInfo.style.marginLeft = '10px';
+                            fileInfo.textContent = `| 文件: ${params.get('file')}`;
+                            statusBar.appendChild(fileInfo);
+                        }
+                    }
                 }
             } catch (e) {
                 document.getElementById('status-text').textContent = '连接失败';

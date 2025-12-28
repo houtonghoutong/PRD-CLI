@@ -19,16 +19,31 @@ class A2UIServer {
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 
             // 路由处理
-            if (req.url === '/') {
+            const parsedUrl = new URL(req.url, `http://localhost:${this.port}`);
+            const pathname = parsedUrl.pathname;
+
+            if (pathname === '/') {
                 this.serveFile(res, path.join(this.viewerPath, 'index.html'), 'text/html');
-            } else if (req.url === '/ui.json') {
-                // Determine which file to serve
+            } else if (pathname === '/ui.json') {
+                // Priority: 1. URL Query Param (?file=...) 2. CLI Argument 3. Default
+                const queryFile = parsedUrl.searchParams.get('file');
                 let jsonPath = path.join(this.projectPath, '.a2ui/current.json');
-                if (this.targetFile) {
+
+                if (queryFile) {
+                    // Prevent directory traversal attacks (basic check)
+                    // Allow relative paths from project root
+                    jsonPath = path.resolve(this.projectPath, queryFile);
+                    if (!jsonPath.startsWith(this.projectPath)) {
+                        res.writeHead(403);
+                        res.end('Access denied: File outside project directory');
+                        return;
+                    }
+                } else if (this.targetFile) {
                     jsonPath = path.isAbsolute(this.targetFile)
                         ? this.targetFile
                         : path.join(this.projectPath, this.targetFile);
                 }
+
                 this.serveFile(res, jsonPath, 'application/json');
             } else {
                 res.writeHead(404);
