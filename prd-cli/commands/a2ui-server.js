@@ -5,8 +5,9 @@ const chalk = require('chalk');
 const { exec } = require('child_process');
 
 class A2UIServer {
-    constructor(port = 3333) {
+    constructor(port = 3333, targetFile = null) {
         this.port = port;
+        this.targetFile = targetFile;
         this.viewerPath = path.join(__dirname, '../a2ui-viewer');
         this.projectPath = process.cwd();
     }
@@ -21,8 +22,14 @@ class A2UIServer {
             if (req.url === '/') {
                 this.serveFile(res, path.join(this.viewerPath, 'index.html'), 'text/html');
             } else if (req.url === '/ui.json') {
-                // 读取项目根目录下的 a2ui-data.json
-                this.serveFile(res, path.join(this.projectPath, '.a2ui/current.json'), 'application/json');
+                // Determine which file to serve
+                let jsonPath = path.join(this.projectPath, '.a2ui/current.json');
+                if (this.targetFile) {
+                    jsonPath = path.isAbsolute(this.targetFile)
+                        ? this.targetFile
+                        : path.join(this.projectPath, this.targetFile);
+                }
+                this.serveFile(res, jsonPath, 'application/json');
             } else {
                 res.writeHead(404);
                 res.end('Not found');
