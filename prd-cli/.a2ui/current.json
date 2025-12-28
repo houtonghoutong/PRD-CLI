@@ -1,53 +1,93 @@
 {
     "type": "Page",
-    "title": "A2UI 功能演示",
+    "title": "#1.1 阶段模板配置 - 界面原型",
     "children": [
         {
-            "type": "Row",
+            "type": "Tabs",
+            "items": [
+                "页面1: 模板列表",
+                "页面2: 模板编辑",
+                "页面3: 阶段编辑弹窗",
+                "页面4: 交付物编辑弹窗"
+            ]
+        },
+        {
+            "type": "Panel",
+            "title": "筛选条件",
             "children": [
                 {
-                    "type": "Col",
+                    "type": "Row",
                     "children": [
                         {
-                            "type": "Panel",
-                            "title": "基本信息表单",
+                            "type": "Col",
                             "children": [
                                 {
                                     "type": "Input",
-                                    "label": "项目名称",
-                                    "placeholder": "请输入项目名称"
-                                },
-                                {
-                                    "type": "Input",
-                                    "label": "负责人",
-                                    "placeholder": "选择负责人"
-                                },
-                                {
-                                    "type": "Text",
-                                    "content": "注：以上信息将用于生成立项文档。"
+                                    "label": "模板名称",
+                                    "placeholder": "请输入关键词搜索"
                                 }
                             ]
-                        }
-                    ]
-                },
-                {
-                    "type": "Col",
-                    "children": [
+                        },
                         {
-                            "type": "Panel",
-                            "title": "操作区域",
+                            "type": "Col",
                             "children": [
                                 {
-                                    "type": "Button",
-                                    "text": "✅ 保存草稿"
-                                },
+                                    "type": "Select",
+                                    "label": "药品类型",
+                                    "options": [
+                                        "全部",
+                                        "化学药",
+                                        "生物药",
+                                        "中药"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Col",
+                            "children": [
                                 {
-                                    "type": "Button",
-                                    "text": "🚀 提交审核"
-                                },
+                                    "type": "Select",
+                                    "label": "项目类型",
+                                    "options": [
+                                        "全部",
+                                        "自主研发",
+                                        "合作开发",
+                                        "许可引进"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Col",
+                            "children": [
                                 {
-                                    "type": "Text",
-                                    "content": "状态：等待输入..."
+                                    "type": "Select",
+                                    "label": "状态",
+                                    "options": [
+                                        "全部",
+                                        "已发布",
+                                        "草稿"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Col",
+                            "children": [
+                                {
+                                    "type": "Row",
+                                    "children": [
+                                        {
+                                            "type": "Button",
+                                            "text": "搜索"
+                                        },
+                                        {
+                                            "type": "Button",
+                                            "text": "重置",
+                                            "variant": "secondary"
+                                        }
+                                    ]
                                 }
                             ]
                         }
@@ -57,18 +97,81 @@
         },
         {
             "type": "Panel",
-            "title": "数据列表预览",
+            "title": "内审模板列表",
             "children": [
                 {
-                    "type": "Row",
-                    "children": [
+                    "type": "Table",
+                    "columns": [
                         {
-                            "type": "Text",
-                            "content": "ID: 1001 | 任务: 需求分析 | 状态: 进行中"
+                            "key": "name",
+                            "title": "模板名称"
                         },
                         {
-                            "type": "Button",
-                            "text": "查看详情"
+                            "key": "drugType",
+                            "title": "药品类型",
+                            "type": "link"
+                        },
+                        {
+                            "key": "projectType",
+                            "title": "项目类型",
+                            "type": "badge",
+                            "variantMap": {
+                                "许可引进": "primary",
+                                "合作开发": "success",
+                                "自主研发": "warning"
+                            }
+                        },
+                        {
+                            "key": "stages",
+                            "title": "阶段数"
+                        },
+                        {
+                            "key": "status",
+                            "title": "状态",
+                            "type": "status"
+                        },
+                        {
+                            "key": "updateTime",
+                            "title": "更新时间"
+                        },
+                        {
+                            "key": "actions",
+                            "title": "操作",
+                            "type": "actions",
+                            "buttons": [
+                                "编辑",
+                                "复制",
+                                "删除"
+                            ]
+                        }
+                    ],
+                    "data": [
+                        {
+                            "name": "化学药内审模板",
+                            "drugType": "化学药",
+                            "projectType": "许可引进",
+                            "stages": "3 个阶段",
+                            "status": "已发布",
+                            "updateTime": "2025-12-20",
+                            "actions": ""
+                        },
+                        {
+                            "name": "生物药内审模板",
+                            "drugType": "生物药",
+                            "projectType": "合作开发",
+                            "stages": "3 个阶段",
+                            "status": "草稿",
+                            "updateTime": "2025-12-18",
+                            "actions": ""
+                        },
+                        {
+                            "name": "中药内审模板",
+                            "drugType": "中药",
+                            "projectType": "自主研发",
+                            "stages": "4 个阶段",
+                            "status": "已发布",
+                            "updateTime": "2025-12-15",
+                            "actions": ""
                         }
                     ]
                 }

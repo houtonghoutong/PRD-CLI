@@ -798,7 +798,59 @@
                                 const tr = document.createElement('tr');
                                 props.columns.forEach(col => {
                                     const td = document.createElement('td');
-                                    td.textContent = row[col.key || col] || '';
+                                    const key = col.key || col;
+                                    const value = row[key] || '';
+                                    const colType = col.type || 'text';
+
+                                    // 根据列类型渲染不同内容
+                                    if (colType === 'link') {
+                                        const link = document.createElement('a');
+                                        link.href = '#';
+                                        link.textContent = value;
+                                        link.style.color = 'var(--primary)';
+                                        link.style.textDecoration = 'none';
+                                        td.appendChild(link);
+                                    } else if (colType === 'badge') {
+                                        const badge = document.createElement('span');
+                                        badge.className = 'component-badge';
+                                        const variant = col.variantMap?.[value] || 'primary';
+                                        badge.classList.add(variant);
+                                        badge.textContent = value;
+                                        td.appendChild(badge);
+                                    } else if (colType === 'status') {
+                                        const status = document.createElement('span');
+                                        status.style.display = 'inline-flex';
+                                        status.style.alignItems = 'center';
+                                        status.style.gap = '6px';
+                                        const dot = document.createElement('span');
+                                        dot.style.width = '6px';
+                                        dot.style.height = '6px';
+                                        dot.style.borderRadius = '50%';
+                                        dot.style.background = value === '已发布' ? 'var(--success)' : 'var(--text-muted)';
+                                        status.appendChild(dot);
+                                        status.appendChild(document.createTextNode(value));
+                                        td.appendChild(status);
+                                    } else if (colType === 'actions') {
+                                        const actions = document.createElement('div');
+                                        actions.style.display = 'flex';
+                                        actions.style.gap = '8px';
+                                        (col.buttons || ['编辑', '复制', '删除']).forEach((btnText, idx) => {
+                                            const actionLink = document.createElement('a');
+                                            actionLink.href = '#';
+                                            actionLink.textContent = btnText;
+                                            actionLink.style.fontSize = '0.8125rem';
+                                            actionLink.style.textDecoration = 'none';
+                                            if (btnText === '删除') {
+                                                actionLink.style.color = 'var(--danger)';
+                                            } else {
+                                                actionLink.style.color = 'var(--primary)';
+                                            }
+                                            actions.appendChild(actionLink);
+                                        });
+                                        td.appendChild(actions);
+                                    } else {
+                                        td.textContent = value;
+                                    }
                                     tr.appendChild(td);
                                 });
                                 tbody.appendChild(tr);
