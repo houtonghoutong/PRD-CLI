@@ -4,1082 +4,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRD A2UI 预览器</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>PRD A2UI 预览器 - Ant Design</title>
+    <!-- React -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Ant Design -->
+    <link rel="stylesheet" href="https://unpkg.com/antd@5/dist/reset.css">
+    <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+    <script src="https://unpkg.com/antd@5/dist/antd.min.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/@ant-design/icons@5/dist/index.umd.min.js"></script>
     <style>
-        :root {
-            /* 主色调 */
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --primary-light: #eff6ff;
-
-            /* 中性色 */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-
-            /* 文字色 */
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-
-            /* 边框色 */
-            --border: #e2e8f0;
-            --border-hover: #cbd5e1;
-
-            /* 状态色 */
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-
-            /* 阴影 */
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-            /* 圆角 */
-            --radius-sm: 6px;
-            --radius: 8px;
-            --radius-lg: 12px;
-            --radius-xl: 16px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fdf2f8 100%);
-            min-height: 100vh;
-            color: var(--text-primary);
-            line-height: 1.6;
+            margin: 0;
             padding: 24px;
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
-        #app {
-            max-width: 1200px;
+        #root {
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* ========== 页面组件 ========== */
-        .component-page {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            letter-spacing: -0.025em;
-        }
-
-        /* ========== 面板组件 ========== */
-        .component-panel {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
-            padding: 24px;
-            border: 1px solid var(--border);
-            transition: box-shadow 0.2s ease;
-        }
-
-        .component-panel:hover {
-            box-shadow: var(--shadow-lg);
-        }
-
-        .panel-header {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-header::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            border-radius: 2px;
-        }
-
-        /* ========== 布局组件 ========== */
-        .layout-row {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .layout-col {
-            flex: 1;
-            min-width: 280px;
-        }
-
-        /* ========== 表单组件 ========== */
-        .component-group {
-            margin-bottom: 20px;
-        }
-
-        .component-label {
-            display: block;
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .component-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.9375rem;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            transition: all 0.2s ease;
-            outline: none;
-        }
-
-        .component-input:hover {
-            border-color: var(--border-hover);
-        }
-
-        .component-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .component-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        /* 多行输入框 */
-        .component-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.9375rem;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            transition: all 0.2s ease;
-            outline: none;
-            resize: vertical;
-            min-height: 100px;
-            font-family: inherit;
-        }
-
-        .component-textarea:hover {
-            border-color: var(--border-hover);
-        }
-
-        .component-textarea:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        /* ========== 按钮组件 ========== */
-        .component-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 0.9375rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
-            color: white;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .component-button:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .component-button:active {
-            transform: translateY(0);
-        }
-
-        .component-button.secondary {
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
-
-        .component-button.secondary:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--border-hover);
-        }
-
-        .component-button.success {
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-        }
-
-        .component-button.danger {
-            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
-        }
-
-        /* ========== 文本组件 ========== */
-        .component-text {
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-            line-height: 1.7;
-            margin: 8px 0;
-        }
-
-        /* ========== 选择框组件 ========== */
-        .component-select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.9375rem;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 40px;
-        }
-
-        .component-select:hover {
-            border-color: var(--border-hover);
-        }
-
-        .component-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        /* ========== 表格组件 ========== */
-        .component-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-            margin: 16px 0;
-        }
-
-        .component-table th {
-            background: var(--bg-secondary);
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border-bottom: 2px solid var(--border);
-        }
-
-        .component-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-primary);
-        }
-
-        .component-table tr:hover td {
-            background: var(--bg-secondary);
-        }
-
-        /* ========== 标签页组件 ========== */
-        .component-tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--bg-secondary);
-            padding: 4px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-        }
-
-        .component-tab {
-            padding: 10px 20px;
-            border: none;
-            background: transparent;
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .component-tab:hover {
-            color: var(--text-primary);
-        }
-
-        .component-tab.active {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        /* ========== 徽章组件 ========== */
-        .component-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .component-badge.primary {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .component-badge.success {
-            background: #dcfce7;
-            color: var(--success);
-        }
-
-        .component-badge.warning {
-            background: #fef3c7;
-            color: var(--warning);
-        }
-
-        .component-badge.danger {
-            background: #fee2e2;
-            color: var(--danger);
-        }
-
-        /* ========== 卡片列表组件 ========== */
-        .component-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .component-card:hover {
-            border-color: var(--border-hover);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .card-content {
-            flex: 1;
-        }
-
-        .card-title {
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .card-desc {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .card-action-btn {
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            border-radius: var(--radius-sm);
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .card-action-btn:hover {
-            background: var(--bg-secondary);
-            border-color: var(--border-hover);
-        }
-
-        .card-action-btn.primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .card-action-btn.danger {
-            color: var(--danger);
-            border-color: var(--danger);
-        }
-
-        /* ========== 文件上传组件 ========== */
-        .component-upload {
-            border: 2px dashed var(--border);
-            border-radius: var(--radius);
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .component-upload:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .upload-icon {
-            font-size: 2rem;
-            margin-bottom: 8px;
-        }
-
-        .upload-text {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-
-        /* ========== 分隔线组件 ========== */
-        .component-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 24px 0;
-        }
-
-        /* ========== 提示信息组件 ========== */
-        .component-alert {
-            padding: 16px;
-            border-radius: var(--radius);
-            margin: 16px 0;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-
-        .component-alert.info {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-        }
-
-        .component-alert.success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-
-        .component-alert.warning {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            color: #92400e;
-        }
-
-        .component-alert.danger {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-        }
-
-        /* ========== 架构图组件 ========== */
-        .component-diagram {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: var(--radius-xl);
-            padding: 32px;
-            min-height: 300px;
-            position: relative;
-        }
-
-        .diagram-title {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            text-align: center;
-            letter-spacing: -0.025em;
-        }
-
-        .diagram-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .component-box {
-            background: white;
-            border-radius: var(--radius);
-            padding: 16px 24px;
-            box-shadow: var(--shadow-lg);
-            text-align: center;
-            min-width: 140px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .component-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
-        }
-
-        .box-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .box-desc {
-            font-size: 0.8125rem;
-            color: var(--text-muted);
-        }
-
-        .component-group-diagram {
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px dashed rgba(255, 255, 255, 0.4);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-        }
-
-        .group-title {
-            color: rgba(255, 255, 255, 0.95);
-            font-size: 0.9375rem;
-            font-weight: 600;
+        .page-header {
             margin-bottom: 16px;
         }
 
-        .group-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            justify-content: center;
-        }
-
-        .component-arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.75rem;
-            padding: 8px 0;
-        }
-
-        .arrow-label {
-            font-size: 0.8125rem;
-            margin-left: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
-        }
-
-        .component-layer {
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            justify-content: center;
-            padding: 12px 0;
-        }
-
-        .layer-title {
-            width: 100%;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.875rem;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        /* ========== 状态提示 ========== */
-        #status {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: rgba(15, 23, 42, 0.9);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 9999px;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-lg);
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.88);
+            margin: 0;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
+        .status-bar {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
+            background: #52c41a;
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        /* ========== 加载状态 ========== */
-        .loading {
-            text-align: center;
-            padding: 80px 40px;
-        }
-
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .loading-text {
-            color: var(--text-secondary);
-            font-size: 1rem;
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
         }
     </style>
 </head>
 
 <body>
-    <div id="app">
-        <div class="loading">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">等待 A2UI 数据...</p>
-        </div>
-    </div>
-    <div id="status">
+    <div id="root"></div>
+    <div class="status-bar">
         <span class="status-dot"></span>
-        连接中...
+        <span id="status-text">连接中...</span>
     </div>
 
     <script>
-        // A2UI 渲染引擎 v2.0
-        const Renderer = {
-            create(type, props) {
-                const el = document.createElement('div');
-                el.className = `component-${type.toLowerCase()}`;
+        const {
+            ConfigProvider, App, Card, Button, Input, Select, Table, Tabs, Tag, Badge,
+            Space, Row, Col, Typography, Divider, Alert, Upload, Form, message
+        } = antd;
+        const { Title, Text, Paragraph } = Typography;
+        const { TextArea } = Input;
+        const { PlusOutlined, EditOutlined, CopyOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, UploadOutlined, InboxOutlined } = icons;
+        const { Dragger } = Upload;
 
-                if (props.id) el.id = props.id;
-                if (props.style) Object.assign(el.style, props.style);
+        // 渲染器组件
+        const A2UIRenderer = ({ data }) => {
+            if (!data) {
+                return React.createElement('div', { className: 'loading-container' },
+                    React.createElement(antd.Spin, { size: 'large', tip: '等待 A2UI 数据...' })
+                );
+            }
+
+            const renderNode = (node) => {
+                if (!node) return null;
+
+                const { type, children, ...props } = node;
 
                 switch (type) {
                     case 'Page':
-                        el.className = 'component-page';
-                        if (props.title) {
-                            const title = document.createElement('h1');
-                            title.className = 'page-title';
-                            title.textContent = props.title;
-                            el.appendChild(title);
-                        }
-                        return el;
+                        return React.createElement('div', { key: props.id },
+                            props.title && React.createElement('div', { className: 'page-header' },
+                                React.createElement('h1', { className: 'page-title' }, '📋 ', props.title)
+                            ),
+                            children && children.map((child, i) => renderNode({ ...child, key: i }))
+                        );
 
                     case 'Panel':
-                        el.className = 'component-panel';
-                        if (props.title) {
-                            const header = document.createElement('div');
-                            header.className = 'panel-header';
-                            header.textContent = props.title;
-                            el.appendChild(header);
-                        }
-                        return el;
-
-                    case 'Button':
-                        const btn = document.createElement('button');
-                        btn.className = 'component-button';
-                        if (props.variant) btn.classList.add(props.variant);
-                        btn.textContent = props.text || 'Button';
-                        return btn;
-
-                    case 'Input':
-                        const group = document.createElement('div');
-                        group.className = 'component-group';
-                        if (props.label) {
-                            const label = document.createElement('label');
-                            label.className = 'component-label';
-                            label.textContent = props.label;
-                            if (props.required) label.textContent += ' *';
-                            group.appendChild(label);
-                        }
-                        const input = document.createElement('input');
-                        input.className = 'component-input';
-                        input.placeholder = props.placeholder || '';
-                        input.type = props.type || 'text';
-                        group.appendChild(input);
-                        return group;
-
-                    case 'Textarea':
-                        const taGroup = document.createElement('div');
-                        taGroup.className = 'component-group';
-                        if (props.label) {
-                            const label = document.createElement('label');
-                            label.className = 'component-label';
-                            label.textContent = props.label;
-                            taGroup.appendChild(label);
-                        }
-                        const textarea = document.createElement('textarea');
-                        textarea.className = 'component-textarea';
-                        textarea.placeholder = props.placeholder || '';
-                        textarea.rows = props.rows || 4;
-                        taGroup.appendChild(textarea);
-                        return taGroup;
-
-                    case 'Select':
-                        const selGroup = document.createElement('div');
-                        selGroup.className = 'component-group';
-                        if (props.label) {
-                            const label = document.createElement('label');
-                            label.className = 'component-label';
-                            label.textContent = props.label;
-                            selGroup.appendChild(label);
-                        }
-                        const select = document.createElement('select');
-                        select.className = 'component-select';
-                        if (props.options) {
-                            props.options.forEach(opt => {
-                                const option = document.createElement('option');
-                                option.value = opt.value || opt;
-                                option.textContent = opt.label || opt;
-                                select.appendChild(option);
-                            });
-                        }
-                        selGroup.appendChild(select);
-                        return selGroup;
-
-                    case 'Text':
-                        const p = document.createElement('p');
-                        p.className = 'component-text';
-                        p.textContent = props.content || '';
-                        return p;
-
-                    case 'Table':
-                        const table = document.createElement('table');
-                        table.className = 'component-table';
-                        if (props.columns && props.data) {
-                            const thead = document.createElement('thead');
-                            const headerRow = document.createElement('tr');
-                            props.columns.forEach(col => {
-                                const th = document.createElement('th');
-                                th.textContent = col.title || col;
-                                headerRow.appendChild(th);
-                            });
-                            thead.appendChild(headerRow);
-                            table.appendChild(thead);
-
-                            const tbody = document.createElement('tbody');
-                            props.data.forEach(row => {
-                                const tr = document.createElement('tr');
-                                props.columns.forEach(col => {
-                                    const td = document.createElement('td');
-                                    const key = col.key || col;
-                                    const value = row[key] || '';
-                                    const colType = col.type || 'text';
-
-                                    // 根据列类型渲染不同内容
-                                    if (colType === 'link') {
-                                        const link = document.createElement('a');
-                                        link.href = '#';
-                                        link.textContent = value;
-                                        link.style.color = 'var(--primary)';
-                                        link.style.textDecoration = 'none';
-                                        td.appendChild(link);
-                                    } else if (colType === 'badge') {
-                                        const badge = document.createElement('span');
-                                        badge.className = 'component-badge';
-                                        const variant = col.variantMap?.[value] || 'primary';
-                                        badge.classList.add(variant);
-                                        badge.textContent = value;
-                                        td.appendChild(badge);
-                                    } else if (colType === 'status') {
-                                        const status = document.createElement('span');
-                                        status.style.display = 'inline-flex';
-                                        status.style.alignItems = 'center';
-                                        status.style.gap = '6px';
-                                        const dot = document.createElement('span');
-                                        dot.style.width = '6px';
-                                        dot.style.height = '6px';
-                                        dot.style.borderRadius = '50%';
-                                        dot.style.background = value === '已发布' ? 'var(--success)' : 'var(--text-muted)';
-                                        status.appendChild(dot);
-                                        status.appendChild(document.createTextNode(value));
-                                        td.appendChild(status);
-                                    } else if (colType === 'actions') {
-                                        const actions = document.createElement('div');
-                                        actions.style.display = 'flex';
-                                        actions.style.gap = '8px';
-                                        (col.buttons || ['编辑', '复制', '删除']).forEach((btnText, idx) => {
-                                            const actionLink = document.createElement('a');
-                                            actionLink.href = '#';
-                                            actionLink.textContent = btnText;
-                                            actionLink.style.fontSize = '0.8125rem';
-                                            actionLink.style.textDecoration = 'none';
-                                            if (btnText === '删除') {
-                                                actionLink.style.color = 'var(--danger)';
-                                            } else {
-                                                actionLink.style.color = 'var(--primary)';
-                                            }
-                                            actions.appendChild(actionLink);
-                                        });
-                                        td.appendChild(actions);
-                                    } else {
-                                        td.textContent = value;
-                                    }
-                                    tr.appendChild(td);
-                                });
-                                tbody.appendChild(tr);
-                            });
-                            table.appendChild(tbody);
-                        }
-                        return table;
-
-                    case 'Tabs':
-                        const tabs = document.createElement('div');
-                        tabs.className = 'component-tabs';
-                        if (props.items) {
-                            props.items.forEach((item, i) => {
-                                const tab = document.createElement('button');
-                                tab.className = 'component-tab';
-                                if (i === 0) tab.classList.add('active');
-                                tab.textContent = item;
-                                tabs.appendChild(tab);
-                            });
-                        }
-                        return tabs;
-
-                    case 'Badge':
-                        const badge = document.createElement('span');
-                        badge.className = 'component-badge';
-                        if (props.variant) badge.classList.add(props.variant);
-                        badge.textContent = props.text || '';
-                        return badge;
-
-                    case 'Card':
-                        const card = document.createElement('div');
-                        card.className = 'component-card';
-                        const cardContent = document.createElement('div');
-                        cardContent.className = 'card-content';
-                        if (props.title) {
-                            const cardTitle = document.createElement('div');
-                            cardTitle.className = 'card-title';
-                            cardTitle.textContent = props.title;
-                            cardContent.appendChild(cardTitle);
-                        }
-                        if (props.desc) {
-                            const cardDesc = document.createElement('div');
-                            cardDesc.className = 'card-desc';
-                            cardDesc.textContent = props.desc;
-                            cardContent.appendChild(cardDesc);
-                        }
-                        card.appendChild(cardContent);
-                        if (props.actions) {
-                            const actions = document.createElement('div');
-                            actions.className = 'card-actions';
-                            props.actions.forEach(action => {
-                                const actionBtn = document.createElement('button');
-                                actionBtn.className = 'card-action-btn';
-                                if (action.variant) actionBtn.classList.add(action.variant);
-                                actionBtn.textContent = action.text;
-                                actions.appendChild(actionBtn);
-                            });
-                            card.appendChild(actions);
-                        }
-                        return card;
-
-                    case 'Upload':
-                        const upload = document.createElement('div');
-                        upload.className = 'component-upload';
-                        upload.innerHTML = `
-                            <div class="upload-icon">📁</div>
-                            <div class="upload-text">${props.text || '点击或拖拽文件到此处上传'}</div>
-                        `;
-                        return upload;
-
-                    case 'Divider':
-                        el.className = 'component-divider';
-                        return el;
-
-                    case 'Alert':
-                        el.className = 'component-alert';
-                        if (props.variant) el.classList.add(props.variant);
-                        el.textContent = props.content || props.text || '';
-                        return el;
+                        return React.createElement(Card, {
+                            key: props.key,
+                            title: props.title,
+                            extra: props.extra && React.createElement(Space, null,
+                                props.extra.map((btn, i) =>
+                                    React.createElement(Button, {
+                                        key: i,
+                                        type: btn.variant === 'primary' ? 'primary' : 'default',
+                                        icon: btn.icon === 'plus' ? React.createElement(PlusOutlined) : null
+                                    }, btn.text || btn)
+                                )
+                            ),
+                            style: { marginBottom: 16 }
+                        }, children && children.map((child, i) => renderNode({ ...child, key: i })));
 
                     case 'Row':
-                        el.className = 'layout-row';
-                        return el;
+                        return React.createElement(Row, { key: props.key, gutter: 16 },
+                            children && children.map((child, i) => renderNode({ ...child, key: i }))
+                        );
 
                     case 'Col':
-                        el.className = 'layout-col';
-                        return el;
+                        return React.createElement(Col, { key: props.key, flex: 1 },
+                            children && children.map((child, i) => renderNode({ ...child, key: i }))
+                        );
+
+                    case 'Input':
+                        return React.createElement(Form.Item, {
+                            key: props.key,
+                            label: props.label,
+                            required: props.required,
+                            style: { marginBottom: 16 }
+                        }, React.createElement(Input, { placeholder: props.placeholder }));
+
+                    case 'Textarea':
+                        return React.createElement(Form.Item, {
+                            key: props.key,
+                            label: props.label,
+                            style: { marginBottom: 16 }
+                        }, React.createElement(TextArea, { placeholder: props.placeholder, rows: props.rows || 4 }));
+
+                    case 'Select':
+                        const options = (props.options || []).map(opt => ({
+                            value: typeof opt === 'string' ? opt : opt.value,
+                            label: typeof opt === 'string' ? opt : opt.label
+                        }));
+                        return React.createElement(Form.Item, {
+                            key: props.key,
+                            label: props.label,
+                            style: { marginBottom: 16 }
+                        }, React.createElement(Select, {
+                            placeholder: '请选择',
+                            options: options,
+                            style: { width: '100%' }
+                        }));
+
+                    case 'Button':
+                        const btnType = props.variant === 'secondary' ? 'default' :
+                            props.variant === 'danger' ? 'primary' :
+                                props.variant === 'link' ? 'link' : 'primary';
+                        const danger = props.variant === 'danger';
+                        return React.createElement(Button, {
+                            key: props.key,
+                            type: btnType,
+                            danger: danger,
+                            icon: props.icon === 'plus' ? React.createElement(PlusOutlined) :
+                                props.icon === 'search' ? React.createElement(SearchOutlined) : null,
+                            style: { marginRight: 8 }
+                        }, props.text);
+
+                    case 'Text':
+                        return React.createElement(Text, { key: props.key, style: { display: 'block', marginBottom: 8 } }, props.content);
+
+                    case 'Tabs':
+                        const items = (props.items || []).map((item, i) => ({
+                            key: String(i),
+                            label: item
+                        }));
+                        return React.createElement(Tabs, { key: props.key, items: items, style: { marginBottom: 16 } });
+
+                    case 'Table':
+                        const columns = (props.columns || []).map(col => {
+                            const column = {
+                                key: col.key || col,
+                                dataIndex: col.key || col,
+                                title: col.title || col
+                            };
+
+                            if (col.type === 'link') {
+                                column.render = (text) => React.createElement('a', null, text);
+                            } else if (col.type === 'badge') {
+                                column.render = (text) => {
+                                    const colorMap = col.variantMap || {};
+                                    const color = colorMap[text] === 'success' ? 'green' :
+                                        colorMap[text] === 'warning' ? 'orange' :
+                                            colorMap[text] === 'danger' ? 'red' : 'blue';
+                                    return React.createElement(Tag, { color: color }, text);
+                                };
+                            } else if (col.type === 'status') {
+                                column.render = (text) => React.createElement(Badge, {
+                                    status: text === '已发布' ? 'success' : 'default',
+                                    text: text
+                                });
+                            } else if (col.type === 'actions') {
+                                column.render = () => React.createElement(Space, null,
+                                    React.createElement('a', null, '编辑'),
+                                    React.createElement('a', null, '复制'),
+                                    React.createElement('a', { style: { color: '#ff4d4f' } }, '删除')
+                                );
+                            }
+                            return column;
+                        });
+
+                        const dataSource = (props.data || []).map((row, i) => ({ ...row, key: i }));
+
+                        return React.createElement(Table, {
+                            key: props.key,
+                            columns: columns,
+                            dataSource: dataSource,
+                            pagination: false,
+                            size: 'middle'
+                        });
+
+                    case 'Badge':
+                        const tagColor = props.variant === 'success' ? 'green' :
+                            props.variant === 'warning' ? 'orange' :
+                                props.variant === 'danger' ? 'red' : 'blue';
+                        return React.createElement(Tag, { key: props.key, color: tagColor }, props.text);
+
+                    case 'Card':
+                        return React.createElement(Card, {
+                            key: props.key,
+                            size: 'small',
+                            style: { marginBottom: 12 }
+                        },
+                            React.createElement(Row, { justify: 'space-between', align: 'middle' },
+                                React.createElement(Col, null,
+                                    React.createElement(Space, { direction: 'vertical', size: 0 },
+                                        React.createElement(Text, { strong: true }, props.title),
+                                        props.tags && React.createElement(Space, { size: 4 },
+                                            props.tags.map((tag, i) =>
+                                                React.createElement(Tag, { key: i, color: tag.variant === 'success' ? 'green' : 'blue' }, tag.text)
+                                            )
+                                        ),
+                                        props.status && React.createElement(Badge, {
+                                            status: props.status === '已发布' ? 'success' : 'default',
+                                            text: props.status
+                                        })
+                                    )
+                                ),
+                                props.actions && React.createElement(Col, null,
+                                    React.createElement(Space, null,
+                                        props.actions.map((action, i) =>
+                                            React.createElement(Button, { key: i, size: 'small' }, action.text || action)
+                                        )
+                                    )
+                                )
+                            )
+                        );
+
+                    case 'Upload':
+                        return React.createElement(Dragger, { key: props.key },
+                            React.createElement('p', { className: 'ant-upload-drag-icon' },
+                                React.createElement(InboxOutlined)
+                            ),
+                            React.createElement('p', { className: 'ant-upload-text' }, props.text || '点击或拖拽文件到此处上传'),
+                            React.createElement('p', { className: 'ant-upload-hint' }, props.hint || '支持单个或批量上传')
+                        );
+
+                    case 'Divider':
+                        return React.createElement(Divider, { key: props.key });
+
+                    case 'Alert':
+                        const alertType = props.variant === 'danger' ? 'error' : props.variant || 'info';
+                        return React.createElement(Alert, {
+                            key: props.key,
+                            type: alertType,
+                            message: props.content || props.text,
+                            showIcon: true,
+                            style: { marginBottom: 16 }
+                        });
 
                     // 架构图组件
                     case 'Diagram':
-                        el.className = 'component-diagram';
-                        if (props.title) {
-                            const title = document.createElement('div');
-                            title.className = 'diagram-title';
-                            title.textContent = props.title;
-                            el.appendChild(title);
-                        }
-                        const content = document.createElement('div');
-                        content.className = 'diagram-content';
-                        el.appendChild(content);
-                        el._content = content;
-                        return el;
+                        return React.createElement('div', {
+                            key: props.key,
+                            style: {
+                                background: 'linear-gradient(135deg, #1677ff 0%, #722ed1 100%)',
+                                borderRadius: 8,
+                                padding: 32,
+                                minHeight: 300
+                            }
+                        },
+                            props.title && React.createElement('div', {
+                                style: { color: 'white', fontSize: 18, fontWeight: 600, textAlign: 'center', marginBottom: 24 }
+                            }, props.title),
+                            React.createElement('div', {
+                                style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }
+                            }, children && children.map((child, i) => renderNode({ ...child, key: i })))
+                        );
 
                     case 'Box':
-                        el.className = 'component-box';
-                        if (props.color) {
-                            el.style.borderLeft = `4px solid ${props.color}`;
-                        }
-                        const boxTitle = document.createElement('div');
-                        boxTitle.className = 'box-title';
-                        boxTitle.textContent = props.title || props.text || '';
-                        el.appendChild(boxTitle);
-                        if (props.desc) {
-                            const boxDesc = document.createElement('div');
-                            boxDesc.className = 'box-desc';
-                            boxDesc.textContent = props.desc;
-                            el.appendChild(boxDesc);
-                        }
-                        return el;
+                        return React.createElement(Card, {
+                            key: props.key,
+                            size: 'small',
+                            style: {
+                                minWidth: 120,
+                                textAlign: 'center',
+                                borderLeft: props.color ? `3px solid ${props.color}` : undefined
+                            }
+                        },
+                            React.createElement(Text, { strong: true }, props.title),
+                            props.desc && React.createElement('div', null,
+                                React.createElement(Text, { type: 'secondary', style: { fontSize: 12 } }, props.desc)
+                            )
+                        );
 
                     case 'Arrow':
-                        el.className = 'component-arrow';
-                        const arrowSymbol = props.direction === 'up' ? '↑' :
+                        const arrow = props.direction === 'up' ? '↑' :
                             props.direction === 'left' ? '←' :
                                 props.direction === 'right' ? '→' : '↓';
-                        el.textContent = arrowSymbol;
-                        if (props.label) {
-                            const arrowLabel = document.createElement('span');
-                            arrowLabel.className = 'arrow-label';
-                            arrowLabel.textContent = props.label;
-                            el.appendChild(arrowLabel);
-                        }
-                        return el;
+                        return React.createElement('div', {
+                            key: props.key,
+                            style: { color: 'white', fontSize: 24, textAlign: 'center' }
+                        }, arrow, props.label && React.createElement('span', { style: { fontSize: 12, marginLeft: 8 } }, props.label));
 
                     case 'Layer':
-                        el.className = 'component-layer';
-                        if (props.title) {
-                            const layerTitle = document.createElement('div');
-                            layerTitle.className = 'layer-title';
-                            layerTitle.textContent = props.title;
-                            el.appendChild(layerTitle);
-                        }
-                        return el;
+                        return React.createElement('div', {
+                            key: props.key,
+                            style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', width: '100%' }
+                        },
+                            props.title && React.createElement('div', {
+                                style: { width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.8)', fontSize: 12, marginBottom: 8 }
+                            }, props.title),
+                            children && children.map((child, i) => renderNode({ ...child, key: i }))
+                        );
 
                     case 'DiagramGroup':
-                        el.className = 'component-group-diagram';
-                        if (props.title) {
-                            const groupTitle = document.createElement('div');
-                            groupTitle.className = 'group-title';
-                            groupTitle.textContent = props.title;
-                            el.appendChild(groupTitle);
-                        }
-                        const groupContent = document.createElement('div');
-                        groupContent.className = 'group-content';
-                        el.appendChild(groupContent);
-                        el._content = groupContent;
-                        return el;
+                        return React.createElement('div', {
+                            key: props.key,
+                            style: {
+                                background: 'rgba(255,255,255,0.1)',
+                                border: '1px dashed rgba(255,255,255,0.3)',
+                                borderRadius: 8,
+                                padding: 16,
+                                width: '100%'
+                            }
+                        },
+                            props.title && React.createElement('div', {
+                                style: { color: 'rgba(255,255,255,0.9)', fontSize: 14, marginBottom: 12 }
+                            }, props.title),
+                            React.createElement('div', {
+                                style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }
+                            }, children && children.map((child, i) => renderNode({ ...child, key: i })))
+                        );
 
                     default:
-                        console.warn('Unknown component type:', type);
-                        el.textContent = `Unknown: ${type}`;
-                        el.style.border = '2px dashed #ef4444';
-                        el.style.padding = '16px';
-                        el.style.color = '#ef4444';
-                        el.style.borderRadius = '8px';
-                        return el;
+                        console.warn('Unknown component:', type);
+                        return React.createElement(Alert, {
+                            key: props.key,
+                            type: 'warning',
+                            message: `未知组件: ${type}`,
+                            style: { marginBottom: 16 }
+                        });
                 }
-            },
+            };
 
-            renderNode(node, container) {
-                if (!node) return;
-
-                try {
-                    const el = this.create(node.type || 'Unknown', node);
-                    const containerTypes = ['Page', 'Panel', 'Row', 'Col', 'Diagram', 'Layer', 'DiagramGroup'];
-
-                    if (containerTypes.includes(node.type)) {
-                        if (node.children && Array.isArray(node.children)) {
-                            const targetContainer = el._content || el;
-                            node.children.forEach(child => this.renderNode(child, targetContainer));
-                        }
+            return React.createElement(ConfigProvider, {
+                theme: {
+                    token: {
+                        colorPrimary: '#1677ff',
+                        borderRadius: 6
                     }
-
-                    container.appendChild(el);
-                } catch (err) {
-                    console.error('Render Error:', err, node);
-                    const errEl = document.createElement('div');
-                    errEl.style.cssText = 'color: #ef4444; padding: 16px; border: 2px solid #ef4444; border-radius: 8px;';
-                    errEl.textContent = `渲染错误: ${err.message}`;
-                    container.appendChild(errEl);
                 }
-            },
-
-            render(data) {
-                const app = document.getElementById('app');
-                app.innerHTML = '';
-
-                if (!data) {
-                    app.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p class="loading-text">无数据</p></div>';
-                    return;
-                }
-
-                this.renderNode(data, app);
-            }
+            }, renderNode(data));
         };
 
+        // 主应用
+        let currentData = null;
         let lastDataStr = '';
+
+        function render() {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(React.createElement(A2UIRenderer, { data: currentData }));
+        }
 
         async function checkUpdate() {
             try {
                 const res = await fetch('/ui.json');
                 if (res.ok) {
                     const data = await res.json();
-                    const currentDataStr = JSON.stringify(data);
+                    const dataStr = JSON.stringify(data);
 
-                    if (currentDataStr !== lastDataStr) {
-                        lastDataStr = currentDataStr;
-                        Renderer.render(data);
+                    if (dataStr !== lastDataStr) {
+                        lastDataStr = dataStr;
+                        currentData = data;
+                        render();
                     }
 
-                    document.getElementById('status').innerHTML = '<span class="status-dot"></span>已连接 · 实时预览';
-                    document.getElementById('status').style.background = 'rgba(16, 185, 129, 0.9)';
+                    document.getElementById('status-text').textContent = '已连接';
+                    document.querySelector('.status-dot').style.background = '#52c41a';
                 }
             } catch (e) {
-                document.getElementById('status').innerHTML = '连接失败';
-                document.getElementById('status').style.background = 'rgba(239, 68, 68, 0.9)';
+                document.getElementById('status-text').textContent = '连接失败';
+                document.querySelector('.status-dot').style.background = '#ff4d4f';
             }
         }
 
+        // 初始化
+        render();
         setInterval(checkUpdate, 1000);
         checkUpdate();
     </script>
