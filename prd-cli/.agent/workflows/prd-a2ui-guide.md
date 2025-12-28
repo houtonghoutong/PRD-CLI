@@ -179,54 +179,123 @@ description: A2UI 可视化指南 - 架构图与界面原型
     📁 位置：02_迭代记录/第01轮迭代/C1_UI原型/"
 ```
 
-### HTML 预览文件要求
+### 🚀 生成独立预览文件 (HTML)
 
-1. 包含完整的 CSS 样式
-2. 包含完整的渲染引擎 JS 代码
-3. 内嵌 JSON 数据（不依赖外部文件）
-4. 顶部显示需求编号、界面名称、确认时间
-5. 可以脱离服务器，双击直接打开
+当 PM 确认原型后，AI 必须生成一个**独立 HTML 文件**，该文件可脱离环境直接打开，方便分享给相关方。
 
----
+**生成步骤**：
+1. 读取下方的 **[HTML 独立文件模板]** 代码
+2. 替换以下占位符：
+   - `{{TITLE}}` -> 需求编号+名称（如 "#REQ-001 用户登录"）
+   - `{{REQ_ID}}` -> 需求编号
+   - `{{NAME}}` -> 界面名称
+   - `{{DATE}}` -> 当前日期 (YYYY-MM-DD)
+   - `{{JSON_DATA}}` -> 完整的 A2UI JSON 数据（注意：不要加引号，直接作为 JS 对象插入）
+3. 将替换后的内容保存为 `.html` 文件，路径：`02_迭代记录/第XX轮迭代/C1_UI原型/REQ-XXX-名称.html`
 
-## 📝 第三部分：通用规范
+**[HTML 独立文件模板]**：
 
-### AI 触发流程
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - PRD UI 原型</title>
+    <!-- React -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Ant Design -->
+    <link rel="stylesheet" href="https://unpkg.com/antd@5/dist/reset.css">
+    <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+    <script src="https://unpkg.com/antd@5/dist/antd.min.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/@ant-design/icons@5/dist/index.umd.min.js"></script>
+    <style>
+        body { margin: 0; padding: 24px; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        #root { max-width: 1400px; margin: 0 auto; }
+        .page-header { margin-bottom: 16px; }
+        .page-title { font-size: 20px; font-weight: 600; color: rgba(0,0,0,0.88); margin: 0; }
+        .meta-info { background: #fff; border: 1px solid #d9d9d9; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: rgba(0,0,0,0.65); }
+        .meta-info span { margin-right: 24px; }
+        .meta-info strong { color: rgba(0,0,0,0.88); }
+    </style>
+</head>
+<body>
+    <div class="meta-info">
+        <span><strong>需求编号：</strong>{{REQ_ID}}</span>
+        <span><strong>界面名称：</strong>{{NAME}}</span>
+        <span><strong>确认时间：</strong>{{DATE}}</span>
+    </div>
+    <div id="root"></div>
 
+    <script>
+        // UI 数据（内嵌）
+        const UI_DATA = {{JSON_DATA}};
+
+        // A2UI 渲染器
+        const { ConfigProvider, Card, Button, Input, Select, Table, Tabs, Tag, Badge, Space, Row, Col, Typography, Divider, Alert, Upload, Form } = antd;
+        const { Title, Text } = Typography;
+        const { TextArea } = Input;
+        const { PlusOutlined, InboxOutlined } = icons;
+        const { Dragger } = Upload;
+
+        const A2UIRenderer = ({ data }) => {
+            const renderNode = (node) => {
+                if (!node) return null;
+                const { type, children, ...props } = node;
+
+                switch (type) {
+                    case 'Page': return React.createElement('div', { key: props.id }, props.title && React.createElement('div', { className: 'page-header' }, React.createElement('h1', { className: 'page-title' }, props.title)), children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    case 'Panel': return React.createElement(Card, { key: props.key, title: props.title, extra: props.extra && React.createElement(Space, null, props.extra.map((btn, i) => React.createElement(Button, { key: i, type: btn.variant === 'primary' ? 'primary' : 'default' }, btn.text || btn))), style: { marginBottom: 16 } }, children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    case 'Row': return React.createElement(Row, { key: props.key, gutter: 16 }, children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    case 'Col': return React.createElement(Col, { key: props.key, flex: 1 }, children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    case 'Input': return React.createElement(Form.Item, { key: props.key, label: props.label, required: props.required, style: { marginBottom: 16 } }, React.createElement(Input, { placeholder: props.placeholder }));
+                    case 'Textarea': return React.createElement(Form.Item, { key: props.key, label: props.label, style: { marginBottom: 16 } }, React.createElement(TextArea, { placeholder: props.placeholder, rows: props.rows || 4 }));
+                    case 'Select': return React.createElement(Form.Item, { key: props.key, label: props.label, style: { marginBottom: 16 } }, React.createElement(Select, { placeholder: '请选择', options: (props.options || []).map(opt => ({ value: typeof opt === 'string' ? opt : opt.value, label: typeof opt === 'string' ? opt : opt.label })), style: { width: '100%' } }));
+                    case 'Button': return React.createElement(Button, { key: props.key, type: props.variant === 'secondary' ? 'default' : props.variant === 'danger' ? 'primary' : 'primary', danger: props.variant === 'danger', style: { marginRight: 8 } }, props.text);
+                    case 'Text': return React.createElement(Text, { key: props.key, style: { display: 'block', marginBottom: 8 } }, props.content);
+                    case 'Tabs': return React.createElement(Tabs, { key: props.key, items: (props.items || []).map((item, i) => ({ key: String(i), label: item })), style: { marginBottom: 16 } });
+                    case 'Table': 
+                        const columns = (props.columns || []).map(col => {
+                            const column = { key: col.key || col, dataIndex: col.key || col, title: col.title || col };
+                            if (col.type === 'link') column.render = (text) => React.createElement('a', null, text);
+                            else if (col.type === 'badge') column.render = (text) => React.createElement(Tag, { color: col.variantMap?.[text] === 'success' ? 'green' : col.variantMap?.[text] === 'warning' ? 'orange' : col.variantMap?.[text] === 'danger' ? 'red' : 'blue' }, text);
+                            else if (col.type === 'status') column.render = (text) => React.createElement(Badge, { status: text === '已发布' ? 'success' : 'default', text });
+                            else if (col.type === 'actions') column.render = () => React.createElement(Space, null, React.createElement('a', null, '编辑'), React.createElement('a', null, '复制'), React.createElement('a', { style: { color: '#ff4d4f' } }, '删除'));
+                            return column;
+                        });
+                        return React.createElement(Table, { key: props.key, columns, dataSource: (props.data || []).map((row, i) => ({ ...row, key: i })), pagination: false, size: 'middle' });
+                    case 'Badge': return React.createElement(Tag, { key: props.key, color: props.variant === 'success' ? 'green' : props.variant === 'warning' ? 'orange' : props.variant === 'danger' ? 'red' : 'blue' }, props.text);
+                    case 'Card': return React.createElement(Card, { key: props.key, size: 'small', style: { marginBottom: 12 } }, React.createElement(Row, { justify: 'space-between', align: 'middle' }, React.createElement(Col, null, React.createElement(Space, { direction: 'vertical', size: 0 }, React.createElement(Text, { strong: true }, props.title), props.status && React.createElement(Badge, { status: props.status === '已发布' ? 'success' : 'default', text: props.status }))), props.actions && React.createElement(Col, null, React.createElement(Space, null, props.actions.map((action, i) => React.createElement(Button, { key: i, size: 'small' }, action.text || action))))));
+                    case 'Upload': return React.createElement(Dragger, { key: props.key }, React.createElement('p', { className: 'ant-upload-drag-icon' }, React.createElement(InboxOutlined)), React.createElement('p', { className: 'ant-upload-text' }, props.text || '点击或拖拽文件上传'));
+                    case 'Divider': return React.createElement(Divider, { key: props.key });
+                    case 'Alert': return React.createElement(Alert, { key: props.key, type: props.variant === 'danger' ? 'error' : props.variant || 'info', message: props.content || props.text, showIcon: true, style: { marginBottom: 16 } });
+                    case 'Diagram': return React.createElement('div', { key: props.key, style: { background: 'linear-gradient(135deg, #1677ff 0%, #722ed1 100%)', borderRadius: 8, padding: 32, minHeight: 300 } }, props.title && React.createElement('div', { style: { color: 'white', fontSize: 18, fontWeight: 600, textAlign: 'center', marginBottom: 24 } }, props.title), React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 } }, children && children.map((child, i) => renderNode({ ...child, key: i }))));
+                    case 'Box': return React.createElement(Card, { key: props.key, size: 'small', style: { minWidth: 120, textAlign: 'center', borderLeft: props.color ? `3px solid ${props.color}` : undefined } }, React.createElement(Text, { strong: true }, props.title), props.desc && React.createElement('div', null, React.createElement(Text, { type: 'secondary', style: { fontSize: 12 } }, props.desc)));
+                    case 'Arrow': return React.createElement('div', { key: props.key, style: { color: 'white', fontSize: 24, textAlign: 'center' } }, (props.direction === 'up' ? '↑' : props.direction === 'left' ? '←' : props.direction === 'right' ? '→' : '↓'), props.label && React.createElement('span', { style: { fontSize: 12, marginLeft: 8 } }, props.label));
+                    case 'Layer': return React.createElement('div', { key: props.key, style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', width: '100%' } }, props.title && React.createElement('div', { style: { width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.8)', fontSize: 12, marginBottom: 8 } }, props.title), children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    case 'DiagramGroup': return React.createElement('div', { key: props.key, style: { background: 'rgba(255,255,255,0.1)', border: '1px dashed rgba(255,255,255,0.3)', borderRadius: 8, padding: 16, width: '100%' } }, props.title && React.createElement('div', { style: { color: 'rgba(255,255,255,0.9)', fontSize: 14, marginBottom: 12 } }, props.title), React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' } }, children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    default: return React.createElement(Alert, { key: props.key, type: 'warning', message: `未知组件: ${type}` });
+                }
+            };
+            return React.createElement(ConfigProvider, { theme: { token: { colorPrimary: '#1677ff', borderRadius: 6 } } }, renderNode(data));
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(A2UIRenderer, { data: UI_DATA }));
+    </script>
+</body>
+</html>
 ```
-1. PM 描述结构/界面
-   ↓
-2. AI 识别关键词（"系统模块"、"页面"、"表单"等）
-   ↓
-3. AI 主动提议："让我生成一个可视化的图..."
-   ↓
-4. AI 生成 JSON 并写入 `.a2ui/current.json`
-   ↓
-5. AI 提示：👉 请刷新浏览器 (http://localhost:3333) 查看
-   ↓
-6. PM 反馈 → AI 迭代修改 → PM 确认 → AI 正式保存
-```
 
-### 在 Markdown 中嵌入预览
+### 📂 多原型文件管理指南
 
-```markdown
-## 系统架构图
+一个项目中通常会有多个需求点，建议按以下方式管理：
 
-> 查看 [系统架构图](./B1_架构图/架构图-系统架构.html)
-
-<!-- 或使用 iframe（部分编辑器支持）-->
-<iframe src="./B1_架构图/架构图-系统架构.html" width="100%" height="400"></iframe>
-```
-
-### index.md 索引文件格式
-
-```markdown
-# UI 原型索引
-
-| 编号 | 名称 | 👁️ 预览 | 📄 数据 | 确认时间 |
-|------|------|--------|--------|---------|
-| REQ-001 | 登录页 | [.html](./REQ-001-登录页.html) | [.json](./REQ-001-登录页.json) | 2025-12-28 |
-```
+1. **命名规范**：`REQ-{编号}-{名称}.html` (如 `REQ-003-用户反馈.html`)
+2. **索引文件**：务必更新 `index.md`，提供所有原型的入口列表
+3. **版本控制**：如果需求变更，直接覆盖旧文件，或另存为 `_v2.html`
 
 ---
 
