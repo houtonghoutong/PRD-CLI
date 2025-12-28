@@ -57,7 +57,7 @@
 - **架构图**：`Diagram`, `Layer`, `DiagramGroup`, `Box`, `Arrow`
 - **界面原型**：`Page`, `Panel`, `Row`, `Col`, `Input`, `Button`, `Text`
 
-详见 `.agent/workflows/prd-c1-a2ui-guide.md`
+详见 `.agent/workflows/prd-a2ui-guide.md`
 
 ---
 
@@ -198,7 +198,7 @@ AI: "✅ 第 1 批（v1.0）已完成 C3 冻结，可以交付开发。
 - **保存位置**：`02_迭代记录/第XX轮迭代/C1_UI原型/REQ-XXX-界面名称.json`
 - **必须更新索引**：同时更新 `index.md` 文件，记录所有已确认的原型。
 
-**详见**：`.agent/workflows/prd-c1-a2ui-guide.md`
+**详见**：`.agent/workflows/prd-a2ui-guide.md`
 
 ---
 
@@ -424,7 +424,7 @@ C 阶段（版本）
 | P0 | `prd-p0-project-info.md` | - | 项目初始化时 |
 | B1 | `prd-b1-planning-draft.md` | - | 填写规划草案时 |
 | B2 | `prd-b2-planning-breakdown.md` | - | 规划拆解时 |
-| C1 | `prd-c1-requirement-list.md` | `prd-c1-a2ui-guide.md` | 填写需求清单时 |
+| C1 | `prd-c1-requirement-list.md` | `prd-a2ui-guide.md` | 填写需求清单时 |
 | R0 | `prd-r0-baseline-review.md` | - | 基线审视时 |
 | R1 | `prd-r1-review.md` | - | 规划审视时 |
 | R2 | `prd-r2-review.md` | - | 版本审视时 |
@@ -434,11 +434,11 @@ C 阶段（版本）
 | 场景 | 使用文件 |
 |------|----------|
 | C1 整体流程、红线、9 个维度 | `prd-c1-requirement-list.md` |
-| 界面示意 (A2UI) 详细操作 | `prd-c1-a2ui-guide.md` |
+| 界面示意 (A2UI) 详细操作 | `prd-a2ui-guide.md` |
 
 **AI 行为**：
 1. 进入 C1 阶段时，先读取 `prd-c1-requirement-list.md` 了解核心规则
-2. 当需要生成界面示意时，参考 `prd-c1-a2ui-guide.md` 的详细指导
+2. 当需要生成界面示意时，参考 `prd-a2ui-guide.md` 的详细指导
 3. A2UI 是 C1 的第 6 个维度（推荐），不是必须，但强烈建议执行
 
 ---

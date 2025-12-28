@@ -201,7 +201,7 @@ AI: "P0 项目基本信息已完善。请检查确认：
 ### 架构图组件
 
 使用 `Diagram`, `Layer`, `DiagramGroup`, `Box`, `Arrow` 组件。
-详见：`prd-c1-a2ui-guide.md`
+详见：`prd-a2ui-guide.md`
 
 ### 架构图保存规则
 

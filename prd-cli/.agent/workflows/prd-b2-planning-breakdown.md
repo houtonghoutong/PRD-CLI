@@ -95,7 +95,7 @@ AI: "✅ B2_规划拆解与范围界定.md 已创建。
 ### 架构图组件
 
 使用 `Diagram`, `Layer`, `DiagramGroup`, `Box`, `Arrow` 组件。
-详见：`prd-c1-a2ui-guide.md`
+详见：`prd-a2ui-guide.md`
 
 ### 架构图保存规则
 
