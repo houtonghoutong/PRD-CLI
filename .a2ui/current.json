@@ -1,88 +1,351 @@
 {
-    "type": "Page",
-    "title": "系统架构概览",
-    "children": [
+    "type": "diagram",
+    "title": "PRD-CLI 流程简化对比",
+    "components": [
         {
-            "type": "Diagram",
-            "title": "产品管理系统架构",
-            "children": [
-                {
-                    "type": "Layer",
-                    "title": "用户层",
-                    "children": [
-                        {
-                            "type": "Box",
-                            "title": "产品经理",
-                            "desc": "需求规划",
-                            "color": "#3b82f6"
-                        },
-                        {
-                            "type": "Box",
-                            "title": "开发团队",
-                            "desc": "技术实现",
-                            "color": "#10b981"
-                        },
-                        {
-                            "type": "Box",
-                            "title": "测试团队",
-                            "desc": "质量保障",
-                            "color": "#f59e0b"
-                        }
-                    ]
+            "id": "title",
+            "type": "Text",
+            "props": {
+                "content": "PRD-CLI 流程简化：12步 → 6步",
+                "x": 400,
+                "y": 30,
+                "fontSize": 24,
+                "fontWeight": "bold",
+                "textAnchor": "middle"
+            }
+        },
+        {
+            "id": "old-title",
+            "type": "Text",
+            "props": {
+                "content": "现状流程（12步）",
+                "x": 150,
+                "y": 80,
+                "fontSize": 18,
+                "fontWeight": "bold",
+                "fill": "#dc2626"
+            }
+        },
+        {
+            "id": "new-title",
+            "type": "Text",
+            "props": {
+                "content": "简化后流程（6步）",
+                "x": 500,
+                "y": 80,
+                "fontSize": 18,
+                "fontWeight": "bold",
+                "fill": "#16a34a"
+            }
+        },
+        {
+            "id": "old-a0",
+            "type": "Box",
+            "props": {
+                "x": 50,
+                "y": 110,
+                "width": 80,
+                "height": 35,
+                "label": "A0",
+                "fill": "#fee2e2"
+            }
+        },
+        {
+            "id": "old-a1",
+            "type": "Box",
+            "props": {
+                "x": 140,
+                "y": 110,
+                "width": 80,
+                "height": 35,
+                "label": "A1",
+                "fill": "#fee2e2"
+            }
+        },
+        {
+            "id": "old-a2",
+            "type": "Box",
+            "props": {
+                "x": 230,
+                "y": 110,
+                "width": 80,
+                "height": 35,
+                "label": "A2",
+                "fill": "#fee2e2"
+            }
+        },
+        {
+            "id": "old-r0",
+            "type": "Box",
+            "props": {
+                "x": 320,
+                "y": 110,
+                "width": 80,
+                "height": 35,
+                "label": "R0",
+                "fill": "#fef3c7"
+            }
+        },
+        {
+            "id": "new-a0",
+            "type": "Box",
+            "props": {
+                "x": 480,
+                "y": 110,
+                "width": 200,
+                "height": 35,
+                "label": "A0 项目基线",
+                "fill": "#dcfce7"
+            }
+        },
+        {
+            "id": "merge-arrow-1",
+            "type": "Arrow",
+            "props": {
+                "from": {
+                    "x": 400,
+                    "y": 127
                 },
-                {
-                    "type": "Arrow",
-                    "direction": "down",
-                    "label": "需求流转"
+                "to": {
+                    "x": 478,
+                    "y": 127
                 },
-                {
-                    "type": "DiagramGroup",
-                    "title": "核心模块",
-                    "children": [
-                        {
-                            "type": "Box",
-                            "title": "需求管理",
-                            "desc": "A→B→C 流程",
-                            "color": "#8b5cf6"
-                        },
-                        {
-                            "type": "Box",
-                            "title": "版本规划",
-                            "desc": "迭代管理",
-                            "color": "#8b5cf6"
-                        },
-                        {
-                            "type": "Box",
-                            "title": "审视机制",
-                            "desc": "R0/R1/R2",
-                            "color": "#8b5cf6"
-                        }
-                    ]
-                },
-                {
-                    "type": "Arrow",
-                    "direction": "down",
-                    "label": "数据存储"
-                },
-                {
-                    "type": "Layer",
-                    "title": "数据层",
-                    "children": [
-                        {
-                            "type": "Box",
-                            "title": "Markdown 文档",
-                            "desc": "结构化存储",
-                            "color": "#6b7280"
-                        },
-                        {
-                            "type": "Box",
-                            "title": "对话归档",
-                            "desc": "沟通记录",
-                            "color": "#6b7280"
-                        }
-                    ]
-                }
-            ]
+                "stroke": "#9ca3af",
+                "strokeDasharray": "5,5"
+            }
+        },
+        {
+            "id": "merge-label-1",
+            "type": "Text",
+            "props": {
+                "content": "合并",
+                "x": 440,
+                "y": 122,
+                "fontSize": 12,
+                "fill": "#6b7280"
+            }
+        },
+        {
+            "id": "old-iter",
+            "type": "Box",
+            "props": {
+                "x": 50,
+                "y": 170,
+                "width": 80,
+                "height": 35,
+                "label": "创建迭代",
+                "fill": "#dbeafe"
+            }
+        },
+        {
+            "id": "old-b1",
+            "type": "Box",
+            "props": {
+                "x": 140,
+                "y": 170,
+                "width": 80,
+                "height": 35,
+                "label": "B1",
+                "fill": "#dbeafe"
+            }
+        },
+        {
+            "id": "old-b2",
+            "type": "Box",
+            "props": {
+                "x": 230,
+                "y": 170,
+                "width": 80,
+                "height": 35,
+                "label": "B2",
+                "fill": "#dbeafe"
+            }
+        },
+        {
+            "id": "old-r1",
+            "type": "Box",
+            "props": {
+                "x": 320,
+                "y": 170,
+                "width": 80,
+                "height": 35,
+                "label": "R1",
+                "fill": "#fef3c7"
+            }
+        },
+        {
+            "id": "new-b1",
+            "type": "Box",
+            "props": {
+                "x": 480,
+                "y": 170,
+                "width": 90,
+                "height": 35,
+                "label": "B1 规划",
+                "fill": "#dbeafe"
+            }
+        },
+        {
+            "id": "new-b2",
+            "type": "Box",
+            "props": {
+                "x": 580,
+                "y": 170,
+                "width": 100,
+                "height": 35,
+                "label": "B2 拆解",
+                "fill": "#dbeafe"
+            }
+        },
+        {
+            "id": "old-b3",
+            "type": "Box",
+            "props": {
+                "x": 185,
+                "y": 230,
+                "width": 80,
+                "height": 35,
+                "label": "B3 冻结",
+                "fill": "#e0e7ff"
+            }
+        },
+        {
+            "id": "new-freeze-b",
+            "type": "Box",
+            "props": {
+                "x": 480,
+                "y": 230,
+                "width": 200,
+                "height": 45,
+                "label": "prd plan freeze",
+                "fill": "#fef3c7",
+                "stroke": "#f59e0b",
+                "strokeWidth": 2
+            }
+        },
+        {
+            "id": "new-freeze-b-sub",
+            "type": "Text",
+            "props": {
+                "content": "自动执行 R1 审视 + B3 冻结",
+                "x": 580,
+                "y": 268,
+                "fontSize": 11,
+                "fill": "#92400e",
+                "textAnchor": "middle"
+            }
+        },
+        {
+            "id": "old-c0",
+            "type": "Box",
+            "props": {
+                "x": 50,
+                "y": 290,
+                "width": 80,
+                "height": 35,
+                "label": "C0",
+                "fill": "#f3e8ff"
+            }
+        },
+        {
+            "id": "old-c1",
+            "type": "Box",
+            "props": {
+                "x": 140,
+                "y": 290,
+                "width": 80,
+                "height": 35,
+                "label": "C1",
+                "fill": "#f3e8ff"
+            }
+        },
+        {
+            "id": "old-r2",
+            "type": "Box",
+            "props": {
+                "x": 230,
+                "y": 290,
+                "width": 80,
+                "height": 35,
+                "label": "R2",
+                "fill": "#fef3c7"
+            }
+        },
+        {
+            "id": "old-c3",
+            "type": "Box",
+            "props": {
+                "x": 320,
+                "y": 290,
+                "width": 80,
+                "height": 35,
+                "label": "C3 冻结",
+                "fill": "#ede9fe"
+            }
+        },
+        {
+            "id": "new-c1",
+            "type": "Box",
+            "props": {
+                "x": 480,
+                "y": 300,
+                "width": 200,
+                "height": 35,
+                "label": "C1 需求清单",
+                "fill": "#f3e8ff"
+            }
+        },
+        {
+            "id": "new-freeze-c",
+            "type": "Box",
+            "props": {
+                "x": 480,
+                "y": 360,
+                "width": 200,
+                "height": 45,
+                "label": "prd version freeze",
+                "fill": "#fef3c7",
+                "stroke": "#f59e0b",
+                "strokeWidth": 2
+            }
+        },
+        {
+            "id": "new-freeze-c-sub",
+            "type": "Text",
+            "props": {
+                "content": "自动执行 R2 审视 + C3 冻结",
+                "x": 580,
+                "y": 398,
+                "fontSize": 11,
+                "fill": "#92400e",
+                "textAnchor": "middle"
+            }
+        },
+        {
+            "id": "summary-old",
+            "type": "Box",
+            "props": {
+                "x": 50,
+                "y": 360,
+                "width": 350,
+                "height": 50,
+                "label": "❌ 12步 + 分散审视 + 依赖记忆",
+                "fill": "#fef2f2",
+                "stroke": "#dc2626"
+            }
+        },
+        {
+            "id": "summary-new",
+            "type": "Box",
+            "props": {
+                "x": 480,
+                "y": 430,
+                "width": 200,
+                "height": 50,
+                "label": "✅ 6步 + 自动审视 + 程序守卫",
+                "fill": "#f0fdf4",
+                "stroke": "#16a34a"
+            }
         }
     ]
 }

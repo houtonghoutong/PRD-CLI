@@ -42,6 +42,7 @@ program
   .description('管理 B 类规划文档 (create B1|B2, freeze)')
   .option('--pm-confirmed', 'PM 已在对话中确认，跳过交互式确认')
   .option('--pm-signature <name>', 'PM 签名（用于冻结操作）')
+  .option('--force', '强制冻结，跳过前置检查（不推荐）')
   .action((action, type, options) => {
     require('../commands/planning')(action, type, options);
   });
@@ -61,6 +62,7 @@ program
   .description('管理 C 类版本文档 (create C0|C1, freeze)')
   .option('--pm-confirmed', 'PM 已在对话中确认，跳过交互式确认')
   .option('--pm-signature <name>', 'PM 签名（用于冻结操作）')
+  .option('--force', '强制冻结，跳过前置检查（不推荐）')
   .action((action, type, options) => {
     require('../commands/version')(action, type, options);
   });

@@ -3,6 +3,7 @@ const path = require('path');
 const chalk = require('chalk');
 const confirm = require('./confirm');
 const dialog = require('./dialog');
+const { runPlanFreezeChecks } = require('./freeze-checks');
 
 module.exports = async function (action, type, options = {}) {
     const configPath = path.join(process.cwd(), '.prd-config.json');
@@ -195,7 +196,25 @@ async function freezePlan(config, configPath, options = {}) {
         `第${String(config.currentIteration).padStart(2, '0')}轮迭代`
     );
 
-    // 检查 B1, B2 是否存在
+    // ===== 新流程：自动执行前置检查 =====
+
+    // 支持 --force 跳过检查
+    if (options.force) {
+        console.log(chalk.yellow('\n⚠️  使用 --force 跳过前置检查\n'));
+    } else {
+        // 执行自动检查（包含 R1 审视）
+        const checkResult = await runPlanFreezeChecks(iterationDir);
+
+        if (!checkResult.pass) {
+            console.log(chalk.yellow('💡 提示：解决以上问题后重新运行 prd plan freeze'));
+            console.log(chalk.gray('   或使用 prd plan freeze --force 强制跳过检查（不推荐）\n'));
+            return;
+        }
+    }
+
+    // ===== 检查通过，继续冻结流程 =====
+
+    // 检查 B1, B2 是否存在（冗余检查，确保安全）
     const b1Path = path.join(iterationDir, 'B1_需求规划草案.md');
     const b2Path = path.join(iterationDir, 'B2_规划拆解与范围界定.md');
 
@@ -204,25 +223,7 @@ async function freezePlan(config, configPath, options = {}) {
         return;
     }
 
-    // 检查 R1 审视是否通过
-    const r1ReviewPath = path.join(iterationDir, 'R1_规划审视报告.md');
-    if (!await fs.pathExists(r1ReviewPath)) {
-        console.log(chalk.red('✗ 请先完成 R1 规划审视'));
-        console.log('运行: prd review r1');
-        return;
-    }
-
-    // 读取 R1 审视结论
-    const r1Content = await fs.readFile(r1ReviewPath, 'utf-8');
-    const hasPassed = r1Content.includes('- [x] ✅ 通过') || r1Content.includes('[x] 通过');
-
-    if (!hasPassed) {
-        console.log(chalk.red('✗ R1 审视未通过，不能冻结规划'));
-        console.log(chalk.yellow('请修改 B1/B2 后重新执行 R1 审视'));
-        return;
-    }
-
-    // ⭐ 支持预确认模式：PM 已在对话中确认并提供签名
+    // PM 确认冻结
     let pmSignature = null;
     if (options.pmConfirmed && options.pmSignature) {
         console.log(chalk.green(`✓ PM 已在对话中确认冻结，签名: ${options.pmSignature}`));

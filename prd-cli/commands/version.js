@@ -3,6 +3,7 @@ const path = require('path');
 const chalk = require('chalk');
 const confirm = require('./confirm');
 const dialog = require('./dialog');
+const { runVersionFreezeChecks } = require('./freeze-checks');
 
 module.exports = async function (action, type, options = {}) {
     const configPath = path.join(process.cwd(), '.prd-config.json');
@@ -159,7 +160,25 @@ async function freezeVersion(config, configPath, options = {}) {
         `第${String(config.currentIteration).padStart(2, '0')}轮迭代`
     );
 
-    // 检查 B3, C0, C1 是否存在
+    // ===== 新流程：自动执行前置检查 =====
+
+    // 支持 --force 跳过检查
+    if (options.force) {
+        console.log(chalk.yellow('\n⚠️  使用 --force 跳过前置检查\n'));
+    } else {
+        // 执行自动检查（包含 R2 审视）
+        const checkResult = await runVersionFreezeChecks(iterationDir);
+
+        if (!checkResult.pass) {
+            console.log(chalk.yellow('💡 提示：解决以上问题后重新运行 prd version freeze'));
+            console.log(chalk.gray('   或使用 prd version freeze --force 强制跳过检查（不推荐）\n'));
+            return;
+        }
+    }
+
+    // ===== 检查通过，继续冻结流程 =====
+
+    // 检查 B3, C1 是否存在（冗余检查，确保安全）
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
     const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
     const c1Path = path.join(iterationDir, 'C1_版本需求清单.md');
@@ -169,30 +188,12 @@ async function freezeVersion(config, configPath, options = {}) {
         return;
     }
 
-    if (!await fs.pathExists(c0Path) || !await fs.pathExists(c1Path)) {
-        console.log(chalk.red('✗ 请先完成 C0 和 C1'));
+    if (!await fs.pathExists(c1Path)) {
+        console.log(chalk.red('✗ 请先完成 C1'));
         return;
     }
 
-    // 检查 R2 审视是否通过
-    const r2ReviewPath = path.join(iterationDir, 'R2_版本审视报告.md');
-    if (!await fs.pathExists(r2ReviewPath)) {
-        console.log(chalk.red('✗ 请先完成 R2 版本审视'));
-        console.log('运行: prd review r2');
-        return;
-    }
-
-    // 读取 R2 审视结论
-    const r2Content = await fs.readFile(r2ReviewPath, 'utf-8');
-    const hasPassed = r2Content.includes('- [x] ✅ 通过') || r2Content.includes('[x] 通过');
-
-    if (!hasPassed) {
-        console.log(chalk.red('✗ R2 审视未通过，不能冻结版本'));
-        console.log(chalk.yellow('请修改 C0/C1 后重新执行 R2 审视'));
-        return;
-    }
-
-    // ⭐ 支持预确认模式：PM 已在对话中确认并提供签名
+    // PM 确认冻结
     let pmSignature = null;
     if (options.pmConfirmed && options.pmSignature) {
         console.log(chalk.green(`✓ PM 已在对话中确认版本冻结，签名: ${options.pmSignature}`));
