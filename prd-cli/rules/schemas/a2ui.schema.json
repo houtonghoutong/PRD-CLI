@@ -1,0 +1,545 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "A2UI Component Schema",
+    "description": "PRD A2UI 可视化组件的 JSON Schema，用于校验生成的界面原型和架构图",
+    "type": "object",
+    "required": [
+        "type"
+    ],
+    "properties": {
+        "type": {
+            "type": "string",
+            "enum": [
+                "Page",
+                "Panel",
+                "Row",
+                "Col",
+                "Input",
+                "Textarea",
+                "Select",
+                "Button",
+                "Text",
+                "Table",
+                "Tabs",
+                "Badge",
+                "Card",
+                "Upload",
+                "Alert",
+                "Divider",
+                "Diagram",
+                "Box",
+                "Arrow",
+                "Layer",
+                "DiagramGroup"
+            ],
+            "description": "组件类型"
+        },
+        "children": {
+            "type": "array",
+            "items": {
+                "$ref": "#"
+            },
+            "description": "子组件列表"
+        }
+    },
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Page"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "页面标题"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Panel"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "面板标题"
+                    },
+                    "extra": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "text": {
+                                            "type": "string"
+                                        },
+                                        "variant": {
+                                            "type": "string",
+                                            "enum": [
+                                                "primary",
+                                                "secondary",
+                                                "danger"
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "description": "面板右上角按钮"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Input"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "description": "输入框标签"
+                    },
+                    "placeholder": {
+                        "type": "string",
+                        "description": "占位文本"
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "description": "是否必填"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Textarea"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "placeholder": {
+                        "type": "string"
+                    },
+                    "rows": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "default": 4
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Select"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "label": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "value",
+                                        "label"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Button"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "按钮文本"
+                    },
+                    "variant": {
+                        "type": "string",
+                        "enum": [
+                            "primary",
+                            "secondary",
+                            "danger"
+                        ],
+                        "default": "primary"
+                    }
+                },
+                "required": [
+                    "text"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Text"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "content": {
+                        "type": "string",
+                        "description": "文本内容"
+                    }
+                },
+                "required": [
+                    "content"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Table"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "key": {
+                                            "type": "string"
+                                        },
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "text",
+                                                "link",
+                                                "badge",
+                                                "status",
+                                                "actions"
+                                            ]
+                                        },
+                                        "variantMap": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "key",
+                                        "title"
+                                    ]
+                                }
+                            ]
+                        },
+                        "description": "表格列定义"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "description": "表格数据"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Tabs"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "标签页名称列表"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Badge"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "variant": {
+                        "type": "string",
+                        "enum": [
+                            "success",
+                            "warning",
+                            "danger",
+                            "info"
+                        ]
+                    }
+                },
+                "required": [
+                    "text"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Card"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "actions": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "text": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Upload"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "上传提示文本"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Alert"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "content": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "variant": {
+                        "type": "string",
+                        "enum": [
+                            "info",
+                            "success",
+                            "warning",
+                            "danger"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Diagram"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "架构图标题"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Box"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "方块标题"
+                    },
+                    "desc": {
+                        "type": "string",
+                        "description": "方块描述"
+                    },
+                    "color": {
+                        "type": "string",
+                        "description": "左边框颜色"
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Arrow"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "direction": {
+                        "type": "string",
+                        "enum": [
+                            "up",
+                            "down",
+                            "left",
+                            "right"
+                        ],
+                        "default": "down"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "箭头标签"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "Layer"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "层级标题"
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "type": {
+                        "const": "DiagramGroup"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "分组标题"
+                    }
+                }
+            }
+        }
+    ]
+}

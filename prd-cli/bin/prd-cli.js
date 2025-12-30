@@ -111,6 +111,27 @@ program
     server.start();
   });
 
+// 规则校验命令
+program
+  .command('check')
+  .description('检查当前项目是否符合 PRD 规则')
+  .option('--json', '输出 JSON 格式（供 AI 读取）')
+  .option('--category <cat>', '只运行指定分类的规则 (G/D/F/S/V/I/U/C/W)')
+  .option('--rule <id>', '只运行指定规则 (如 D001)')
+  .option('--no-log', '不保存日志到 .prd-logs/')
+  .action((options) => {
+    require('../commands/check')(options);
+  });
+
+// 规则统计命令
+program
+  .command('stats')
+  .description('显示规则校验统计报告（基于历史日志）')
+  .option('--json', '输出 JSON 格式')
+  .action((options) => {
+    require('../commands/stats')(options);
+  });
+
 // 帮助信息增强
 program.on('--help', () => {
   console.log('');

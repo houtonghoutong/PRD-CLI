@@ -1,0 +1,221 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "PRD Rules Index",
+    "description": "PRD-CLI 规则索引的 JSON Schema",
+    "type": "object",
+    "required": [
+        "version",
+        "rules"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "lastUpdated": {
+            "type": "string",
+            "format": "date"
+        },
+        "categories": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "nameEn": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        "rules": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/rule"
+            }
+        },
+        "validators": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/validator"
+            }
+        },
+        "scopeMapping": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        }
+    },
+    "definitions": {
+        "rule": {
+            "type": "object",
+            "required": [
+                "id",
+                "category",
+                "severity",
+                "scope",
+                "description",
+                "validatorType"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "pattern": "^[A-Z]\\d{3}$",
+                    "description": "规则 ID，格式为 X000"
+                },
+                "category": {
+                    "type": "string",
+                    "enum": [
+                        "G",
+                        "D",
+                        "F",
+                        "S",
+                        "V",
+                        "I",
+                        "U",
+                        "C",
+                        "W"
+                    ],
+                    "description": "规则分类"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "CRITICAL",
+                        "HIGH",
+                        "MEDIUM",
+                        "LOW"
+                    ],
+                    "description": "严重程度"
+                },
+                "scope": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "global",
+                            "p0",
+                            "b1",
+                            "b2",
+                            "plan",
+                            "c0",
+                            "c1",
+                            "version",
+                            "r1",
+                            "r2",
+                            "iteration",
+                            "a2ui"
+                        ]
+                    },
+                    "description": "适用范围"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "规则描述"
+                },
+                "validatorType": {
+                    "type": "string",
+                    "enum": [
+                        "program",
+                        "ai-self-check",
+                        "hybrid"
+                    ],
+                    "description": "校验类型"
+                },
+                "validator": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "校验器名称"
+                },
+                "checkLogic": {
+                    "type": "string",
+                    "description": "校验逻辑说明"
+                },
+                "examples": {
+                    "type": "object",
+                    "properties": {
+                        "correct": {
+                            "type": "string"
+                        },
+                        "wrong": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "triggers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "触发关键词"
+                },
+                "savePoints": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "保存触发点"
+                },
+                "questionTemplates": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "质疑问题模板"
+                },
+                "checkItems": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "检查项"
+                },
+                "dimensions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "检查维度"
+                },
+                "dimensionDetails": {
+                    "type": "object",
+                    "description": "维度详细说明"
+                }
+            }
+        },
+        "validator": {
+            "type": "object",
+            "required": [
+                "description",
+                "status"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "implementedIn": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "planned",
+                        "implemented",
+                        "deprecated"
+                    ]
+                }
+            }
+        }
+    }
+}

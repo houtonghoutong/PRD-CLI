@@ -55,37 +55,44 @@ C3(版本冻结)
 
 ## 🚀 安装
 
-### 方式1：一键初始化（推荐）✨
+### 方式1：npx 直接运行（无需安装）✨
 
-只需一个命令，**自动完成初始化并配置 AI 规则文件**：
+无需全局安装，直接使用 npx 运行任何命令：
 
 ```bash
-# 1. 创建并进入项目目录
-mkdir 我的项目 && cd 我的项目
+# 初始化新项目（推荐）
+npx -y prd-workflow-cli@latest init 我的项目
 
-# 2. 一键初始化（自动配置一切！）
-npx prd-workflow-cli
+# 或者进入空目录直接初始化
+mkdir 我的项目 && cd 我的项目
+npx -y prd-workflow-cli@latest
+
+# 查看帮助
+npx prd-workflow-cli@latest --help
+
+# 规则校验 (v1.4.0 新增)
+npx prd-workflow-cli@latest check
+
+# 统计报告 (v1.4.0 新增)
+npx prd-workflow-cli@latest stats
 ```
 
-就这样！运行后你会看到：
-- ✅ `.agent/workflows/` - PRD 工作流指引
-- ✅ `.cursorrules` - Cursor AI 规则
-- ✅ `.antigravity/` - Antigravity AI 规则
+> 💡 **建议使用 `@latest` 确保使用最新版本**
+> 
+> ⚠️ 不加 `@latest` 可能使用缓存的旧版本
 
-> 💡 **现在你的 AI 助手已经知道如何协助你完成 PRD 流程了！**
-> 例如：直接告诉 AI "我要创建一个新项目的需求文档"
-
-### 方式2：全局安装
-
-如果你经常使用，可以全局安装：
+### 方式2：全局安装（推荐频繁使用者）
 
 ```bash
 npm install -g prd-workflow-cli
 
-# 然后使用
+# 验证安装
+prd --version  # 应该显示 1.4.0
+
+# 然后直接使用 prd 命令
 prd init 我的项目
-cd 我的项目
-npm install   # 重要！这一步会安装 AI 规则文件
+prd check
+prd stats
 ```
 
 ### 方式3：从源码安装
@@ -228,6 +235,24 @@ prd iteration list  # 查看所有迭代
 |------|------|
 | `prd review r1` | 执行 R1 规划审视 |
 | `prd review r2` | 执行 R2 版本审视 |
+
+### 规则校验 (v1.4.0 新增)
+
+| 命令 | 说明 |
+|------|------|
+| `prd check` | 检查项目是否符合 PRD 规则 |
+| `prd check --json` | 输出 JSON 格式（供 AI 读取） |
+| `prd check --no-log` | 不记录日志 |
+| `prd stats` | 显示规则统计报告 |
+| `prd stats --json` | 输出 JSON 格式统计 |
+
+### 其他命令
+
+| 命令 | 说明 |
+|------|------|
+| `prd ui [file]` | 启动 A2UI 界面预览服务 |
+| `prd upgrade` | 更新项目中的 workflows 和 AI 规则 |
+| `prd index` | 生成/更新迭代索引 |
 
 ## 🤖 与 AI IDE 集成
 

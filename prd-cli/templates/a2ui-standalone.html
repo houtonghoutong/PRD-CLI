@@ -68,7 +68,7 @@
 
     <script>
         // UI 数据（内嵌）
-        const UI_DATA = {{JSON_DATA}};
+        const UI_DATA = {{ JSON_DATA }};
 
         // A2UI 渲染器
         const { ConfigProvider, Card, Button, Input, Select, Table, Tabs, Tag, Badge, Space, Row, Col, Typography, Divider, Alert, Upload, Form } = antd;
@@ -93,7 +93,7 @@
                     case 'Button': return React.createElement(Button, { key: props.key, type: props.variant === 'secondary' ? 'default' : props.variant === 'danger' ? 'primary' : 'primary', danger: props.variant === 'danger', style: { marginRight: 8 } }, props.text);
                     case 'Text': return React.createElement(Text, { key: props.key, style: { display: 'block', marginBottom: 8 } }, props.content);
                     case 'Tabs': return React.createElement(Tabs, { key: props.key, items: (props.items || []).map((item, i) => ({ key: String(i), label: item })), style: { marginBottom: 16 } });
-                    case 'Table': 
+                    case 'Table':
                         const columns = (props.columns || []).map(col => {
                             const column = { key: col.key || col, dataIndex: col.key || col, title: col.title || col };
                             if (col.type === 'link') column.render = (text) => React.createElement('a', null, text);
@@ -112,7 +112,7 @@
                     case 'Box': return React.createElement(Card, { key: props.key, size: 'small', style: { minWidth: 120, textAlign: 'center', borderLeft: props.color ? `3px solid ${props.color}` : undefined } }, React.createElement(Text, { strong: true }, props.title), props.desc && React.createElement('div', null, React.createElement(Text, { type: 'secondary', style: { fontSize: 12 } }, props.desc)));
                     case 'Arrow': return React.createElement('div', { key: props.key, style: { color: 'white', fontSize: 24, textAlign: 'center' } }, (props.direction === 'up' ? '↑' : props.direction === 'left' ? '←' : props.direction === 'right' ? '→' : '↓'), props.label && React.createElement('span', { style: { fontSize: 12, marginLeft: 8 } }, props.label));
                     case 'Layer': return React.createElement('div', { key: props.key, style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', width: '100%' } }, props.title && React.createElement('div', { style: { width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.8)', fontSize: 12, marginBottom: 8 } }, props.title), children && children.map((child, i) => renderNode({ ...child, key: i })));
-                    case 'DiagramGroup': return React.createElement('div', { key: props.key, style: { background: 'rgba(255,255,255,0.1)', border: '1px dashed rgba(255,255,255,0.3)', borderRadius: 8, padding: 16, width: '100%' } }, props.title && React.createElement('div', { style: { color: 'rgba(255,255,255,0.9)', fontSize: 14, marginBottom: 12 } }, props.title), React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' } }, children && children.map((child, i) => renderNode({ ...child, key: i })));
+                    case 'DiagramGroup': return React.createElement('div', { key: props.key, style: { background: 'rgba(255,255,255,0.1)', border: '1px dashed rgba(255,255,255,0.3)', borderRadius: 8, padding: 16, width: '100%' } }, props.title && React.createElement('div', { style: { color: 'rgba(255,255,255,0.9)', fontSize: 14, marginBottom: 12 } }, props.title), React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' } }, children && children.map((child, i) => renderNode({ ...child, key: i }))));
                     default: return React.createElement(Alert, { key: props.key, type: 'warning', message: `未知组件: ${type}` });
                 }
             };

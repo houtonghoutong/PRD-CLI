@@ -1,0 +1,614 @@
+{
+    "$schema": "./schemas/rules.schema.json",
+    "version": "1.0.0",
+    "lastUpdated": "2024-12-29",
+    "categories": {
+        "G": {
+            "name": "全局红线",
+            "nameEn": "Global Critical"
+        },
+        "D": {
+            "name": "文档状态",
+            "nameEn": "Document State"
+        },
+        "F": {
+            "name": "流程顺序",
+            "nameEn": "Flow Order"
+        },
+        "S": {
+            "name": "需求范围",
+            "nameEn": "Scope Control"
+        },
+        "V": {
+            "name": "A2UI可视化",
+            "nameEn": "Visualization"
+        },
+        "I": {
+            "name": "分段保存",
+            "nameEn": "Incremental Save"
+        },
+        "U": {
+            "name": "用户角度",
+            "nameEn": "User Perspective"
+        },
+        "C": {
+            "name": "完整性检查",
+            "nameEn": "Completeness Check"
+        },
+        "W": {
+            "name": "工作启动",
+            "nameEn": "Session Start"
+        }
+    },
+    "rules": [
+        {
+            "id": "G001",
+            "category": "G",
+            "severity": "CRITICAL",
+            "scope": [
+                "global"
+            ],
+            "description": "所有回复必须使用简体中文",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "examples": {
+                "correct": "使用中文回复用户的问题",
+                "wrong": "Reply in English without user request"
+            }
+        },
+        {
+            "id": "G002",
+            "category": "G",
+            "severity": "CRITICAL",
+            "scope": [
+                "global"
+            ],
+            "description": "禁止未经对话就填充文档，必须通过提问引导 PM 填写",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "examples": {
+                "correct": "AI: 请告诉我这个功能的目标用户是谁？",
+                "wrong": "AI: 我帮你填好了所有内容..."
+            }
+        },
+        {
+            "id": "G003",
+            "category": "G",
+            "severity": "CRITICAL",
+            "scope": [
+                "global"
+            ],
+            "description": "禁止替 PM 做决策（优先级/范围/目标由 PM 决定）",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "examples": {
+                "correct": "AI: 这个需求的优先级您定为高还是中？",
+                "wrong": "AI: 这个需求优先级应该定为高"
+            }
+        },
+        {
+            "id": "G004",
+            "category": "G",
+            "severity": "CRITICAL",
+            "scope": [
+                "global"
+            ],
+            "description": "禁止'快速完成'跳过流程，每个阶段都要充分对话和审视",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "examples": {
+                "correct": "逐步引导 PM 完成每个阶段",
+                "wrong": "AI: 让我快速帮您跳过这些步骤..."
+            }
+        },
+        {
+            "id": "D001",
+            "category": "D",
+            "severity": "CRITICAL",
+            "scope": [
+                "plan",
+                "version"
+            ],
+            "description": "禁止修改已冻结的 B3 文档",
+            "validatorType": "program",
+            "validator": "frozen-check",
+            "checkLogic": "检查 .prd-config.json 的 planning.frozen 状态"
+        },
+        {
+            "id": "D002",
+            "category": "D",
+            "severity": "CRITICAL",
+            "scope": [
+                "version"
+            ],
+            "description": "禁止修改已冻结的 C3 文档",
+            "validatorType": "program",
+            "validator": "frozen-check",
+            "checkLogic": "检查 .prd-config.json 的 version.frozen 状态"
+        },
+        {
+            "id": "D003",
+            "category": "D",
+            "severity": "CRITICAL",
+            "scope": [
+                "plan"
+            ],
+            "description": "B3 冻结后，禁止修改 B1、B2",
+            "validatorType": "program",
+            "validator": "frozen-check",
+            "checkLogic": "若 planning.frozen=true，拦截对 B1/B2 的写入"
+        },
+        {
+            "id": "D004",
+            "category": "D",
+            "severity": "CRITICAL",
+            "scope": [
+                "version"
+            ],
+            "description": "C3 冻结后，禁止修改 C0、C1",
+            "validatorType": "program",
+            "validator": "frozen-check",
+            "checkLogic": "若 version.frozen=true，拦截对 C0/C1 的写入"
+        },
+        {
+            "id": "D005",
+            "category": "D",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "文档状态变更后必须同步更新 .prd-config.json",
+            "validatorType": "program",
+            "validator": "config-sync-check",
+            "checkLogic": "对比文件修改时间与 config 更新时间"
+        },
+        {
+            "id": "F001",
+            "category": "F",
+            "severity": "CRITICAL",
+            "scope": [
+                "plan"
+            ],
+            "description": "禁止跳过 R1 审视（B2 后必须 R1 才能冻结 B3）",
+            "validatorType": "program",
+            "validator": "flow-order-check",
+            "checkLogic": "冻结 B3 前检查是否存在 R1 审视报告文件"
+        },
+        {
+            "id": "F002",
+            "category": "F",
+            "severity": "CRITICAL",
+            "scope": [
+                "version"
+            ],
+            "description": "禁止跳过 R2 审视（C1 后必须 R2 才能冻结 C3）",
+            "validatorType": "program",
+            "validator": "flow-order-check",
+            "checkLogic": "冻结 C3 前检查是否存在 R2 审视报告文件"
+        },
+        {
+            "id": "F003",
+            "category": "F",
+            "severity": "HIGH",
+            "scope": [
+                "iteration"
+            ],
+            "description": "禁止创建迭代后直接创建 B1，必须先做 R1 启动检查",
+            "validatorType": "program",
+            "validator": "flow-order-check",
+            "checkLogic": "创建 B1 前检查是否存在 R1 启动检查记录"
+        },
+        {
+            "id": "F004",
+            "category": "F",
+            "severity": "CRITICAL",
+            "scope": [
+                "r1"
+            ],
+            "description": "R1 禁止直接输出'通过'，必须有 5 维度分析 + 评估矩阵",
+            "validatorType": "hybrid",
+            "validator": "r1-content-check",
+            "checkLogic": "检查 R1 文件是否包含 5 维度章节标题"
+        },
+        {
+            "id": "F005",
+            "category": "F",
+            "severity": "HIGH",
+            "scope": [
+                "version"
+            ],
+            "description": "每个批次必须走完整 C0→C1→R2→C3 流程，禁止跳过",
+            "validatorType": "hybrid",
+            "validator": "batch-flow-check",
+            "checkLogic": "检查版本目录结构完整性"
+        },
+        {
+            "id": "S001",
+            "category": "S",
+            "severity": "CRITICAL",
+            "scope": [
+                "c1"
+            ],
+            "description": "禁止在 C1 阶段加入新需求，新需求只能暂存到 A2",
+            "validatorType": "hybrid",
+            "validator": "scope-check",
+            "checkLogic": "对比 C1 需求列表与 B3 范围，发现新增时告警"
+        },
+        {
+            "id": "S002",
+            "category": "S",
+            "severity": "CRITICAL",
+            "scope": [
+                "c0"
+            ],
+            "description": "C0 只能包含 B2 规划的首批需求（如有多批次）",
+            "validatorType": "program",
+            "validator": "scope-check",
+            "checkLogic": "解析 B2 的批次划分，对比 C0 范围"
+        },
+        {
+            "id": "S003",
+            "category": "S",
+            "severity": "HIGH",
+            "scope": [
+                "c1"
+            ],
+            "description": "C1 需求必须在 B3 范围内，禁止超出",
+            "validatorType": "program",
+            "validator": "scope-check",
+            "checkLogic": "对比 C1 需求 ID 与 B3 需求列表"
+        },
+        {
+            "id": "S004",
+            "category": "S",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "新需求正确流程：暂存 A2 → 新迭代 → B1 处理",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "V001",
+            "category": "V",
+            "severity": "HIGH",
+            "scope": [
+                "p0",
+                "b1",
+                "b2"
+            ],
+            "description": "PM 描述系统结构时，必须生成 A2UI 架构图",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "triggers": [
+                "系统模块",
+                "功能结构",
+                "前端后端",
+                "技术架构",
+                "干系人"
+            ]
+        },
+        {
+            "id": "V002",
+            "category": "V",
+            "severity": "HIGH",
+            "scope": [
+                "c1"
+            ],
+            "description": "PM 描述界面/表单时，必须生成 A2UI 界面原型",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "triggers": [
+                "页面",
+                "表单",
+                "按钮",
+                "界面",
+                "用户看到"
+            ]
+        },
+        {
+            "id": "V003",
+            "category": "V",
+            "severity": "CRITICAL",
+            "scope": [
+                "a2ui"
+            ],
+            "description": "A2UI JSON 必须写入 .a2ui/current.json，禁止只打印到对话",
+            "validatorType": "program",
+            "validator": "a2ui-file-check",
+            "checkLogic": "检查 .a2ui/current.json 是否存在且最近被修改"
+        },
+        {
+            "id": "V004",
+            "category": "V",
+            "severity": "CRITICAL",
+            "scope": [
+                "c1"
+            ],
+            "description": "PM 确认原型后，必须保存 .json + .html 两个文件",
+            "validatorType": "program",
+            "validator": "a2ui-pair-check",
+            "checkLogic": "检查 C1_UI原型 目录下文件是否成对存在"
+        },
+        {
+            "id": "V005",
+            "category": "V",
+            "severity": "HIGH",
+            "scope": [
+                "c1"
+            ],
+            "description": "原型命名规范：REQ-XXX-名称.json/html",
+            "validatorType": "program",
+            "validator": "a2ui-naming-check",
+            "checkLogic": "正则 /^REQ-\\d{3}-[\\u4e00-\\u9fa5a-zA-Z0-9_-]+\\.(json|html)$/"
+        },
+        {
+            "id": "V006",
+            "category": "V",
+            "severity": "HIGH",
+            "scope": [
+                "c1"
+            ],
+            "description": "保存原型后必须更新 index.md 索引",
+            "validatorType": "program",
+            "validator": "a2ui-index-check",
+            "checkLogic": "检查 index.md 是否包含新文件的链接"
+        },
+        {
+            "id": "V007",
+            "category": "V",
+            "severity": "MEDIUM",
+            "scope": [
+                "a2ui"
+            ],
+            "description": "只能使用 A2UI 定义的组件，禁止编造新组件类型",
+            "validatorType": "program",
+            "validator": "a2ui-schema-check",
+            "checkLogic": "使用 JSON Schema 校验组件类型"
+        },
+        {
+            "id": "I001",
+            "category": "I",
+            "severity": "CRITICAL",
+            "scope": [
+                "global"
+            ],
+            "description": "确认一个需求，立即写入文件（铁律）",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "I002",
+            "category": "I",
+            "severity": "CRITICAL",
+            "scope": [
+                "global"
+            ],
+            "description": "禁止聊完全部需求后一次性写入",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "I003",
+            "category": "I",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "完成章节/确认 3 个需求项/10 轮对话后必须保存",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "savePoints": [
+                "完成章节",
+                "确认 3 个需求",
+                "10 轮对话",
+                "PM说'确定了'",
+                "切换主题"
+            ]
+        },
+        {
+            "id": "I004",
+            "category": "I",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "切换讨论主题前必须保存当前内容",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "U001",
+            "category": "U",
+            "severity": "HIGH",
+            "scope": [
+                "b2"
+            ],
+            "description": "B2 讨论需求时，必须从用户角度提出至少 3 个质疑",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "questionTemplates": [
+                "用户真的需要这个功能吗？",
+                "用户会怎么使用？",
+                "用户会满意吗？"
+            ]
+        },
+        {
+            "id": "U002",
+            "category": "U",
+            "severity": "HIGH",
+            "scope": [
+                "c1"
+            ],
+            "description": "C1 记录需求前，必须审计是否站在用户角度",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "checkItems": [
+                "需求背景反映真实用户痛点",
+                "使用用户语言而非技术语言",
+                "验收标准考虑用户体验"
+            ]
+        },
+        {
+            "id": "U003",
+            "category": "U",
+            "severity": "HIGH",
+            "scope": [
+                "b2",
+                "c1"
+            ],
+            "description": "禁止直接记录 PM 说的内容而不质疑",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "C001",
+            "category": "C",
+            "severity": "CRITICAL",
+            "scope": [
+                "b2",
+                "c1"
+            ],
+            "description": "PM 说'需求完成'时，必须从 5 维度检查功能闭环",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "dimensions": [
+                "用户",
+                "技术",
+                "管理",
+                "产品逻辑",
+                "体验"
+            ]
+        },
+        {
+            "id": "C002",
+            "category": "C",
+            "severity": "HIGH",
+            "scope": [
+                "b2",
+                "c1"
+            ],
+            "description": "5 维度具体内容：用户/技术/管理/产品逻辑/体验",
+            "validatorType": "ai-self-check",
+            "validator": null,
+            "dimensionDetails": {
+                "用户": "用户如何触发、看到什么、操作后发生什么",
+                "技术": "数据来源、存储、接口",
+                "管理": "谁配置、谁管理、后台需求",
+                "产品逻辑": "业务规则、状态流转、异常处理",
+                "体验": "等待反馈、成功/失败提示"
+            }
+        },
+        {
+            "id": "C003",
+            "category": "C",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "禁止'只记录 PM 说的，不追问遗漏的'",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "W001",
+            "category": "W",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "开始工作前，必须查看 .prd-config.json 了解项目状态",
+            "validatorType": "ai-self-check",
+            "validator": null
+        },
+        {
+            "id": "W002",
+            "category": "W",
+            "severity": "HIGH",
+            "scope": [
+                "global"
+            ],
+            "description": "开始工作前，必须确认哪些文档已冻结",
+            "validatorType": "program",
+            "validator": "frozen-status-output",
+            "checkLogic": "CLI 启动时自动输出冻结状态"
+        }
+    ],
+    "validators": {
+        "frozen-check": {
+            "description": "检查文档冻结状态",
+            "implementedIn": "validators/frozen-check.js",
+            "status": "planned"
+        },
+        "config-sync-check": {
+            "description": "检查 config 同步状态",
+            "implementedIn": "validators/config-sync-check.js",
+            "status": "planned"
+        },
+        "flow-order-check": {
+            "description": "检查流程顺序",
+            "implementedIn": "validators/flow-order-check.js",
+            "status": "planned"
+        },
+        "scope-check": {
+            "description": "检查需求范围",
+            "implementedIn": "validators/scope-check.js",
+            "status": "planned"
+        },
+        "a2ui-pair-check": {
+            "description": "检查 A2UI 文件是否成对",
+            "implementedIn": "validators/a2ui-pair-check.js",
+            "status": "planned"
+        },
+        "a2ui-naming-check": {
+            "description": "检查 A2UI 文件命名",
+            "implementedIn": "validators/a2ui-naming-check.js",
+            "status": "planned"
+        },
+        "a2ui-index-check": {
+            "description": "检查 A2UI 索引更新",
+            "implementedIn": "validators/a2ui-index-check.js",
+            "status": "planned"
+        },
+        "a2ui-schema-check": {
+            "description": "A2UI JSON Schema 校验",
+            "implementedIn": "validators/a2ui-schema-check.js",
+            "status": "planned"
+        },
+        "a2ui-file-check": {
+            "description": "检查 A2UI 文件是否写入",
+            "implementedIn": "validators/a2ui-file-check.js",
+            "status": "planned"
+        },
+        "r1-content-check": {
+            "description": "检查 R1 内容完整性",
+            "implementedIn": "validators/r1-content-check.js",
+            "status": "planned"
+        },
+        "batch-flow-check": {
+            "description": "检查批次流程完整性",
+            "implementedIn": "validators/batch-flow-check.js",
+            "status": "planned"
+        },
+        "frozen-status-output": {
+            "description": "输出冻结状态",
+            "implementedIn": "validators/frozen-status-output.js",
+            "status": "planned"
+        }
+    },
+    "scopeMapping": {
+        "global": "所有阶段",
+        "p0": "P0 项目信息",
+        "b1": "B1 规划草案",
+        "b2": "B2 规划拆解",
+        "plan": "B 类文档（规划）",
+        "c0": "C0 版本范围",
+        "c1": "C1 需求清单",
+        "version": "C 类文档（版本）",
+        "r1": "R1 规划审视",
+        "r2": "R2 版本审视",
+        "iteration": "迭代管理",
+        "a2ui": "A2UI 可视化"
+    }
+}
