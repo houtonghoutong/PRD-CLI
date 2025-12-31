@@ -65,13 +65,13 @@ async function createVersionDoc(type, config, configPath) {
         return;
     }
 
-    // C1 需要先有 C0
+    // C1 现在已包含版本范围声明（原 C0 内容），不再强制要求先创建 C0
+    // 但检查 C0 是否存在，如果存在则提示已有
     if (type === 'C1') {
         const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
-        if (!await fs.pathExists(c0Path)) {
-            console.log(chalk.red('✗ 请先创建 C0'));
-            console.log('运行: prd version create C0');
-            return;
+        if (await fs.pathExists(c0Path)) {
+            console.log(chalk.cyan('ℹ️  检测到 C0 已存在，C1 已包含版本范围声明部分'));
+            console.log(chalk.gray('   提示：新版 C1 已合并 C0 内容，你可以直接在 C1 中填写版本范围\n'));
         }
     }
 
@@ -102,35 +102,31 @@ async function createVersionDoc(type, config, configPath) {
         console.log('2. 创建 C1: prd version create C1');
     } else if (type === 'C1') {
         console.log(chalk.bold('⚠️  重要提醒:\n'));
+        console.log(chalk.green('📋 新版 C1 已包含版本范围声明（原 C0 内容）'));
+        console.log(chalk.gray('   无需单独创建 C0，直接在 C1 中填写版本范围和详细需求\n'));
+
         console.log(chalk.yellow('【PM 职责】'));
-        console.log('- 确认需求是否准确');
-        console.log('- 确认需求是否完整\n');
+        console.log('- 填写版本范围声明（第 1 章节）');
+        console.log('- 确认需求是否准确完整');
+        console.log('- 定义验收标准\n');
 
         console.log(chalk.cyan('【AI 职责】'));
-        console.log('- 拆分为清单');
-        console.log('- 校验可验证性');
+        console.log('- 基于 B2 拆分需求清单');
+        console.log('- 校验需求可验证性');
         console.log('- 标注来源关系\n');
 
         console.log(chalk.red('【AI 禁止】'));
-        console.log('- ❌ 引入规划外需求\n');
+        console.log('- ❌ 引入 B3 规划外需求\n');
 
         console.log(chalk.bold('下一步:'));
-        console.log('1. PM 填写 C1_版本需求清单.md');
-        console.log('2. 执行 R2 审视: prd review r2');
+        console.log('1. PM 填写 C1_版本需求清单.md（包含版本范围 + 详细需求）');
+        console.log('2. 完成后执行冻结: prd version freeze');
         console.log('');
-        console.log(chalk.bold.red('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-        console.log(chalk.bold.red('🚨 关键步骤：C1 填写完成后必须执行 R2 审视'));
-        console.log(chalk.bold.red('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        console.log(chalk.bold.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        console.log(chalk.bold.green('✨ 简化流程：C1 填写完成后直接运行 prd version freeze'));
+        console.log(chalk.bold.green('   程序会自动执行 R2 审视，通过后完成冻结'));
+        console.log(chalk.bold.green('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
         console.log('');
-        console.log(chalk.yellow('  R2 审视将检查：'));
-        console.log('  1. ✅ 一致性检查：C1 是否忠实于 B3/B2/C0');
-        console.log('  2. ✅ 范围检查：是否有超出当前版本的需求');
-        console.log('  3. ✅ 用户视角审查：站在用户角度评估需求');
-        console.log('     - 用户感知是否良好？');
-        console.log('     - 是否解决了用户真正的问题？');
-        console.log('     - 用户使用时会满意吗？');
-        console.log('');
-        console.log(chalk.gray('提示：没有 R2 审视报告，无法执行 prd version freeze'));
     } else if (type === 'C2') {
         console.log(chalk.bold('⚠️  重要提醒：\n'));
         console.log(chalk.yellow('【C2 用途】'));
@@ -420,30 +416,65 @@ function getC1Template() {
 ## 文档说明
 
 **目的**: 
+- 声明本版本的范围边界
 - 详细列出所有版本需求
 - 定义验收标准
 - 作为研发的输入
 
 **填写要求**:
-- 每个需求必须可在 B2/C0 中找到来源
+- 版本范围必须基于 B3 冻结的规划
+- 每个需求必须可在 B2 中找到来源
 - 必须有明确的验收条件
 - 禁止引入规划外的需求
 
 ---
 
-## 1. 需求列表
+## 1. 版本范围声明
 
-### 需求 #1
+### 1.1 版本定位
 
-**需求标题**: 
+**版本编号**: v______
+**计划发布时间**: ______
+
+**本版本解决的核心问题**:
+<!-- 引用 B1/B3 中的规划目标 -->
+
+### 1.2 版本范围
+
+**本版本包含的功能**:
+1. 
+2. 
+3. 
+
+**对应 B2 中的需求项**:
+- 需求项 #__: ______
+- 需求项 #__: ______
+
+**本版本明确不包含**:
+1. 
+2. 
+3. 
+
+**不包含的原因**:
+- 延后到后续版本
+- 不在 B3 规划范围
+- 资源/时间限制
+
+---
+
+## 2. 详细需求清单
+
+### REQ-001 需求标题
+
 **需求编号**: REQ-001
-**来源**: B2 需求项 #__ / C0 功能__
+**来源**: B2 需求项 #__
+**优先级**: P0 / P1 / P2
+
+**需求背景**:
+<!-- 用户痛点/业务目标 -->
 
 **需求描述**:
 <!-- 详细描述需求 -->
-
-**业务目标**:
-<!-- 该需求解决什么业务问题 -->
 
 **核心规则**:
 1. 
@@ -455,75 +486,64 @@ function getC1Template() {
 - [ ] 标准2
 - [ ] 标准3
 
-**优先级**: P0 / P1 / P2
+**边界情况**:
+<!-- 异常处理、特殊情况 -->
 
 ---
 
-### 需求 #2
+### REQ-002 需求标题
 
-<!-- 继续列举其他需求 -->
+<!-- 继续列举其他需求，使用相同格式 -->
 
 ---
 
-## 2. 需求关系
+## 3. 需求关系
 
-### 2.1 依赖关系
+### 3.1 依赖关系
 
-**需求 #1 依赖**:
+**需求 REQ-001 依赖**:
 - 依赖需求: REQ-___
-- 依赖功能: (引用 A1)
+- 依赖现有功能: (引用 A1)
 
-### 2.2 互斥关系
+### 3.2 互斥关系
 
 **互斥需求**:
 <!-- 如果某些需求不能同时满足，说明原因 -->
 
 ---
 
-## 3. 非功能需求
+## 4. 非功能需求
 
-### 3.1 性能要求
+### 4.1 性能要求
 
 **响应时间**: 
 **并发量**: 
 
-### 3.2 安全要求
+### 4.2 安全要求
 
 **权限控制**: 
 **数据安全**: 
 
 ---
 
-## 4. 边界情况
-
-### 4.1 异常处理
-
-**异常场景1**: 
-- 触发条件: 
-- 期望行为: 
-
-### 4.2 边界值
-
-**边界条件**: 
-<!-- 列出关键的边界值和处理方式 -->
-
----
-
 ## 5. 验收总览
 
-### 5.1 需求完整性
+### 5.1 需求完整性检查
 
-- [ ] 所有需求均来自 B2/C0
+- [ ] 版本范围已明确，不超出 B3
+- [ ] 所有需求均来自 B2
 - [ ] 每个需求都有验收标准
 - [ ] 依赖关系已标注
 - [ ] 边界情况已说明
 
-### 5.2 PM 确认
+### 5.2 版本统计
 
 **总需求数**: ______
 **P0 需求数**: ______
 **P1 需求数**: ______
 **P2 需求数**: ______
+
+### 5.3 PM 确认
 
 **PM 签字**: _____________
 **日期**: _____________

@@ -256,22 +256,31 @@ async function freezePlan(config, configPath, options = {}) {
         extractSection(b2Content, '包含范围') ||
         '（请手动填写，未能自动提取）';
 
+    // 读取 R1 审视报告（如果存在）
+    let r1Content = '';
+    const r1ReviewPath = path.join(iterationDir, 'R1_规划审视报告.md');
+    if (await fs.pathExists(r1ReviewPath)) {
+        r1Content = await fs.readFile(r1ReviewPath, 'utf-8');
+    }
+
     // 提取 R1 审视详情
     let r1Summary = '';
     const r1Sections = ['目标清晰性', '场景真实性', '现状一致性', '范围收敛性', '版本化准备度'];
     for (const section of r1Sections) {
-        const sectionContent = extractSection(r1Content, section);
+        const sectionContent = r1Content ? extractSection(r1Content, section) : null;
         if (sectionContent && sectionContent.length > 10) {
             r1Summary += `- ${section}: ${sectionContent.substring(0, 100)}...\n`;
         }
     }
     if (!r1Summary) {
-        r1Summary = '（请参考 R1_规划审视报告.md）';
+        r1Summary = options.force
+            ? '（使用 --force 跳过审视，请确保已充分评估）'
+            : '（请参考 R1_规划审视报告.md）';
     }
 
     // 检查 R1 中的结论
-    let r1Conclusion = '✅ 通过';
-    if (r1Content.includes('有条件通过')) {
+    let r1Conclusion = options.force ? '⚠️ 强制通过' : '✅ 通过';
+    if (r1Content && r1Content.includes('有条件通过')) {
         r1Conclusion = '⚠️ 有条件通过';
     }
 
