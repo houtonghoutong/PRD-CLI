@@ -421,18 +421,23 @@ AI: "等一下，让我从 5 个维度检查一下：
 ## 🔄 工作流程
 
 ```
-A 阶段（基线）
-  A0 → A1 → A2 → R0
+简化后的流程（6 步）：
 
-↓ R0 通过后
+A 阶段（基线）
+  prd init → A0 → A1 → A2（基线完成）
+
+↓ 基线完成后
 
 B 阶段（规划）
-  创建迭代 → B1 → B2 → R1 → B3（冻结）
+  prd plan create B1 → prd plan create B2 → prd plan freeze
+  ⚠️ freeze 时自动执行 R1 审视，通过后生成 B3
 
 ↓ B3 冻结后
 
 C 阶段（版本）
-  C0 → C1 → R2 → C3（冻结）
+  prd version create C1 → prd version freeze
+  📋 C1 已包含版本范围声明（原 C0）
+  ⚠️ freeze 时自动执行 R2 审视，通过后生成 C3
 
 ↓ C3 冻结后
 

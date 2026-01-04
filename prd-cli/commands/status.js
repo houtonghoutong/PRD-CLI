@@ -68,25 +68,23 @@ module.exports = async function () {
             console.log(`  R1 启动检查: ${hasR1Start ? chalk.green('✓') : chalk.gray('○')}`);
             console.log(`  B1 规划草案: ${hasB1 ? chalk.green('✓') : chalk.gray('○')}`);
             console.log(`  B2 规划拆解: ${hasB2 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  R1 规划审视: ${hasR1Review ? chalk.green('✓') : chalk.gray('○')}`);
+            console.log(`  R1 规划审视: ${hasR1Review ? chalk.green('✓') : chalk.gray('○')} ${!hasR1Review && hasB2 ? chalk.gray('(自动执行)') : ''}`);
             console.log(`  B3 规划冻结: ${hasB3 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  C0 版本范围: ${hasC0 ? chalk.green('✓') : chalk.gray('○')}`);
+            console.log(`  C0 版本范围: ${hasC0 ? chalk.green('✓') : chalk.gray('○')} ${!hasC0 ? chalk.gray('(已合并到C1)') : ''}`);
             console.log(`  C1 版本需求: ${hasC1 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  R2 版本审视: ${hasR2 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  C3 版本冻结: ${hasC3 ? chalk.green('✓') : chalk.gray('○')}`);
+            console.log(`  R2 版本审视: ${hasR2 ? chalk.green('✓') : chalk.gray('○')} ${!hasR2 && hasC1 ? chalk.gray('(自动执行)') : ''}`);
+            console.log(`  C3 版本冻结: ${hasC3 ? chalk.green('✓') : chalk.gray('○')}`);;
 
             // 判断当前阶段
             let currentStage = '';
             if (hasC3) {
                 currentStage = chalk.green('✓ 已完成');
             } else if (hasC1) {
-                currentStage = chalk.cyan('· 待 R2 审视');
-            } else if (hasC0) {
-                currentStage = chalk.cyan('· C1 创建中');
+                currentStage = chalk.cyan('· 待版本冻结');
             } else if (hasB3) {
                 currentStage = chalk.cyan('· 版本需求阶段');
             } else if (hasB2) {
-                currentStage = chalk.cyan('· 待 R1 审视');
+                currentStage = chalk.cyan('· 待规划冻结');
             } else if (hasB1) {
                 currentStage = chalk.cyan('· B2 创建中');
             } else if (hasR1Start) {
@@ -120,18 +118,13 @@ module.exports = async function () {
                 console.log(chalk.cyan('  prd plan create B1  # 创建规划草案'));
             } else if (!files.some(f => f.includes('B2'))) {
                 console.log(chalk.cyan('  prd plan create B2  # 创建规划拆解'));
-            } else if (!files.some(f => f.includes('R1_规划审视'))) {
-                console.log(chalk.cyan('  prd review r1  # 执行 R1 审视'));
             } else if (!files.some(f => f.includes('B3'))) {
-                console.log(chalk.cyan('  prd plan freeze  # 冻结规划'));
-            } else if (!files.some(f => f.includes('C0'))) {
-                console.log(chalk.cyan('  prd version create C0  # 创建版本范围'));
+                console.log(chalk.cyan('  prd plan freeze  # 冻结规划（自动R1审视）'));
             } else if (!files.some(f => f.includes('C1'))) {
                 console.log(chalk.cyan('  prd version create C1  # 创建版本需求'));
-            } else if (!files.some(f => f.includes('R2'))) {
-                console.log(chalk.cyan('  prd review r2  # 执行 R2 审视'));
+                console.log(chalk.gray('  ↑ C1 已包含版本范围声明，无需单独创建 C0'));
             } else if (!files.some(f => f.includes('C3'))) {
-                console.log(chalk.cyan('  prd version freeze  # 冻结版本'));
+                console.log(chalk.cyan('  prd version freeze  # 冻结版本（自动R2审视）'));
             } else {
                 console.log(chalk.green('  当前迭代已完成!'));
                 console.log(chalk.cyan('  prd iteration new  # 开始新迭代'));

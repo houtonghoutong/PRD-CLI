@@ -159,25 +159,22 @@ prd iteration new
 prd plan create B1  # 需求规划草案
 prd plan create B2  # 规划拆解与范围界定
 
-# 执行 R1 审视
-prd review r1
-
-# 如果通过，冻结规划
+# 冻结规划（自动执行 R1 审视）
 prd plan freeze  # 生成 B3 规划冻结归档
+# ✅ freeze 命令会自动执行前置检查和 R1 审视
+# ✅ 不通过则阻断，显示具体问题
 ```
 
 ### 5. 版本需求(C 类文档)
 
 ```bash
-# 创建版本文档
-prd version create C0  # 版本范围声明
-prd version create C1  # 版本需求清单
+# 创建版本需求清单（已包含版本范围声明）
+prd version create C1  # C1 已包含原 C0 内容，无需单独创建 C0
 
-# 执行 R2 审视
-prd review r2
-
-# 如果通过，冻结版本
+# 冻结版本（自动执行 R2 审视）
 prd version freeze  # 生成 C3 版本冻结归档
+# ✅ freeze 命令会自动执行 R2 审视
+# ✅ 不通过则阻断，显示具体问题
 ```
 
 ### 6. 查看项目状态
@@ -225,16 +222,16 @@ prd iteration list  # 查看所有迭代
 
 | 命令 | 说明 |
 |------|------|
-| `prd version create C0` | 创建版本范围声明 |
-| `prd version create C1` | 创建版本需求清单 |
-| `prd version freeze` | 冻结版本(生成 C3) |
+| `prd version create C1` | 创建版本需求清单（已含版本范围） |
+| `prd version freeze` | 冻结版本(自动 R2 审视，生成 C3) |
 
-### 审视管理(R 类)
+### 审视管理(R 类) - 已集成到 freeze
 
 | 命令 | 说明 |
 |------|------|
-| `prd review r1` | 执行 R1 规划审视 |
-| `prd review r2` | 执行 R2 版本审视 |
+| `prd review r1` | 手动执行 R1 规划审视（可选） |
+| `prd review r2` | 手动执行 R2 版本审视（可选） |
+| *✅ 推荐* | `prd plan/version freeze` 已自动包含审视 |
 
 ### 规则校验 (v1.4.0 新增)
 

@@ -305,9 +305,10 @@ async function freezePlan(config, configPath, options = {}) {
 
     console.log(chalk.bold.green('🎉 规划已冻结!\n'));
     console.log(chalk.bold('下一步:'));
-    console.log('1. 创建版本范围: prd version create C0');
-    console.log('2. 创建版本需求: prd version create C1');
-    console.log('3. 执行 R2 审视: prd review r2');
+    console.log('1. 创建版本需求: prd version create C1');
+    console.log('   📋 C1 已包含版本范围声明，无需单独创建 C0');
+    console.log('2. 填写完成后执行: prd version freeze');
+    console.log('   ⚠️ 程序会自动执行 R2 审视');
     console.log('');
 }
 

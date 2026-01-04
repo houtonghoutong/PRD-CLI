@@ -137,22 +137,19 @@ program
 // 帮助信息增强
 program.on('--help', () => {
   console.log('');
-  console.log(chalk.bold('典型工作流:'));
+  console.log(chalk.bold('简化工作流（6 步）:'));
   console.log('  1. ' + chalk.cyan('prd init <项目名>') + '          # 初始化项目');
-  console.log('  2. ' + chalk.cyan('prd baseline create A0') + '      # 创建产品基础文档');
-  console.log('  3. ' + chalk.cyan('prd iteration new') + '           # 开始新迭代');
-  console.log('  4. ' + chalk.cyan('prd plan create B1') + '          # 创建规划草案');
-  console.log('  5. ' + chalk.cyan('prd review r1') + '               # R1 审视');
-  console.log('  6. ' + chalk.cyan('prd plan freeze') + '             # 冻结规划(B3)');
-  console.log('  7. ' + chalk.cyan('prd version create C0') + '       # 创建版本范围');
-  console.log('  8. ' + chalk.cyan('prd review r2') + '               # R2 审视');
-  console.log('  9. ' + chalk.cyan('prd version freeze') + '          # 冻结版本(C3)');
+  console.log('  2. ' + chalk.cyan('prd plan create B1') + '          # 创建规划草案');
+  console.log('  3. ' + chalk.cyan('prd plan create B2') + '          # 创建规划拆解');
+  console.log('  4. ' + chalk.cyan('prd plan freeze') + '             # 冻结规划（自动 R1 审视）');
+  console.log('  5. ' + chalk.cyan('prd version create C1') + '       # 创建版本需求（含版本范围）');
+  console.log('  6. ' + chalk.cyan('prd version freeze') + '          # 冻结版本（自动 R2 审视）');
   console.log('');
   console.log(chalk.bold('文档说明:'));
-  console.log('  A 类 - 现状基线文档 (A0, A1, A2, R0)');
+  console.log('  A 类 - 现状基线文档 (A0, A1, A2)');
   console.log('  B 类 - 需求规划文档 (B1, B2, B3)');
-  console.log('  C 类 - 版本需求文档 (C0, C1, C3)');
-  console.log('  R 类 - 审视报告 (R1, R2)');
+  console.log('  C 类 - 版本需求文档 (C1 已含版本范围, C3)');
+  console.log('  R 类 - 审视（已集成到 freeze 命令）');
   console.log('');
   console.log(chalk.bold('维护命令:'));
   console.log('  ' + chalk.cyan('prd upgrade') + '                 # 更新 workflows 和 AI 规则到最新版本');

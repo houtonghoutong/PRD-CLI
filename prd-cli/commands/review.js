@@ -212,22 +212,32 @@ async function performR2Review(config, options = {}) {
         process.exit(1);
     }
 
-    // 检查必需文档
+    // 检查必需文档（C1 已包含版本范围声明，C0 不再强制）
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
     const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
     const c1Path = path.join(iterationDir, 'C1_版本需求清单.md');
 
-    if (!await fs.pathExists(b3Path) || !await fs.pathExists(c0Path) || !await fs.pathExists(c1Path)) {
-        console.log(chalk.red('✗ 缺少必需的 B3、C0 或 C1 文档'));
-        console.log('请先创建：');
-        console.log('  prd plan freeze  (生成 B3)');
-        console.log('  prd version create C0');
-        console.log('  prd version create C1');
+    if (!await fs.pathExists(b3Path)) {
+        console.log(chalk.red('✗ 缺少 B3 规划冻结归档'));
+        console.log('请先执行: prd plan freeze');
         if (process.env.PRD_TEST_MODE === 'true') {
-            throw new Error('缺少必需的 B3、C0 或 C1 文档');
+            throw new Error('缺少 B3 文档');
         }
         process.exit(1);
     }
+
+    if (!await fs.pathExists(c1Path)) {
+        console.log(chalk.red('✗ 缺少 C1 版本需求清单'));
+        console.log('请先执行: prd version create C1');
+        console.log(chalk.gray('提示: 新版 C1 已包含版本范围声明，无需单独创建 C0'));
+        if (process.env.PRD_TEST_MODE === 'true') {
+            throw new Error('缺少 C1 文档');
+        }
+        process.exit(1);
+    }
+
+    // 可选检测 C0（向后兼容提示）
+    const hasC0 = await fs.pathExists(c0Path);
 
     // ⭐ 支持预确认模式和非交互模式（用于测试）
     if (options.pmConfirmed) {
@@ -256,8 +266,8 @@ async function performR2Review(config, options = {}) {
 
 **审视对象**:
 - B3_规划冻结归档.md
-- C0_版本范围声明.md
-- C1_版本需求清单.md
+- C1_版本需求清单.md（已包含版本范围声明）
+${hasC0 ? '- C0_版本范围声明.md（兼容旧版）' : ''}
 
 ---
 
@@ -354,7 +364,7 @@ async function performR2Review(config, options = {}) {
     console.log(chalk.cyan('  "请帮我执行 R2 审视，项目路径是 [当前目录]"'));
     console.log('');
     console.log('AI 将会：');
-    console.log('  1. 读取 B3、C0、C1 文档');
+    console.log('  1. 读取 B3、C1 文档');
     console.log('  2. 检查版本是否偏离规划');
     console.log('  3. 填写 R2 报告');
     console.log('  4. 展示结论让你决策');
