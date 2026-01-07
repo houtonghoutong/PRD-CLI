@@ -67,6 +67,14 @@ program
     require('../commands/version')(action, type, options);
   });
 
+// IT (INVEST) 命令
+program
+  .command('it <action> [name]')
+  .description('管理 IT 用户故事 (create|list|show)')
+  .action((action, name, options) => {
+    require('../commands/it')(action, name, options);
+  });
+
 // 需求变更命令
 program
   .command('change')
