@@ -55,40 +55,38 @@ module.exports = async function () {
         if (await fs.pathExists(iterationDir)) {
             const files = await fs.readdir(iterationDir);
 
-            const hasR1Start = files.some(f => f.includes('R1_规划启动'));
-            const hasB1 = files.some(f => f.includes('B1'));
-            const hasB2 = files.some(f => f.includes('B2'));
-            const hasR1Review = files.some(f => f.includes('R1_规划审视'));
+            const hasB = files.some(f => f.includes('B_规划文档'));
             const hasB3 = files.some(f => f.includes('B3'));
-            const hasC0 = files.some(f => f.includes('C0'));
-            const hasC1 = files.some(f => f.includes('C1'));
+
+            // 检查 IT 目录
+            const itDir = path.join(iterationDir, 'IT');
+            let hasIT = false;
+            let itCount = 0;
+            if (await fs.pathExists(itDir)) {
+                const folders = await fs.readdir(itDir);
+                itCount = folders.filter(f => f.startsWith('IT-')).length;
+                hasIT = itCount > 0;
+            }
+
             const hasR2 = files.some(f => f.includes('R2'));
             const hasC3 = files.some(f => f.includes('C3'));
 
-            console.log(`  R1 启动检查: ${hasR1Start ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  B1 规划草案: ${hasB1 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  B2 规划拆解: ${hasB2 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  R1 规划审视: ${hasR1Review ? chalk.green('✓') : chalk.gray('○')} ${!hasR1Review && hasB2 ? chalk.gray('(自动执行)') : ''}`);
+            console.log(`  B  规划文档: ${hasB ? chalk.green('✓') : chalk.gray('○')}`);
             console.log(`  B3 规划冻结: ${hasB3 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  C0 版本范围: ${hasC0 ? chalk.green('✓') : chalk.gray('○')} ${!hasC0 ? chalk.gray('(已合并到C1)') : ''}`);
-            console.log(`  C1 版本需求: ${hasC1 ? chalk.green('✓') : chalk.gray('○')}`);
-            console.log(`  R2 版本审视: ${hasR2 ? chalk.green('✓') : chalk.gray('○')} ${!hasR2 && hasC1 ? chalk.gray('(自动执行)') : ''}`);
+            console.log(`  IT 用户故事: ${hasIT ? chalk.green(`✓ (${itCount}个)`) : chalk.gray('○')}`);
+            console.log(`  R2 版本审视: ${hasR2 ? chalk.green('✓') : chalk.gray('○')} ${!hasR2 && hasIT ? chalk.gray('(自动执行)') : ''}`);
             console.log(`  C3 版本冻结: ${hasC3 ? chalk.green('✓') : chalk.gray('○')}`);;
 
             // 判断当前阶段
             let currentStage = '';
             if (hasC3) {
                 currentStage = chalk.green('✓ 已完成');
-            } else if (hasC1) {
+            } else if (hasIT) {
                 currentStage = chalk.cyan('· 待版本冻结');
             } else if (hasB3) {
-                currentStage = chalk.cyan('· 版本需求阶段');
-            } else if (hasB2) {
+                currentStage = chalk.cyan('· 需求开发中 (IT)');
+            } else if (hasB) {
                 currentStage = chalk.cyan('· 待规划冻结');
-            } else if (hasB1) {
-                currentStage = chalk.cyan('· B2 创建中');
-            } else if (hasR1Start) {
-                currentStage = chalk.cyan('· 规划阶段');
             } else {
                 currentStage = chalk.yellow('· 已创建');
             }
@@ -113,16 +111,16 @@ module.exports = async function () {
 
         if (await fs.pathExists(iterationDir)) {
             const files = await fs.readdir(iterationDir);
+            const itDir = path.join(iterationDir, 'IT');
+            const hasIT = await fs.pathExists(itDir) &&
+                (await fs.readdir(itDir)).some(f => f.startsWith('IT-'));
 
-            if (!files.some(f => f.includes('B1'))) {
-                console.log(chalk.cyan('  prd plan create B1  # 创建规划草案'));
-            } else if (!files.some(f => f.includes('B2'))) {
-                console.log(chalk.cyan('  prd plan create B2  # 创建规划拆解'));
+            if (!files.some(f => f.includes('B_规划文档'))) {
+                console.log(chalk.cyan('  prd plan create B  # 创建规划文档'));
             } else if (!files.some(f => f.includes('B3'))) {
-                console.log(chalk.cyan('  prd plan freeze  # 冻结规划（自动R1审视）'));
-            } else if (!files.some(f => f.includes('C1'))) {
-                console.log(chalk.cyan('  prd version create C1  # 创建版本需求'));
-                console.log(chalk.gray('  ↑ C1 已包含版本范围声明，无需单独创建 C0'));
+                console.log(chalk.cyan('  prd plan freeze  # 冻结规划'));
+            } else if (!hasIT) {
+                console.log(chalk.cyan('  prd it create "需求名称"  # 创建 IT 用户故事'));
             } else if (!files.some(f => f.includes('C3'))) {
                 console.log(chalk.cyan('  prd version freeze  # 冻结版本（自动R2审视）'));
             } else {

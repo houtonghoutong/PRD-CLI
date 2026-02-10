@@ -1,6 +1,6 @@
 const TestHelper = require('../helpers/test-helper');
 
-describe('Review Commands', () => {
+describe('Review Commands - v2.0.0', () => {
     let testDir;
     let projectDir;
 
@@ -13,82 +13,60 @@ describe('Review Commands', () => {
         await TestHelper.cleanup(testDir);
     });
 
-    describe('R1 - 规划审视', () => {
-        test('应该成功创建 R1 审视报告', async () => {
-            // 准备完整的前置条件
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
+    // v2.0.0: 审视已内化到 freeze 命令中，不再有独立的 R1/R2 命令
+    describe('规划审视（内化到 prd plan freeze）', () => {
+        test('需求规划应包含启动检查内容', async () => {
+            // v2.0.0 中启动检查已集成到需求规划文档中
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
             await TestHelper.createIteration(projectDir);
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
+            await TestHelper.createPlan(projectDir);  // v2.0.0 无需参数
 
-            const result = await TestHelper.review(projectDir, 'r1');
-
-            expect(result.success).toBe(true);
-
-            const exists = await TestHelper.fileExists(
+            // 检查需求规划文档是否存在
+            let planExists = await TestHelper.fileExists(
                 projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划审视报告.md'
+                '02_迭代记录/第01轮迭代/需求规划.md'
             );
-            expect(exists).toBe(true);
-        });
+            // 兼容旧文件名
+            if (!planExists) {
+                planExists = await TestHelper.fileExists(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
+            expect(planExists).toBe(true);
 
-        test('R1 审视报告应包含5个审视维度', async () => {
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
-            await TestHelper.createIteration(projectDir);
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
-
-            await TestHelper.review(projectDir, 'r1');
-
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划审视报告.md'
-            );
-
-            expect(content).toContain('# R1_规划审视报告');
-            expect(content).toContain('目标清晰性');
-            expect(content).toContain('场景真实性');
-            expect(content).toContain('现状一致性');
-            expect(content).toContain('范围收敛性');
-            expect(content).toContain('版本化准备度');
-        });
-
-        test('没有 B1/B2 时应该失败', async () => {
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
-            await TestHelper.createIteration(projectDir);
-
-            const result = await TestHelper.review(projectDir, 'r1');
-
-            expect(result.success).toBe(false);
-            expect(result.error || result.output).toMatch(/B1|B2/);
-        });
-
-        test('没有迭代时应该失败', async () => {
-            const result = await TestHelper.review(projectDir, 'r1');
-
-            expect(result.success).toBe(false);
-            expect(result.error || result.output).toContain('迭代');
+            // 需求规划应包含启动检查内容
+            let content;
+            try {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/需求规划.md'
+                );
+            } catch (e) {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
+            expect(content).toContain('启动检查');
         });
     });
 
-    describe('R2 - 版本审视', () => {
-        test('R2 审视需要 B3、C0、C1', async () => {
-            // 只创建基础条件，不创建 B3/C0/C1
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
+    describe('版本审视（内化到 prd version freeze）', () => {
+        test('版本冻结需要规划冻结和 IT 文档', async () => {
+            // 只创建基础条件，不创建规划冻结/IT
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
             await TestHelper.createIteration(projectDir);
 
             const result = await TestHelper.review(projectDir, 'r2');
 
             expect(result.success).toBe(false);
-            expect(result.error || result.output).toMatch(/B3|C0|C1/);
+            // v2.0.0: 检查规划冻结和 IT 目录
+            expect(result.error || result.output).toMatch(/规划|IT|B3|freeze/i);
         });
     });
 });

@@ -1,6 +1,6 @@
 const TestHelper = require('../helpers/test-helper');
 
-describe('Planning Commands', () => {
+describe('Planning Commands - v2.0.0', () => {
     let testDir;
     let projectDir;
 
@@ -8,10 +8,10 @@ describe('Planning Commands', () => {
         testDir = await TestHelper.createTempDir('planning-test');
         projectDir = await TestHelper.initProject(testDir);
 
-        // 创建必要的前置条件
-        await TestHelper.createBaseline(projectDir, 'A0');
-        await TestHelper.createBaseline(projectDir, 'A1');
-        await TestHelper.createBaseline(projectDir, 'A2');
+        // 创建必要的前置条件（使用新的中文名）
+        await TestHelper.createBaseline(projectDir, '产品定义');
+        await TestHelper.createBaseline(projectDir, '代码快照');
+        await TestHelper.createBaseline(projectDir, '用户反馈');
         await TestHelper.createIteration(projectDir);
     });
 
@@ -19,102 +19,89 @@ describe('Planning Commands', () => {
         await TestHelper.cleanup(testDir);
     });
 
-    describe('B1 - 需求规划草案', () => {
-        test('应该成功创建 B1 文档', async () => {
+    describe('需求规划（v2.0.0 新架构）', () => {
+        test('应该成功创建需求规划文档', async () => {
+            const result = await TestHelper.createPlan(projectDir);  // v2.0.0 无需参数
+
+            expect(result.success).toBe(true);
+
+            // 检查新文件名
+            let exists = await TestHelper.fileExists(
+                projectDir,
+                '02_迭代记录/第01轮迭代/需求规划.md'
+            );
+            // 兼容旧文件名
+            if (!exists) {
+                exists = await TestHelper.fileExists(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
+            expect(exists).toBe(true);
+        });
+
+        test('需求规划应包含必要章节', async () => {
+            await TestHelper.createPlan(projectDir);
+
+            let content;
+            try {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/需求规划.md'
+                );
+            } catch (e) {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
+
+            expect(content).toContain('启动检查');
+            expect(content).toContain('核心问题');
+            expect(content).toContain('需求拆解');
+            expect(content).toContain('PM 确认');
+        });
+
+        test('应该支持旧的 B 参数（向后兼容）', async () => {
+            const result = await TestHelper.createPlan(projectDir, 'B');
+
+            expect(result.success).toBe(true);
+        });
+    });
+
+    describe('B1/B2 废弃命令（v1.5.0 已废弃）', () => {
+        test('prd plan create B1 应该被阻止', async () => {
             const result = await TestHelper.createPlan(projectDir, 'B1');
 
-            expect(result.success).toBe(true);
-
-            const exists = await TestHelper.fileExists(
-                projectDir,
-                '02_迭代记录/第01轮迭代/B1_需求规划草案.md'
-            );
-            expect(exists).toBe(true);
+            // 应该失败并提示使用新命令
+            expect(result.success).toBe(false);
         });
 
-        test('B1 文档应包含必要章节', async () => {
-            await TestHelper.createPlan(projectDir, 'B1');
+        test('prd plan create B2 应该被阻止', async () => {
+            const result = await TestHelper.createPlan(projectDir, 'B2');
 
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/B1_需求规划草案.md'
-            );
-
-            expect(content).toContain('# B1_需求规划草案');
-            expect(content).toContain('## 1. 规划目标');
-            expect(content).toContain('## 2. 使用场景');
-            expect(content).toContain('## 3. 规划范围');
-            expect(content).toContain('明确不做');
-        });
-
-        test('没有完整 A 类基线时的提示', async () => {
-            // 创建一个新项目，只创建部分基线
-            const tempDir = await TestHelper.createTempDir('partial-baseline-test');
-            const tempProject = await TestHelper.initProject(tempDir);
-            await TestHelper.createIteration(tempProject);
-            // 只创建 A0，缺少 A1 和 A2
-            await TestHelper.createBaseline(tempProject, 'A0');
-
-            const result = await TestHelper.createPlan(tempProject, 'B1');
-
-            // 应该提示缺少文档（可能成功也可能失败，取决于实现）
-            if (!result.success) {
-                expect(result.output).toContain('A 类基线文档');
-            }
-
-            await TestHelper.cleanup(tempDir);
+            // 应该失败并提示使用新命令
+            expect(result.success).toBe(false);
         });
     });
 
-    describe('B2 - 规划拆解与范围界定', () => {
-        test('应该成功创建 B2 文档', async () => {
-            // 先创建 B1
-            await TestHelper.createPlan(projectDir, 'B1');
+    describe('规划冻结（v2.0.0）', () => {
+        test('完成需求规划后应该能检测到文档', async () => {
+            // 创建需求规划
+            await TestHelper.createPlan(projectDir);
 
-            const result = await TestHelper.createPlan(projectDir, 'B2');
-
-            expect(result.success).toBe(true);
-
-            const exists = await TestHelper.fileExists(
+            // 检查文档存在性
+            let exists = await TestHelper.fileExists(
                 projectDir,
-                '02_迭代记录/第01轮迭代/B2_规划拆解与范围界定.md'
+                '02_迭代记录/第01轮迭代/需求规划.md'
             );
-            expect(exists).toBe(true);
-        });
-
-        test('B2 文档应包含必要章节', async () => {
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
-
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/B2_规划拆解与范围界定.md'
-            );
-
-            expect(content).toContain('# B2_规划拆解与范围界定');
-            expect(content).toContain('## 1. 需求项列表');
-            expect(content).toContain('## 2. 优先级排序');
-            expect(content).toContain('## 3. 范围界定');
-        });
-
-        test('没有 B1 时的提示', async () => {
-            const result = await TestHelper.createPlan(projectDir, 'B2');
-
-            // 应该提示需要先创建 B1（可能成功也可能失败）
-            if (!result.success) {
-                expect(result.output).toContain('B1');
+            if (!exists) {
+                exists = await TestHelper.fileExists(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
             }
-        });
-    });
-
-    describe('Plan Freeze - 冻结规划', () => {
-        test('完整流程后应该能冻结', async () => {
-            // 完整流程
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
-
-            // 注意：freeze 需要 R1 审视通过，这里先不测试
-            // 因为需要修改 R1 报告内容
+            expect(exists).toBe(true);
         });
     });
 });

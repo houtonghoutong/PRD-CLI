@@ -209,6 +209,26 @@ module.exports = async function (options = {}) {
 
         const totalChanges = newFiles.length + updatedFiles.length;
 
+        // 清理废弃文件
+        const deprecatedFiles = [
+            '.agent/workflows/prd-c1-requirement-list.md',
+            '.agent/workflows/prd-b1-planning-draft.md',
+            '.agent/workflows/prd-b2-planning-breakdown.md',
+            '.agent/workflows/prd-r1-review.md'
+        ];
+
+        for (const file of deprecatedFiles) {
+            const filePath = path.join(projectPath, file);
+            if (await fs.pathExists(filePath)) {
+                if (!dryRun) {
+                    await fs.remove(filePath);
+                    console.log(chalk.red(`🗑️  已删除废弃文件: ${file}`));
+                } else {
+                    console.log(chalk.red(`🗑️  [预览] 将删除废弃文件: ${file}`));
+                }
+            }
+        }
+
         if (totalChanges === 0) {
             console.log(chalk.green('✓ 所有文件已是最新版本！'));
         } else if (!dryRun) {

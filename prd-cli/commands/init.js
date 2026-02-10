@@ -28,7 +28,7 @@ module.exports = async function (projectName) {
             console.log(chalk.yellow(`   你正在尝试在 PRD 项目中创建子项目 "${projectName}"。`));
             console.log('');
             console.log(chalk.cyan('   建议操作：'));
-            console.log(chalk.gray('   1. 如果要在当前项目工作，直接使用 prd baseline create A0 等命令'));
+            console.log(chalk.gray('   1. 如果要在当前项目工作，直接使用 prd baseline create 产品定义 等命令'));
             console.log(chalk.gray('   2. 如果确实要创建独立新项目，请先 cd 到其他目录'));
             console.log(chalk.gray('   3. 如果要更新规则文件，请运行: prd upgrade'));
             console.log('');
@@ -38,10 +38,10 @@ module.exports = async function (projectName) {
 
         console.log(chalk.blue(`正在${isCurrentDir ? '在当前目录' : '创建项目: ' + projectName}初始化...`));
 
-        // 创建项目目录结构
+        // 创建项目目录结构（使用新的中文命名）
         const directories = [
             '00_项目总览',
-            '01_产品基线',
+            '01_基线',           // 原 01_产品基线
             '02_迭代记录',
             '98_对话归档',
             '99_归档区/历史参考与废弃文档',
@@ -56,8 +56,9 @@ module.exports = async function (projectName) {
         const config = {
             projectName: displayName,
             createdAt: new Date().toISOString(),
+            cliVersion: '2.0.0',
             currentIteration: 0,
-            workflow: 'A → R → B → C',
+            workflow: '基线 → 规划 → IT → 版本',
             stages: {
                 baseline: { completed: false, documents: [] },
                 planning: { completed: false, documents: [] },
@@ -83,7 +84,7 @@ module.exports = async function (projectName) {
                 help: 'prd --help'
             },
             dependencies: {
-                'prd-workflow-cli': '^1.1.29'
+                'prd-workflow-cli': '^2.0.0'
             }
         };
 
@@ -93,147 +94,89 @@ module.exports = async function (projectName) {
             { spaces: 2 }
         );
 
-        // 创建 P0 项目基本信息模板
-        const p0Template = `# P0_项目基本信息
+        // 创建项目信息模板（原 P0）
+        const projectInfoTemplate = `# 项目信息
 
 **创建时间**: ${new Date().toLocaleString('zh-CN')}
 **项目名称**: ${displayName}
-**文档状态**: 草案
 
 ---
 
-## 文档说明
-
-**目的**: 
-- 明确项目是否应该存在
-- 确认项目目标是否成立
-- 识别关键干系人
-
-**填写要求**:
-- 只填写事实，不填愿景
-- 目标要可检验
-- 干系人要具体到人
+> ⚠️ **这是业务的"宪法"** - 只记录代码无法表达的决策
+> 
+> 功能清单由 AI 扫描代码自动生成（见代码快照），无需在此重复
 
 ---
 
-## 1. 项目基本信息
+## 1. 产品定位
 
-### 1.1 项目定位
+**一句话说明这个产品是什么**:
+<!-- 例如：面向企业用户的项目管理工具 -->
 
-**项目全称**: ${displayName}
 
-**项目简述**:
-<!-- 一句话说明这个项目是什么 -->
+**核心价值主张**:
+<!-- 用户为什么选择你而不是竞品？ -->
 
-**所属产品线**: 
-<!-- 例如：核心业务系统、辅助工具、创新试点 -->
-
-**项目级别**: 
-- [ ] 战略级（公司级重点）
-- [ ] 业务级（部门级重点）
-- [ ] 支撑级（基础能力）
 
 ---
 
-## 2. 项目目标
+## 2. 边界声明
 
-### 2.1 核心目标
+### 2.1 明确不做的事情
 
-**要解决的主要问题**:
-<!-- 不超过 3 个核心问题 -->
-1. 
-2. 
-3. 
+<!-- 这是最重要的部分！列出被拒绝的需求/方向 -->
 
-**成功标准**:
-<!-- 如何判断项目成功？用可衡量的指标 -->
-- 指标 1: ______
-- 指标 2: ______
-- 指标 3: ______
+| 不做的事情 | 原因 |
+|-----------|------|
+| 例：第三方登录 | 数据安全考虑 |
+| 例：移动端 App | 资源限制，优先 Web |
+| | |
 
-### 2.2 目标合理性确认
+### 2.2 核心约束（红线）
 
-**为什么现在做这个项目？**
-<!-- 时机/背景/触发因素 -->
+<!-- 不可妥协的限制 -->
 
-**不做会怎样？**
-<!-- 说明紧迫性 -->
+- [ ] 安全约束: ___________
+- [ ] 合规约束: ___________
+- [ ] 性能约束: ___________
+- [ ] 其他: ___________
 
 ---
 
-## 3. 干系人
+## 3. 责任人
 
-### 3.1 核心干系人
-
-**PM（产品负责人）**:
-- 姓名: ____________
-- 职责: 项目最终决策
-- 联系方式: ____________
-
-**技术负责人**:
-- 姓名: ____________
-- 职责: 技术可行性把关
-- 联系方式: ____________
-
-**业务方**:
-- 部门: ____________
-- 联系人: ____________
-- 职责: 业务需求确认
-
-### 3.2 相关方
-
-**可能受影响的团队/系统**:
-<!-- 列出会受此项目影响的其他团队或系统 -->
+| 角色 | 姓名 | 职责 |
+|-----|------|------|
+| **产品负责人 (PM)** | _____ | 最终决策 |
+| **技术负责人** | _____ | 技术可行性 |
+| **业务方** | _____ | 业务验收 |
 
 ---
 
-## 4. 项目约束
+## 4. 成功标准
 
-### 4.1 时间约束
+<!-- 如何判断项目成功？必须可衡量 -->
 
-**期望启动时间**: ____________
-**期望交付时间**: ____________
-
-### 4.2 资源约束
-
-**已知的资源限制**:
-<!-- 人力/预算/技术限制 -->
-
-### 4.3 依赖条件
-
-**项目依赖**:
-<!-- 需要其他项目/系统先完成什么？ -->
+| 指标 | 当前值 | 目标值 | 截止日期 |
+|-----|-------|-------|---------| 
+| 例：注册转化率 | 30% | 60% | 2024-Q2 |
+| | | | |
 
 ---
 
-## 5. 项目状态
+## PM 确认
 
-**当前状态**: 初始化
-**当前迭代**: 0 轮
-**下一步**: 创建 A 类基线文档
-
----
-
-## 6. PM 确认
-
-- [ ] 项目目标已明确且合理
-- [ ] 干系人已确认
-- [ ] 约束条件已记录
-- [ ] 可以开始基线建立
+- [ ] 边界声明已明确
+- [ ] 责任人已确认
+- [ ] 成功标准可衡量
 
 **PM 签字**: _____________
 **日期**: _____________
-
----
-
-## 备注
-
-<!-- 其他需要说明的重要信息 -->
 `;
 
         await fs.writeFile(
-            path.join(projectPath, '00_项目总览/P0_项目基本信息.md'),
-            p0Template
+            path.join(projectPath, '00_项目总览/项目信息.md'),
+            projectInfoTemplate
         );
 
         // 复制工作流模板
@@ -294,73 +237,74 @@ module.exports = async function (projectName) {
         // 创建 .a2ui 目录（用于临时预览数据）
         await fs.ensureDir(path.join(projectPath, '.a2ui'));
 
-        // 创建 README
+        // 创建 README（使用新的中文命名）
         const readme = `# ${displayName}
 
-本项目采用规范化的产品需求管理流程
+本项目采用规范化的产品需求管理流程 (PRD-CLI v2.0.0)
 
 ## 📁 目录结构
 
 \`\`\`
 ${displayName}/
-├── 00_项目总览/          # 项目基本信息
-├── 01_产品基线/          # A 类文档：现状基线
-├── 02_迭代记录/          # 各轮迭代的 B、C 类文档
-│   ├── 第01轮迭代/
-│   ├── 第02轮迭代/
-│   └── ...
+├── 00_项目总览/          # 项目信息
+│   └── 项目信息.md
+├── 01_基线/              # 产品基线
+│   ├── 产品定义.md       # PM 填写
+│   ├── 代码快照.md       # AI 扫描生成
+│   └── 用户反馈.md       # AI 整理
+├── 02_迭代记录/          # 各轮迭代
+│   └── 第01轮迭代/
+│       ├── 需求规划.md   # PM + AI 对话
+│       ├── 规划冻结.md   # 自动生成
+│       ├── IT/           # 用户故事
+│       │   └── IT-001-功能名/
+│       │       ├── 业务需求.md
+│       │       └── 技术规格.md
+│       └── 版本发布.md   # 自动生成
 └── 99_归档区/            # 历史文档归档
 \`\`\`
 
 ## 🔄 工作流程
 
-1. **A 类 - 建立基线** (01_产品基线/)
-   - A0: 产品基础与范围说明
-   - A1: 已上线功能与流程清单
-   - A2: 存量反馈与数据汇总
-   - R0: 基线审视报告
+\`\`\`
+基线阶段 → 规划阶段 → IT阶段 → 版本阶段
+    ↓          ↓          ↓          ↓
+  AI生成   PM+AI对话   PM+AI对话   自动生成
+\`\`\`
 
-2. **B 类 - 需求规划** (02_迭代记录/第N轮迭代/)
-   - R1: 规划前审视（启动条件检查）
-   - B1: 需求规划草案
-   - B2: 规划拆解与范围界定
-   - R1: 规划审视（冻结前审查）
-   - B3: 规划冻结归档
-
-3. **C 类 - 版本需求** (02_迭代记录/第N轮迭代/)
-   - R2: 版本审视
-   - C0: 版本范围声明
-   - C1: 版本需求清单
-   - C3: 版本冻结归档
-
-## 🛠️ 使用 CLI 工具
+## 🛠️ 常用命令
 
 \`\`\`bash
 # 查看项目状态
 prd status
 
 # 创建基线文档
-prd baseline create A0
+prd baseline create 产品定义
+prd baseline create 代码快照
+prd baseline create 用户反馈
 
 # 开始新迭代
 prd iteration new
 
 # 创建规划文档
-prd plan create B1
+prd plan create
 
-# 执行 R1 审视
-prd review r1
-
-# 冻结规划
+# 冻结规划（自动审视）
 prd plan freeze
+
+# 创建 IT 用户故事
+prd it create "功能名称"
+
+# 冻结版本（自动审视）
+prd version freeze
 \`\`\`
 
-## 📝 关键原则
+## 📝 核心原则
 
-- **R1 是启动闸门**: 必须满足三个条件才能开始规划
-- **B3 是决策冻结**: 规划一旦冻结不可随意更改
-- **C 类不讨论方向**: 只执行已冻结的规划
-- **审视是强制的**: R1/R2 必须通过才能进入下一阶段
+- **PM 决策，AI 执行**：AI 不替 PM 做决策
+- **对话驱动**：文档通过对话逐步完成，不一次填充
+- **审视内化**：审视作为动作内化到 freeze 命令中
+- **防止幻觉**：AI 不编造技术细节
 
 ---
 创建时间: ${new Date().toLocaleString('zh-CN')}
@@ -376,38 +320,29 @@ prd plan freeze
 
         // 显示 AI 集成信息
         console.log(chalk.bold('🤖 AI 集成已配置:'));
-        console.log(chalk.gray('   ✓ .agent/workflows/  - PRD 工作流指引（包含所有阶段的详细步骤）'));
+        console.log(chalk.gray('   ✓ .agent/workflows/  - PRD 工作流指引'));
         console.log(chalk.gray('   ✓ .cursorrules       - Cursor AI 规则'));
         console.log(chalk.gray('   ✓ .antigravity/      - Antigravity AI 规则'));
         console.log(chalk.gray('   ✓ a2ui-viewer/       - A2UI 界面预览器'));
-        console.log(chalk.gray('   ✓ .a2ui/             - A2UI 临时数据目录'));
         console.log('');
         console.log(chalk.yellow('   💡 现在你可以直接与 AI 助手对话，AI 已经知道如何协助你完成 PRD 流程！'));
-        console.log(chalk.gray('   例如：告诉 AI "我要创建一个新项目的需求文档"'));
-        console.log(chalk.gray('   启动界面预览：运行 prd ui'));
         console.log('');
 
-        console.log(chalk.bold('📋 下一步操作（请按顺序执行）:'));
+        console.log(chalk.bold('📋 下一步操作:'));
         console.log('');
         if (!isCurrentDir) {
-            console.log(chalk.cyan('第 1 步: 进入项目目录'));
-            console.log(`  cd ${displayName}`);
+            console.log(chalk.cyan('1. 进入项目目录'));
+            console.log(`   cd ${displayName}`);
             console.log('');
-            console.log(chalk.cyan('第 2 步: 完善 P0_项目基本信息.md'));
+            console.log(chalk.cyan('2. 完善项目信息'));
         } else {
-            console.log(chalk.cyan('第 1 步: 完善 P0_项目基本信息.md'));
+            console.log(chalk.cyan('1. 完善项目信息'));
         }
-        console.log(chalk.gray('  文件位置: 00_项目总览/P0_项目基本信息.md'));
-        console.log(chalk.gray('  填写内容: 项目目标、干系人、约束条件等'));
-        console.log(chalk.yellow('  ⚠️  必须完成 P0 填写后才能开始创建 A 类基线文档'));
+        console.log(chalk.gray('   文件位置: 00_项目总览/项目信息.md'));
+        console.log(chalk.yellow('   ⚠️  必须完成项目信息后才能开始创建基线文档'));
         console.log('');
-        console.log(chalk.cyan(`第 ${isCurrentDir ? '2' : '3'} 步: 创建 A0 基线文档`));
-        console.log('  prd baseline create A0  # P0 填写完成后执行');
-        console.log('');
-
-        console.log(chalk.bold('🔄 后续更新:'));
-        console.log(chalk.gray('   当 CLI 包有新版本时，运行以下命令同步更新项目规则:'));
-        console.log(chalk.cyan('   npm update -g prd-workflow-cli && prd upgrade'));
+        console.log(chalk.cyan(`${isCurrentDir ? '2' : '3'}. 创建产品定义`));
+        console.log('   prd baseline create 产品定义');
         console.log('');
 
     } catch (error) {

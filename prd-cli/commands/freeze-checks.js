@@ -23,31 +23,20 @@ async function runPlanFreezeChecks(iterationDir) {
     // ===== 阶段 1: 文档存在性检查 =====
     console.log(chalk.bold('\n📁 文档存在性检查\n'));
 
-    const b1Path = path.join(iterationDir, 'B1_需求规划草案.md');
-    const b2Path = path.join(iterationDir, 'B2_规划拆解与范围界定.md');
-
-    const b1Exists = await fs.pathExists(b1Path);
-    const b2Exists = await fs.pathExists(b2Path);
+    const bPlanPath = path.join(iterationDir, 'B_规划文档.md');
+    const bPlanExists = await fs.pathExists(bPlanPath);
 
     results.push({
         category: '文档存在性',
-        item: 'B1_需求规划草案.md',
-        pass: b1Exists,
-        message: b1Exists ? '文件存在' : '文件不存在，请运行 prd plan create B1'
+        item: 'B_规划文档.md',
+        pass: bPlanExists,
+        message: bPlanExists ? '文件存在' : '文件不存在，请运行 prd plan create B'
     });
 
-    results.push({
-        category: '文档存在性',
-        item: 'B2_规划拆解与范围界定.md',
-        pass: b2Exists,
-        message: b2Exists ? '文件存在' : '文件不存在，请运行 prd plan create B2'
-    });
-
-    printCheckResult('B1_需求规划草案.md', b1Exists);
-    printCheckResult('B2_规划拆解与范围界定.md', b2Exists);
+    printCheckResult('B_规划文档.md', bPlanExists);
 
     // 如果文档不存在，提前返回
-    if (!b1Exists || !b2Exists) {
+    if (!bPlanExists) {
         return {
             pass: false,
             results,
@@ -58,44 +47,26 @@ async function runPlanFreezeChecks(iterationDir) {
     // ===== 阶段 2: 必填项检查 =====
     console.log(chalk.bold('\n📝 必填项检查\n'));
 
-    const b1Content = await fs.readFile(b1Path, 'utf-8');
-    const b2Content = await fs.readFile(b2Path, 'utf-8');
+    const bPlanContent = await fs.readFile(bPlanPath, 'utf-8');
 
-    // B1 必填项检查
-    const b1Checks = [
-        { field: '规划目标', pattern: /要解决的核心问题[\s\S]*?(?=\n##|\n---|$)/i },
-        { field: '不做什么', pattern: /本轮规划不包含[\s\S]*?(?=\n##|\n---|$)/i },
-        { field: '问题来源', pattern: /问题来源[\s\S]*?\[x\]/i }
+    // B_规划文档 必填项检查
+    const bPlanChecks = [
+        { field: '启动检查', pattern: /\[x\].*问题真实存在/i },
+        { field: '核心问题', pattern: /要解决的问题[\s\S]*?(?=\n##|\n---|$)/i },
+        { field: '需求拆解', pattern: /REQ-\d{3}/i },
+        { field: 'PM 确认', pattern: /\[x\].*核心问题已明确/i }
     ];
 
-    for (const check of b1Checks) {
-        const match = b1Content.match(check.pattern);
-        const hasContent = match && match[0].length > 50 && !match[0].includes('<!-- 填写');
+    for (const check of bPlanChecks) {
+        const match = bPlanContent.match(check.pattern);
+        const hasContent = match && (check.pattern.toString().includes('[x]') ? true : match[0].length > 30);
         results.push({
             category: '必填项',
-            item: `B1 - ${check.field}`,
+            item: `B - ${check.field}`,
             pass: hasContent,
-            message: hasContent ? '已填写' : `请在 B1 中填写「${check.field}」`
+            message: hasContent ? '已填写' : `请在 B_规划文档 中完成「${check.field}」`
         });
-        printCheckResult(`B1 - ${check.field}`, hasContent);
-    }
-
-    // B2 必填项检查
-    const b2Checks = [
-        { field: '需求清单', pattern: /需求项 #\d/i },
-        { field: '优先级排序', pattern: /P0.*必须做|P1.*重要/i },
-        { field: '首版范围', pattern: /首版包含[\s\S]*?需求项/i }
-    ];
-
-    for (const check of b2Checks) {
-        const hasContent = check.pattern.test(b2Content);
-        results.push({
-            category: '必填项',
-            item: `B2 - ${check.field}`,
-            pass: hasContent,
-            message: hasContent ? '已填写' : `请在 B2 中填写「${check.field}」`
-        });
-        printCheckResult(`B2 - ${check.field}`, hasContent);
+        printCheckResult(`B - ${check.field}`, hasContent);
     }
 
     // ===== 阶段 3: R1 审视（5 维度） =====
@@ -216,39 +187,51 @@ async function runR1Review(b1Content, b2Content, iterationDir) {
 /**
  * 执行 C3 冻结前的所有检查
  */
+/**
+ * 执行 C3 冻结前的所有检查
+ */
 async function runVersionFreezeChecks(iterationDir) {
     const results = [];
 
-    console.log(chalk.bold('\n📋 C3 版本冻结前置检查\n'));
+    console.log(chalk.bold('\n📋 C3 版本冻结前置检查 (自动 R2 审视)\n'));
     console.log(chalk.gray('─'.repeat(50)));
 
-    // ===== 阶段 1: 文档存在性检查 =====
-    console.log(chalk.bold('\n📁 文档存在性检查\n'));
+    // ===== 阶段 1: IT 完整性检查 =====
+    console.log(chalk.bold('\n📁 IT 文档检查\n'));
 
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
-    const c1Path = path.join(iterationDir, 'C1_版本需求清单.md');
+    const itDir = path.join(iterationDir, 'IT');
 
     const b3Exists = await fs.pathExists(b3Path);
-    const c1Exists = await fs.pathExists(c1Path);
+    let itExists = await fs.pathExists(itDir);
+    let itFolders = [];
+
+    if (itExists) {
+        const items = await fs.readdir(itDir);
+        itFolders = items.filter(name => name.startsWith('IT-'));
+        if (itFolders.length === 0) {
+            itExists = false;
+        }
+    }
 
     results.push({
-        category: '文档存在性',
+        category: '文档准备',
         item: 'B3_规划冻结归档.md',
         pass: b3Exists,
         message: b3Exists ? '规划已冻结' : '请先执行 prd plan freeze'
     });
 
     results.push({
-        category: '文档存在性',
-        item: 'C1_版本需求清单.md',
-        pass: c1Exists,
-        message: c1Exists ? '文件存在' : '请运行 prd version create C1'
+        category: '文档准备',
+        item: 'IT 用户故事',
+        pass: itExists,
+        message: itExists ? `发现 ${itFolders.length} 个 IT 故事` : '请先运行 prd it create 创建用户故事'
     });
 
     printCheckResult('B3_规划冻结归档.md', b3Exists);
-    printCheckResult('C1_版本需求清单.md', c1Exists);
+    printCheckResult('IT 用户故事', itExists, itExists ? `共 ${itFolders.length} 个` : '目录为空或不存在');
 
-    if (!b3Exists || !c1Exists) {
+    if (!b3Exists || !itExists) {
         return {
             pass: false,
             results,
@@ -256,20 +239,80 @@ async function runVersionFreezeChecks(iterationDir) {
         };
     }
 
+    // 检查每个 IT 的文件完整性
+    let allFilesCompleted = true;
+    for (const folder of itFolders) {
+        const itPath = path.join(itDir, folder);
+        const itId = folder.split('-').slice(0, 2).join('-');
+        const bizPath = path.join(itPath, `${itId}-BIZ.md`);
+        const devPath = path.join(itPath, `${itId}-DEV.md`);
+
+        // 检查 BIZ
+        if (await fs.pathExists(bizPath)) {
+            const content = await fs.readFile(bizPath, 'utf-8');
+            const isDefault = content.includes('[用户角色]');
+            if (isDefault) {
+                allFilesCompleted = false;
+                results.push({ category: 'IT完整性', item: `${itId}-BIZ`, pass: false, message: '文件待填写' });
+                printCheckResult(`${itId}-BIZ.md`, false, '文件包含默认模板内容');
+            }
+        } else {
+            allFilesCompleted = false;
+            results.push({ category: 'IT完整性', item: `${itId}-BIZ`, pass: false, message: '文件缺失' });
+            printCheckResult(`${itId}-BIZ.md`, false, '文件不存在');
+        }
+
+        // 检查 DEV
+        if (await fs.pathExists(devPath)) {
+            const content = await fs.readFile(devPath, 'utf-8');
+            const isDefault = content.includes('<!-- 从 BIZ 复制 -->');
+            if (isDefault) {
+                allFilesCompleted = false;
+                results.push({ category: 'IT完整性', item: `${itId}-DEV`, pass: false, message: '文件待填写' });
+                printCheckResult(`${itId}-DEV.md`, false, '文件包含默认模板内容');
+            }
+        } else {
+            allFilesCompleted = false;
+            results.push({ category: 'IT完整性', item: `${itId}-DEV`, pass: false, message: '文件缺失' });
+            printCheckResult(`${itId}-DEV.md`, false, '文件不存在');
+        }
+    }
+
+    if (!allFilesCompleted) {
+        return {
+            pass: false,
+            results,
+            summary: 'IT 文档未填写完整'
+        };
+    }
+
     // ===== 阶段 2: R2 审视（5 维度） =====
     console.log(chalk.bold('\n📊 R2 版本审视（5 维度）\n'));
 
-    const b3Content = await fs.readFile(b3Path, 'utf-8');
-    const c1Content = await fs.readFile(c1Path, 'utf-8');
+    // 读取所有 IT 内容汇总
+    let allBizContent = '';
+    let allDevContent = '';
+    let hasUI = false;
 
-    // 可选：读取 C0
-    let c0Content = '';
-    const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
-    if (await fs.pathExists(c0Path)) {
-        c0Content = await fs.readFile(c0Path, 'utf-8');
+    for (const folder of itFolders) {
+        const itPath = path.join(itDir, folder);
+        const itId = folder.split('-').slice(0, 2).join('-');
+
+        allBizContent += await fs.readFile(path.join(itPath, `${itId}-BIZ.md`), 'utf-8') + '\n';
+        allDevContent += await fs.readFile(path.join(itPath, `${itId}-DEV.md`), 'utf-8') + '\n';
+
+        // 检查是否有 UI 原型文件
+        const uiDir = path.join(itPath, 'UI原型');
+        if (await fs.pathExists(uiDir)) {
+            const uis = await fs.readdir(uiDir);
+            if (uis.some(f => f.endsWith('.json') || f.endsWith('.html'))) {
+                hasUI = true;
+            }
+        }
     }
 
-    const r2Checks = await runR2Review(b3Content, c0Content, c1Content);
+    const b3Content = await fs.readFile(b3Path, 'utf-8');
+    const r2Checks = await runR2Review(b3Content, allBizContent, allDevContent, hasUI);
     results.push(...r2Checks);
 
     for (const check of r2Checks) {
@@ -301,66 +344,61 @@ async function runVersionFreezeChecks(iterationDir) {
 
 /**
  * 执行 R2 审视（5 维度）
+ * 针对 IT 架构
  */
-async function runR2Review(b3Content, c0Content, c1Content) {
+async function runR2Review(b3Content, allBizContent, allDevContent, hasUI) {
     const results = [];
 
     // 1. 版本目标一致性
-    const hasVersionGoal = /版本目标|本版本/.test(c0Content + c1Content);
+    // 检查 BIZ 中是否包含场景描述
+    const hasScenario = /### 场景|触发条件/i.test(allBizContent);
     results.push({
         category: 'R2审视',
-        item: '1. 版本目标一致性',
-        pass: hasVersionGoal,
-        message: hasVersionGoal
-            ? '版本目标已定义'
-            : '请在 C0/C1 中明确版本目标'
+        item: '1. 业务场景闭环',
+        pass: hasScenario,
+        message: hasScenario ? '已定义业务场景' : '请在 BIZ 文档中描述具体应用场景'
     });
 
     // 2. 范围偏移检查
-    // 简化检查：确保 C1 中没有引入 B3 范围外的新需求
-    const c1HasReq = /REQ-\d+|需求项/.test(c1Content);
+    // 检查是否有关联 B3 的痕迹
+    const hasTrace = /关联 BIZ|来源追溯/i.test(allDevContent) || /来源/i.test(allBizContent);
     results.push({
         category: 'R2审视',
-        item: '2. 范围偏移检查',
-        pass: c1HasReq,
-        message: c1HasReq
-            ? '需求项已定义，请人工确认未超出 B3 范围'
-            : '请在 C1 中定义需求项'
+        item: '2. 规划范围一致性',
+        pass: hasTrace,
+        message: hasTrace ? '已包含来源追溯' : '建议在文档中明确与 B3 的关联'
     });
 
     // 3. 规划覆盖完整性
-    const hasAcceptance = /验收标准|验收条件/.test(c1Content);
+    const hasAcceptance = /验收标准|### 4\. 验收/i.test(allBizContent);
     results.push({
         category: 'R2审视',
-        item: '3. 规划覆盖完整性',
+        item: '3. 验收标准完整性',
         pass: hasAcceptance,
-        message: hasAcceptance
-            ? '验收标准已定义'
-            : '请在 C1 中为每个需求定义验收标准'
+        message: hasAcceptance ? '已定义验收标准' : '请在 BIZ 文档中完善验收标准'
     });
 
     // 4. 需求粒度成熟度
-    const hasDetail = /功能描述|详细描述|业务规则/.test(c1Content);
-    const hasBoundary = /边界|异常|特殊情况/.test(c1Content);
+    const hasDetail = /功能描述|交互规则|状态变化/i.test(allDevContent);
+    const hasBoundary = /边界|异常|特殊情况/i.test(allBizContent + allDevContent);
     results.push({
         category: 'R2审视',
-        item: '4. 需求粒度成熟度',
+        item: '4. 细节与边界',
         pass: hasDetail,
         message: hasDetail
-            ? (hasBoundary ? '需求描述详细且有边界定义' : '需求有描述，建议补充边界情况')
-            : '请在 C1 中详细描述每个需求'
+            ? (hasBoundary ? '细节与边界定义完整' : '有功能描述，建议补充边界/异常情况')
+            : '请在 DEV 文档中完善功能细节'
     });
 
     // 5. 进入执行准备度
-    const reqCount = (c1Content.match(/REQ-\d+|### 需求/g) || []).length;
-    const isReady = reqCount >= 1 && hasAcceptance;
+    // IT 架构下，UI 原型是加分项，但 DEV 必须有
+    const isReady = hasDetail && hasAcceptance;
     results.push({
         category: 'R2审视',
-        item: '5. 进入执行准备度',
+        item: '5. 开发就绪状态',
         pass: isReady,
-        message: isReady
-            ? `共 ${reqCount} 个需求，可进入开发`
-            : '请确保所有需求都有验收标准'
+        // message: `${hasUI ? '包含 UI 原型，' : ''}技术规格已就绪`
+        message: isReady ? '技术规格已就绪' : '请确保完善验收标准和功能细节'
     });
 
     return results;

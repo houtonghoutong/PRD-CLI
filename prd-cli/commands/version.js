@@ -37,6 +37,17 @@ async function createVersionDoc(type, config, configPath) {
         `第${String(config.currentIteration).padStart(2, '0')}轮迭代`
     );
 
+    // 拦截废弃的文档类型
+    if (type === 'C0') {
+        console.log(chalk.red('❌ C0 已废弃。请直接创建 IT 用户故事。'));
+        return;
+    }
+    if (type === 'C1') {
+        console.log(chalk.red('❌ C1 已废弃。请使用 "prd it create" 替代。'));
+        console.log(chalk.cyan('运行: prd it create "需求名称"'));
+        return;
+    }
+
     // C 类文档必须先有 B3
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
     if (!await fs.pathExists(b3Path)) {
@@ -174,18 +185,22 @@ async function freezeVersion(config, configPath, options = {}) {
 
     // ===== 检查通过，继续冻结流程 =====
 
-    // 检查 B3, C1 是否存在（冗余检查，确保安全）
-    const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
-    const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
-    const c1Path = path.join(iterationDir, 'C1_版本需求清单.md');
+    // 检查规划冻结是否存在（支持新旧文件名）
+    let freezePath = path.join(iterationDir, '规划冻结.md');
+    if (!await fs.pathExists(freezePath)) {
+        freezePath = path.join(iterationDir, 'B3_规划冻结归档.md');
+    }
 
-    if (!await fs.pathExists(b3Path)) {
-        console.log(chalk.red('✗ 请先完成规划冻结 (B3)'));
+    if (!await fs.pathExists(freezePath)) {
+        console.log(chalk.red('✗ 请先完成规划冻结'));
+        console.log('运行: prd plan freeze');
         return;
     }
 
-    if (!await fs.pathExists(c1Path)) {
-        console.log(chalk.red('✗ 请先完成 C1'));
+    // 检查 IT 是否存在
+    const itDirCheck = path.join(iterationDir, 'IT');
+    if (!await fs.pathExists(itDirCheck)) {
+        console.log(chalk.red('✗ 请先创建 IT 用户故事'));
         return;
     }
 
@@ -204,65 +219,82 @@ async function freezeVersion(config, configPath, options = {}) {
         return;
     }
 
-    // ⭐ 读取 C0、C1、R2 内容，提取关键信息
-    console.log(chalk.gray('正在从 C0/C1/R2 提取关键信息...'));
+    // ⭐ 读取 IT 内容，提取关键信息
+    console.log(chalk.gray('正在从 IT 文档提取关键信息...'));
 
-    const c0Content = await fs.readFile(c0Path, 'utf-8');
-    const c1Content = await fs.readFile(c1Path, 'utf-8');
+    const itDir = path.join(iterationDir, 'IT');
+    const itFolders = (await fs.readdir(itDir)).filter(name => name.startsWith('IT-'));
 
-    // 提取 C0 版本目标
-    let c0VersionGoal = extractSection(c0Content, '版本目标') ||
-        extractSection(c0Content, '核心问题') ||
-        '（请手动填写，未能自动提取）';
+    let itSummaries = '';
+    let totalReqCount = itFolders.length;
+    let p0Count = 0;
+    let p1Count = 0;
+    let p2Count = 0;
+    let versionGoal = '';
 
-    // 提取 C0 版本范围
-    let c0Scope = extractSection(c0Content, '包含范围') ||
-        extractSection(c0Content, '版本包含') ||
-        '（请手动填写，未能自动提取）';
+    for (const folder of itFolders) {
+        const itPath = path.join(itDir, folder);
+        const itId = folder.split('-').slice(0, 2).join('-');
 
-    // 统计 C1 需求数量
-    const p0Count = (c1Content.match(/优先级[:\s]*P0/gi) || []).length;
-    const p1Count = (c1Content.match(/优先级[:\s]*P1/gi) || []).length;
-    const p2Count = (c1Content.match(/优先级[:\s]*P2/gi) || []).length;
-    const reqCount = (c1Content.match(/需求\s*#\d+|REQ-\d+/gi) || []).length || (p0Count + p1Count + p2Count);
-
-    // 提取 R2 审视摘要
-    let r2Summary = '';
-    const r2Sections = ['版本目标一致性', '版本范围偏移检查', '规划覆盖完整性', '需求粒度成熟度', '进入执行准备度'];
-    for (const section of r2Sections) {
-        const sectionContent = extractSection(r2Content, section);
-        if (sectionContent && sectionContent.length > 10) {
-            r2Summary += `- ${section}: ${sectionContent.substring(0, 80)}...\n`;
+        // 读取业务需求文档（支持新旧文件名）
+        let bizPath = path.join(itPath, '业务需求.md');
+        if (!await fs.pathExists(bizPath)) {
+            bizPath = path.join(itPath, `${itId}-BIZ.md`);
         }
-    }
-    if (!r2Summary) {
-        r2Summary = '（请参考 R2_版本审视报告.md）';
+        let bizContent = '';
+        if (await fs.pathExists(bizPath)) {
+            bizContent = await fs.readFile(bizPath, 'utf-8');
+        }
+
+        // 提取 IT 标题
+        const titleMatch = bizContent.match(/^# (IT-\d+ .*?) -/);
+        const title = titleMatch ? titleMatch[1] : folder;
+
+        // 提取优先级
+        if (/P0/i.test(bizContent)) p0Count++;
+        else if (/P1/i.test(bizContent)) p1Count++;
+        else p2Count++; // 默认为 P2
+
+        // 提取用户故事摘要
+        const storyMatch = bizContent.match(/### 1. 用户故事\s*\n([\s\S]*?)(?=\n##|$)/);
+        const story = storyMatch ? storyMatch[1].trim().split('\n')[0] : '（无在 BIZ 中找到用户故事）';
+
+        itSummaries += `### ${title}\n\n`;
+        itSummaries += `**用户故事**: ${story}\n\n`;
+        itSummaries += `**文档位置**: IT/${folder}/\n\n`;
     }
 
-    // 生成 C3（传入提取的内容）
-    const c3Template = getC3Template(pmSignature, {
-        c0VersionGoal,
-        c0Scope,
-        reqCount,
+    // 从规划冻结提取版本目标
+    const freezeContent = await fs.readFile(freezePath, 'utf-8');
+    versionGoal = extractSection(freezeContent, '核心问题') || '请参考规划冻结文档';
+
+    // 审视归档说明
+    const reviewSummary = '本次冻结执行了自动化版本审视，检查了所有 IT 文档的完整性与一致性。';
+
+    // 生成版本发布文档
+    const releaseTemplate = getReleaseTemplate(pmSignature, {
+        versionGoal,
+        totalReqCount,
         p0Count,
         p1Count,
         p2Count,
-        r2Summary
+        itSummaries,
+        reviewSummary
     });
-    const c3Path = path.join(iterationDir, 'C3_版本冻结归档.md');
-    await fs.writeFile(c3Path, c3Template);
+    const releasePath = path.join(iterationDir, '版本发布.md');
+    await fs.writeFile(releasePath, releaseTemplate);
 
     // 记录 PM 决策和文档创建
-    await dialog.logPMConfirmation('version', 'freeze_c3', 'approved',
+    await dialog.logPMConfirmation('version', 'freeze', 'approved',
         `PM签名: ${pmSignature}, 版本冻结`
     );
-    await dialog.logDocumentCreation('version', 'C3', c3Path);
+    await dialog.logDocumentCreation('version', '版本发布', releasePath);
 
-    console.log(chalk.green('\n✓ C3_版本冻结归档.md 创建成功!'));
-    console.log(chalk.cyan(`文件位置: ${c3Path}\n`));
+    console.log(chalk.green('\n✓ 版本发布.md 创建成功!'));
+    console.log(chalk.cyan(`文件位置: ${releasePath}\n`));
 
-    console.log(chalk.bold.green('🎉 版本已冻结!产品需求阶段完成!\n'));
-    console.log(chalk.bold('✅ 本轮迭代已完成,可以：'));
+    console.log(chalk.bold.green('🎉 版本已冻结！产品需求阶段完成！\n'));
+    console.log(chalk.bold('✅ 本轮迭代已完成，可以：'));
     console.log('1. 将冻结的需求交付给研发团队');
     console.log('2. 开始下一轮迭代: prd iteration new');
     console.log('3. 查看项目状态: prd status');
@@ -660,28 +692,28 @@ function extractSection(content, sectionTitle) {
     return null;
 }
 
-function getC3Template(pmSignature, extractedContent = {}) {
+function getReleaseTemplate(pmSignature, extractedContent = {}) {
     const {
-        c0VersionGoal = '（未提供）',
-        c0Scope = '（未提供）',
-        reqCount = 0,
+        versionGoal = '（未提供）',
+        totalReqCount = 0,
         p0Count = 0,
         p1Count = 0,
         p2Count = 0,
-        r2Summary = '（未提供）'
+        itSummaries = '（无用户故事）',
+        reviewSummary = '（未提供）'
     } = extractedContent;
 
-    return `# C3_版本冻结归档
+    return `# 版本发布
 
 **冻结时间**: ${new Date().toLocaleString('zh-CN')}
 **PM 签名**: ${pmSignature}
-**文档状态**: 已冻结 ✅
+**状态**: 已冻结 ✅
 
 ---
 
 ## 冻结声明
 
-本版本需求已通过 R2 审视，正式冻结。
+本版本需求已通过自动化审视，正式冻结。
 
 **冻结承诺**:
 - 产品需求阶段完成
@@ -694,79 +726,52 @@ function getC3Template(pmSignature, extractedContent = {}) {
 
 ### 1.1 版本目标
 
-**来自 C0 的版本目标**:
+${versionGoal}
 
-${c0VersionGoal}
+### 1.2 需求概览
 
-### 1.2 版本范围
-
-**来自 C0 的范围说明**:
-
-${c0Scope}
-
-### 1.3 需求清单
-
-**来自 C1 的需求统计**:
-- 总需求数: ${reqCount || '（请手动统计）'}
-- P0 需求: ${p0Count}
-- P1 需求: ${p1Count}
-- P2 需求: ${p2Count}
+**IT 用户故事统计**:
+- 总故事数: ${totalReqCount}
+- P0 故事: ${p0Count}
+- P1 故事: ${p1Count}
+- P2 故事: ${p2Count}
 
 ---
 
-## 2. R2 审视结论
+## 2. 需求清单
 
-### 2.1 审视结果
+${itSummaries}
 
-**R2 审视状态**: ✅ 通过
+---
 
+## 3. 审视结论
+
+**审视状态**: ✅ 通过
 **通过时间**: ${new Date().toLocaleString('zh-CN')}
 
 **审视摘要**:
+${reviewSummary}
 
-${r2Summary}
-
-### 2.2 一致性确认
-
-**与 B3 规划的一致性**:
+**与规划的一致性**:
 - ✅ 未背叛规划
-- ✅ 未超出 B3 范围
-- ✅ 需求可追溯到 B2
+- ✅ 未超出规划范围
+- ✅ 需求可追溯
 
 ---
 
-## 3. 交付清单
+## 4. 交付清单
 
-### 3.1 关键文档
+**用户故事文档**:
+- 包含 ${totalReqCount} 个独立的用户故事文档（业务需求.md）
 
-**基线文档**:
-- A0: 产品基础与范围说明
-- A1: 已上线功能清单
-- A2: 存量反馈汇总
-
-**规划文档**:
-- B1: 需求规划草案
-- B2: 规划拆解与范围界定
-- B3: 规划冻结归档
-- R1: 规划审视报告
-
-**版本文档**:
-- C0: 版本范围声明
-- C1: 版本需求清单
-- R2: 版本审视报告
-
-### 3.2 交付物
-
-**可交付给研发的文档**:
-- ✅ C1_版本需求清单.md (主要依据)
-- ✅ C0_版本范围声明.md (边界参考)
-- ✅ B3_规划冻结归档.md (背景理解)
+**技术规格文档**:
+- 包含 ${totalReqCount} 个对应的技术规格文档（技术规格.md）
 
 ---
 
-## 4. 冻结管理
+## 5. 冻结管理
 
-### 4.1 修改规则
+### 5.1 修改规则
 
 **冻结后禁止**:
 - ❌ 修改需求内容
@@ -778,38 +783,34 @@ ${r2Summary}
 - ✅ UI/UX 设计细节
 - ✅ 测试用例
 
-### 4.2 变更流程
+### 5.2 变更流程
 
 **如需变更需求**:
-1. 运行 prd change 记录变更
-2. 创建 C2_版本变更说明.md
-3. 评估是否需要重新执行 R2 审视
-4. PM 重新签字确认
+1. 评估变更影响
+2. PM 重新签字确认
+3. 更新版本发布文档
 
 ---
 
-## 5. 下一步
+## 6. 下一步
 
-### 5.1 研发阶段
+### 6.1 研发阶段
 
 **可以启动**:
 - 技术方案设计
 - 架构评审
 - 开发排期
 
-### 5.2 后续迭代
+### 6.2 后续迭代
 
 **如需新的迭代**:
 1. 运行: prd iteration new
-2. 重新执行 A → R → B → C 流程
-3. 基于本次迭代的经验优化
+2. 重新执行 基线 → 规划 → IT → 版本 流程
 
 ---
 
 **PM 最终确认**: ${pmSignature}
 **冻结日期**: ${new Date().toLocaleDateString('zh-CN')}
-**状态**: 🔒 已冻结
 **产品需求阶段**: ✅ 完成
 `;
 }
-

@@ -96,9 +96,11 @@ class TestHelper {
 
     /**
      * 创建规划文档
+     * v2.0.0: type 参数可选，默认创建需求规划.md
      */
-    static async createPlan(projectDir, type) {
-        return this.execCommand(`plan create ${type}`, projectDir);
+    static async createPlan(projectDir, type = '') {
+        const command = type ? `plan create ${type}` : 'plan create';
+        return this.execCommand(command, projectDir);
     }
 
     /**

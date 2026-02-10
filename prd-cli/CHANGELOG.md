@@ -1,5 +1,153 @@
 # 变更日志 (CHANGELOG)
 
+## [2.0.0] - 2026-02-09
+
+### 🚀 重大更新 - 中文命名体系 & 流程简化
+
+本版本对命名体系进行了全面重构，采用直观的中文命名，去除混乱的编号系统。
+
+### 💥 破坏性变更
+
+#### 文档命名变更
+
+| 旧名称 | 新名称 |
+|--------|--------|
+| `P0_项目基本信息.md` | `项目信息.md` |
+| `A0_产品基础与范围说明.md` | `产品定义.md` |
+| `A1_已上线功能与流程清单.md` | `代码快照.md` |
+| `A2_存量反馈与数据汇总.md` | `用户反馈.md` |
+| `B_规划文档.md` | `需求规划.md` |
+| `B3_规划冻结归档.md` | `规划冻结.md` |
+| `IT-xxx-BIZ.md` | `业务需求.md` |
+| `IT-xxx-DEV.md` | `技术规格.md` |
+| `C3_版本冻结归档.md` | `版本发布.md` |
+
+#### 目录结构变更
+
+| 旧目录 | 新目录 |
+|--------|--------|
+| `01_产品基线/` | `01_基线/` |
+
+#### 删除的概念
+
+- **R0/R1/R2** - "审视"作为动作内化到 `freeze` 命令中，不再是独立文档
+
+### ✨ 新增
+
+- **中文参数支持**：`prd baseline create 产品定义/代码快照/用户反馈`
+- **简化命令**：`prd plan create` 无需参数
+- **向后兼容**：旧参数（A0/A1/A2/B）仍可使用
+
+### 🔄 变更
+
+#### 命令变更
+
+| 旧命令 | 新命令 |
+|--------|--------|
+| `prd baseline create A0` | `prd baseline create 产品定义` |
+| `prd baseline create A1` | `prd baseline create 代码快照` |
+| `prd baseline create A2` | `prd baseline create 用户反馈` |
+| `prd baseline create R0` | **删除** |
+| `prd plan create B` | `prd plan create` |
+| `prd review r1/r2` | **删除**（内化到 freeze） |
+
+#### 核心流程简化
+
+```
+旧流程: A → R → B → C
+新流程: 基线 → 规划 → IT → 版本
+```
+
+### 📝 更新的术语
+
+| 术语 | 含义 |
+|------|------|
+| **IT** | INVEST User Story（保留） |
+| **基线** | 产品现状基线（原 A 类） |
+| **规划** | 需求规划（原 B 类） |
+| **版本** | 版本发布（原 C 类） |
+
+### 🧪 测试
+
+- 所有单元测试已更新适配新命名
+- 快照测试已重新生成
+- 向后兼容性测试通过
+
+---
+
+## [1.5.0] - 2026-01-22
+
+### 🚀 重大更新 - IT 架构升级 & 文档流程简化
+
+本版本对 PRD-CLI 进行了全面重构，大幅简化文档维护流程，引入 IT (INVEST) 用户故事结构。
+
+### ✨ 新增
+
+#### 1. IT (INVEST) 用户故事结构
+- **双文档模式**：每个需求包含 `IT-xxx-BIZ.md`（业务规格）和 `IT-xxx-DEV.md`（开发规格）
+- **BIZ 文档**：用户故事、验收标准（AC-xxx）、业务规则（BR-xxx）
+- **DEV 文档**：影响范围、开发要点、待确认问题
+- **新增命令**：`prd it create "需求名称"` 创建 IT 用户故事
+- **新增工作流**：`/prd-it-biz`、`/prd-it-dev`
+
+#### 2. A 类文档简化（Code-First）
+- **A1 自动生成**：新增 `/prd-a1-scan` 工作流，AI 扫描代码生成 `A1_代码功能快照.md`
+- **P0 模板精简**：聚焦"业务宪法"（产品定位、边界、职责、成功标准）
+
+#### 3. B 阶段简化
+- **文档合并**：将 B1、B2、R1 合并为单一 `B_规划文档.md`
+- **新增命令**：`prd plan create B` 创建简化的规划文档
+- **新增工作流**：`/prd-b-planning`
+- **R1 内化**：启动条件检查集成到 B 文档中
+
+### 🔄 变更
+
+#### 文档结构变更
+| 旧结构 | 新结构 |
+|-------|-------|
+| B1 + B2 + R1 | `B_规划文档.md` |
+| C0 + C1 | `IT-xxx-BIZ.md` + `IT-xxx-DEV.md` |
+| 11个文档 | **6个核心文档** |
+
+#### 命令变更
+- `prd plan create B1/B2` → **已废弃**，使用 `prd plan create B`
+- `prd version create C0/C1` → **已废弃**，使用 `prd it create`
+
+#### AI 规则变更
+- **新增红线**：禁止编造技术细节（API/SQL/算法）
+- **DEV 文档定位**：开发要点提示，具体 RT 拆解由技术负责人决定
+- **职责边界**：AI 提供方向建议，不做具体 RT 拆解
+
+### 🗑️ 删除
+
+- `.agent/workflows/prd-c1-requirement-list.md`
+- `.agent/workflows/prd-b1-planning-draft.md`
+- `.agent/workflows/prd-b2-planning-breakdown.md`
+- `.agent/workflows/prd-r1-review.md`
+
+### 🔧 优化
+
+- `prd status` 更新显示新的文档结构
+- `prd upgrade` 自动清理废弃工作流文件
+- `prd iteration new` 简化提示，不再创建 R1 启动检查文档
+- `commands/freeze-checks.js` 检查 `B_规划文档.md`
+
+### 📝 文档
+
+- 更新 `.cursorrules`、`.antigravity/rules.md` 适配新架构
+- 更新 `rules/index.json` scope 映射
+- 更新 README.md 反映新工作流
+
+### 核心价值
+
+- ✅ **文档减少 45%**：从 11 个减少到 6 个核心文档
+- ✅ **AI 不越界**：明确 AI 只提供方向，不编造技术细节
+- ✅ **Code-First**：A1 由 AI 从代码生成，减少手动维护
+- ✅ **简化规划**：B 阶段一次对话完成，无需多轮文档
+
+---
+
+
 ## [1.1.25] - 2025-12-25
 
 ### ✨ 新增 - 自动更新 + upgrade 升级命令

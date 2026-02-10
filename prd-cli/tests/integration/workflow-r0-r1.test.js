@@ -1,35 +1,25 @@
 const TestHelper = require('../helpers/test-helper');
 
-describe('R0-R1 Flow Control - 流程跳跃检测', () => {
+describe('Workflow Integration Tests - v2.0.0', () => {
     let testDir;
     let projectDir;
 
     beforeEach(async () => {
-        testDir = await TestHelper.createTempDir('r0r1-test');
+        testDir = await TestHelper.createTempDir('workflow-test');
         projectDir = await TestHelper.initProject(testDir);
 
-        // 完成基线准备
-        await TestHelper.createBaseline(projectDir, 'A0');
-        await TestHelper.createBaseline(projectDir, 'A1');
-        await TestHelper.createBaseline(projectDir, 'R0');
+        // 完成基线准备（R0 已废弃）
+        await TestHelper.createBaseline(projectDir, '产品定义');
+        await TestHelper.createBaseline(projectDir, '代码快照');
     });
 
     afterEach(async () => {
         await TestHelper.cleanup(testDir);
     });
 
-    describe('R0 完成后的状态检查', () => {
-        test('R0 完成后不应该自动创建 R1 审视报告', async () => {
-            // R0 已完成，检查是否自动生成了 R1_规划审视报告.md
-            const r1ReviewExists = await TestHelper.fileExists(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划审视报告.md'
-            );
-
-            expect(r1ReviewExists).toBe(false);
-        });
-
-        test('R0 完成后不应该自动创建迭代', async () => {
+    describe('基线完成后的状态检查', () => {
+        test('基线完成后不应该自动创建其他文档', async () => {
+            // 检查是否自动生成了后续文档
             const iterationExists = await TestHelper.fileExists(
                 projectDir,
                 '02_迭代记录/第01轮迭代'
@@ -39,142 +29,116 @@ describe('R0-R1 Flow Control - 流程跳跃检测', () => {
         });
     });
 
-    describe('R1 启动条件检查文档', () => {
-        test('创建迭代应该自动生成 R1_规划启动条件检查.md', async () => {
+    describe('需求规划（v2.0.0 新架构）', () => {
+        test('创建迭代后应能创建需求规划', async () => {
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
             await TestHelper.createIteration(projectDir);
 
-            const r1StartExists = await TestHelper.fileExists(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划启动条件检查.md'
-            );
+            const bResult = await TestHelper.createPlan(projectDir);
+            expect(bResult.success).toBe(true);
 
-            expect(r1StartExists).toBe(true);
+            // 检查新文件名
+            let planExists = await TestHelper.fileExists(
+                projectDir,
+                '02_迭代记录/第01轮迭代/需求规划.md'
+            );
+            // 兼容旧文件名
+            if (!planExists) {
+                planExists = await TestHelper.fileExists(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
+            expect(planExists).toBe(true);
         });
 
-        test('R1 启动条件检查应包含3个必要条件', async () => {
+        test('需求规划应包含启动检查（内化）', async () => {
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
             await TestHelper.createIteration(projectDir);
+            await TestHelper.createPlan(projectDir);
 
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划启动条件检查.md'
-            );
+            let content;
+            try {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/需求规划.md'
+                );
+            } catch (e) {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
 
-            expect(content).toContain('启动条件一：问题是否被确认真实存在');
-            expect(content).toContain('启动条件二：问题是否需要"单独一轮规划"来解决');
-            expect(content).toContain('启动条件三：问题是否已经被理解到"可规划"的程度');
+            expect(content).toContain('启动检查');
+            expect(content).toContain('问题真实存在');
+            expect(content).toContain('值得单独规划');
+            expect(content).toContain('问题已理解清楚');
         });
     });
 
-    describe('R1 审视的前置条件检查', () => {
-        test('没有创建迭代时，R1 审视应该失败', async () => {
-            const result = await TestHelper.review(projectDir, 'r1');
+    describe('废弃命令阻止（v2.0.0）', () => {
+        test('B1 命令应被阻止', async () => {
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
+            await TestHelper.createIteration(projectDir);
 
-            // 应该失败或返回错误
+            const result = await TestHelper.createPlan(projectDir, 'B1');
+
             expect(result.success).toBe(false);
         });
 
-        test('没有 B1/B2 时，R1 审视应该失败', async () => {
-            // 先创建基线文档（否则无法创建迭代）
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-
-            // 只创建迭代，不创建 B1/B2
+        test('B2 命令应被阻止', async () => {
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
             await TestHelper.createIteration(projectDir);
 
-            const result = await TestHelper.review(projectDir, 'r1');
+            const result = await TestHelper.createPlan(projectDir, 'B2');
 
-            // 应该失败
             expect(result.success).toBe(false);
-            // 错误信息应该提到 B1 或 B2
-            const errorMsg = result.error || result.output;
-            expect(errorMsg.includes('B1') || errorMsg.includes('B2')).toBe(true);
         });
     });
 
-    describe('完整的正确流程', () => {
-        test('按照正确顺序：迭代 → B1 → B2 → R1 审视', async () => {
-            // 0. 先创建必要的基线文档（B1/B2 的前置条件）
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2'); // B1需要A2
+    describe('完整的简化流程（v2.0.0）', () => {
+        test('正确顺序：基线 → 迭代 → 需求规划', async () => {
+            // 1. 创建基线
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
 
-            // 1. 创建迭代
+            // 2. 创建迭代
             const iterationResult = await TestHelper.createIteration(projectDir);
             expect(iterationResult.success).toBe(true);
 
-            // 验证 R1 启动条件检查已生成
-            const r1StartExists = await TestHelper.fileExists(
+            // 3. 创建需求规划
+            const bResult = await TestHelper.createPlan(projectDir);
+            expect(bResult.success).toBe(true);
+
+            // 4. 验证核心文档存在
+            let planExists = await TestHelper.fileExists(
                 projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划启动条件检查.md'
+                '02_迭代记录/第01轮迭代/需求规划.md'
             );
-            expect(r1StartExists).toBe(true);
-
-            // 2. 创建 B1
-            const b1Result = await TestHelper.createPlan(projectDir, 'B1');
-            expect(b1Result.success).toBe(true);
-
-            // 3. 创建 B2
-            const b2Result = await TestHelper.createPlan(projectDir, 'B2');
-            expect(b2Result.success).toBe(true);
-
-            // 4. 执行 R1 审视
-            const r1Result = await TestHelper.review(projectDir, 'r1');
-            expect(r1Result.success).toBe(true);
-
-            // 5. 验证 R1 审视报告已生成
-            const r1ReviewExists = await TestHelper.fileExists(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划审视报告.md'
-            );
-            expect(r1ReviewExists).toBe(true);
-        });
-
-        test('验证两个 R1 文档都存在且不同', async () => {
-            // 先创建基线文档
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2'); // B1需要A2
-
-            // 完整流程
-            await TestHelper.createIteration(projectDir);
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
-            await TestHelper.review(projectDir, 'r1');
-
-            // 读取两个文档
-            const r1Start = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划启动条件检查.md'
-            );
-
-            const r1Review = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划审视报告.md'
-            );
-
-            // 验证是不同的文档
-            expect(r1Start).toContain('R1_规划启动条件检查');
-            expect(r1Review).toContain('R1_规划审视报告');
-
-            // 验证内容不同
-            expect(r1Start).toContain('启动条件一');
-            expect(r1Review).toContain('目标清晰性');
-        });
-    });
-
-    describe('错误流程阻止', () => {
-        test('应该阻止跳过 B1 直接创建 B2', async () => {
-            await TestHelper.createIteration(projectDir);
-
-            // 不创建 B1，直接创建 B2 应该失败
-            // 注意：这取决于实际的命令实现
-            const b2Result = await TestHelper.createPlan(projectDir, 'B2');
-
-            // 如果实现了检查，应该失败
-            // 如果没有实现，这个测试会提醒我们需要添加检查
-            if (!b2Result.success) {
-                expect(b2Result.error || b2Result.output).toContain('B1');
+            if (!planExists) {
+                planExists = await TestHelper.fileExists(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
             }
+            expect(planExists).toBe(true);
+
+            // 5. 验证 IT 目录存在
+            const itDirExists = await TestHelper.fileExists(
+                projectDir,
+                '02_迭代记录/第01轮迭代/IT'
+            );
+            expect(itDirExists).toBe(true);
         });
     });
 });

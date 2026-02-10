@@ -1,6 +1,6 @@
 const TestHelper = require('../helpers/test-helper');
 
-describe('Iteration Commands', () => {
+describe('Iteration Commands - v1.5.0', () => {
     let testDir;
     let projectDir;
 
@@ -26,14 +26,16 @@ describe('Iteration Commands', () => {
             expect(exists).toBe(true);
         });
 
-        test('创建迭代应该生成 R1 启动条件检查', async () => {
+        test('创建迭代应该生成 IT 目录（v1.5.0）', async () => {
             await TestHelper.createIteration(projectDir);
 
-            const exists = await TestHelper.fileExists(
+            // v1.5.0: 不再生成 R1_规划启动条件检查.md
+            // 改为生成 IT 目录
+            const itDirExists = await TestHelper.fileExists(
                 projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划启动条件检查.md'
+                '02_迭代记录/第01轮迭代/IT'
             );
-            expect(exists).toBe(true);
+            expect(itDirExists).toBe(true);
         });
 
         test('可以创建多轮迭代', async () => {

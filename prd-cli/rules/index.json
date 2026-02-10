@@ -145,10 +145,10 @@
             "scope": [
                 "version"
             ],
-            "description": "C3 冻结后，禁止修改 C0、C1",
+            "description": "C3 冻结后，禁止修改 IT 文档",
             "validatorType": "program",
             "validator": "frozen-check",
-            "checkLogic": "若 version.frozen=true，拦截对 C0/C1 的写入"
+            "checkLogic": "若 version.frozen=true，拦截对 IT 目录的写入"
         },
         {
             "id": "D005",
@@ -181,7 +181,7 @@
             "scope": [
                 "version"
             ],
-            "description": "禁止跳过 R2 审视（C1 后必须 R2 才能冻结 C3）",
+            "description": "禁止跳过 R2 审视（IT 后必须 R2 才能冻结 C3）",
             "validatorType": "program",
             "validator": "flow-order-check",
             "checkLogic": "冻结 C3 前检查是否存在 R2 审视报告文件"
@@ -217,7 +217,7 @@
             "scope": [
                 "version"
             ],
-            "description": "每个批次必须走完整 C0→C1→R2→C3 流程，禁止跳过",
+            "description": "每个批次必须走完整 IT→R2→C3 流程，禁止跳过",
             "validatorType": "hybrid",
             "validator": "batch-flow-check",
             "checkLogic": "检查版本目录结构完整性"
@@ -227,36 +227,36 @@
             "category": "S",
             "severity": "CRITICAL",
             "scope": [
-                "c1"
+                "it"
             ],
-            "description": "禁止在 C1 阶段加入新需求，新需求只能暂存到 A2",
+            "description": "禁止在 IT 阶段加入新需求，新需求只能暂存到 A2",
             "validatorType": "hybrid",
             "validator": "scope-check",
-            "checkLogic": "对比 C1 需求列表与 B3 范围，发现新增时告警"
+            "checkLogic": "对比 IT 需求列表与 B3 范围，发现新增时告警"
         },
         {
             "id": "S002",
             "category": "S",
             "severity": "CRITICAL",
             "scope": [
-                "c0"
+                "it"
             ],
-            "description": "C0 只能包含 B2 规划的首批需求（如有多批次）",
+            "description": "IT 只能包含 B2 规划的首批需求（如有多批次）",
             "validatorType": "program",
             "validator": "scope-check",
-            "checkLogic": "解析 B2 的批次划分，对比 C0 范围"
+            "checkLogic": "解析 B2 的批次划分，对比 IT 范围"
         },
         {
             "id": "S003",
             "category": "S",
             "severity": "HIGH",
             "scope": [
-                "c1"
+                "it"
             ],
-            "description": "C1 需求必须在 B3 范围内，禁止超出",
+            "description": "IT 需求必须在 B3 范围内，禁止超出",
             "validatorType": "program",
             "validator": "scope-check",
-            "checkLogic": "对比 C1 需求 ID 与 B3 需求列表"
+            "checkLogic": "对比 IT 需求 ID 与 B3 需求列表"
         },
         {
             "id": "S004",
@@ -294,7 +294,7 @@
             "category": "V",
             "severity": "HIGH",
             "scope": [
-                "c1"
+                "it"
             ],
             "description": "PM 描述界面/表单时，必须生成 A2UI 界面原型",
             "validatorType": "ai-self-check",
@@ -324,31 +324,31 @@
             "category": "V",
             "severity": "CRITICAL",
             "scope": [
-                "c1"
+                "it"
             ],
             "description": "PM 确认原型后，必须保存 .json + .html 两个文件",
             "validatorType": "program",
             "validator": "a2ui-pair-check",
-            "checkLogic": "检查 C1_UI原型 目录下文件是否成对存在"
+            "checkLogic": "检查 IT/UI原型 目录下文件是否成对存在"
         },
         {
             "id": "V005",
             "category": "V",
             "severity": "HIGH",
             "scope": [
-                "c1"
+                "it"
             ],
-            "description": "原型命名规范：REQ-XXX-名称.json/html",
+            "description": "原型命名规范：IT-XXX-名称.json/html",
             "validatorType": "program",
             "validator": "a2ui-naming-check",
-            "checkLogic": "正则 /^REQ-\\d{3}-[\\u4e00-\\u9fa5a-zA-Z0-9_-]+\\.(json|html)$/"
+            "checkLogic": "正则 /^IT-\\d{3}-[\\u4e00-\\u9fa5a-zA-Z0-9_-]+\\.(json|html)$/"
         },
         {
             "id": "V006",
             "category": "V",
             "severity": "HIGH",
             "scope": [
-                "c1"
+                "it"
             ],
             "description": "保存原型后必须更新 index.md 索引",
             "validatorType": "program",
@@ -439,9 +439,9 @@
             "category": "U",
             "severity": "HIGH",
             "scope": [
-                "c1"
+                "it"
             ],
-            "description": "C1 记录需求前，必须审计是否站在用户角度",
+            "description": "IT 记录需求前，必须审计是否站在用户角度",
             "validatorType": "ai-self-check",
             "validator": null,
             "checkItems": [
@@ -456,7 +456,7 @@
             "severity": "HIGH",
             "scope": [
                 "b2",
-                "c1"
+                "it"
             ],
             "description": "禁止直接记录 PM 说的内容而不质疑",
             "validatorType": "ai-self-check",
@@ -468,7 +468,7 @@
             "severity": "CRITICAL",
             "scope": [
                 "b2",
-                "c1"
+                "it"
             ],
             "description": "PM 说'需求完成'时，必须从 5 维度检查功能闭环",
             "validatorType": "ai-self-check",
@@ -487,7 +487,7 @@
             "severity": "HIGH",
             "scope": [
                 "b2",
-                "c1"
+                "it"
             ],
             "description": "5 维度具体内容：用户/技术/管理/产品逻辑/体验",
             "validatorType": "ai-self-check",
@@ -603,8 +603,7 @@
         "b1": "B1 规划草案",
         "b2": "B2 规划拆解",
         "plan": "B 类文档（规划）",
-        "c0": "C0 版本范围",
-        "c1": "C1 需求清单",
+        "it": "IT 用户故事",
         "version": "C 类文档（版本）",
         "r1": "R1 规划审视",
         "r2": "R2 版本审视",

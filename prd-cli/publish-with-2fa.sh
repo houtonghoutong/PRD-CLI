@@ -44,7 +44,7 @@ if [ $? -eq 0 ]; then
     echo "https://www.npmjs.com/package/prd-workflow-cli"
     echo ""
     echo "安装命令："
-    echo "npm install -g prd-workflow-cli@1.1.8"
+    echo "npm install -g prd-workflow-cli@2.0.0"
 else
     echo ""
     echo "❌ 发布失败"

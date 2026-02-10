@@ -213,9 +213,15 @@ async function performR2Review(config, options = {}) {
     }
 
     // 检查必需文档（C1 已包含版本范围声明，C0 不再强制）
+    // 检查必需文档
     const b3Path = path.join(iterationDir, 'B3_规划冻结归档.md');
-    const c0Path = path.join(iterationDir, 'C0_版本范围声明.md');
-    const c1Path = path.join(iterationDir, 'C1_版本需求清单.md');
+    const itDir = path.join(iterationDir, 'IT');
+    let hasItFiles = false;
+
+    if (await fs.pathExists(itDir)) {
+        const files = await fs.readdir(itDir);
+        hasItFiles = files.some(f => f.startsWith('IT-'));
+    }
 
     if (!await fs.pathExists(b3Path)) {
         console.log(chalk.red('✗ 缺少 B3 规划冻结归档'));
@@ -226,22 +232,20 @@ async function performR2Review(config, options = {}) {
         process.exit(1);
     }
 
-    if (!await fs.pathExists(c1Path)) {
-        console.log(chalk.red('✗ 缺少 C1 版本需求清单'));
-        console.log('请先执行: prd version create C1');
-        console.log(chalk.gray('提示: 新版 C1 已包含版本范围声明，无需单独创建 C0'));
+    if (!hasItFiles) {
+        console.log(chalk.red('✗ 缺少 IT 用户故事文档'));
+        console.log('请先执行: prd it create "名称"');
         if (process.env.PRD_TEST_MODE === 'true') {
-            throw new Error('缺少 C1 文档');
+            throw new Error('缺少 IT 文档');
         }
         process.exit(1);
     }
 
-    // 可选检测 C0（向后兼容提示）
-    const hasC0 = await fs.pathExists(c0Path);
+    const hasC0 = false; // 已废弃
 
     // ⭐ 支持预确认模式和非交互模式（用于测试）
     if (options.pmConfirmed) {
-        console.log(chalk.green('✓ PM 已在对话中确认 C0C1 已填写完成，理解角色分工'));
+        console.log(chalk.green('✓ PM 已在对话中确认 IT 文档已填写完成，理解角色分工'));
     } else if (process.env.PRD_TEST_MODE === 'true') {
         // 测试模式：跳过交互式确认
         console.log(chalk.yellow('⚠️ 测试模式：跳过交互式确认'));
@@ -266,60 +270,70 @@ async function performR2Review(config, options = {}) {
 
 **审视对象**:
 - B3_规划冻结归档.md
-- C1_版本需求清单.md（已包含版本范围声明）
-${hasC0 ? '- C0_版本范围声明.md（兼容旧版）' : ''}
+- IT 用户故事 (IT-xxx-BIZ/DEV)
 
 ---
 
-## 一、版本目标一致性
+## 一、业务场景闭环（以终为始）
 
 **审视标准**:
-- C0 的版本目标是否能在 B3 中找到明确对应
-- 是否存在规划外目标
+- IT-BIZ 中描述的场景，是否服务于 B3 的核心问题
+- IT 是否引入了 B3 没提到的新业务目标
 
 **审视结果**:
 <!-- AI 填写 -->
 
 ---
 
-## 二、版本范围偏移检查
+## 二、规划范围一致性
 
 **审视标准**:
-- 版本包含/不包含是否符合 B3 边界
-- 是否存在隐性扩展或"顺手加戏"
+- B2 中的每个需求项，是否都有对应的 IT
+- IT 中是否包含 B2 没有的功能点（新增需求）
 
 **审视结果**:
 <!-- AI 填写 -->
 
 ---
 
-## 三、规划覆盖完整性
+## 三、验收标准完整性
 
 **审视标准**:
-- B3 中的核心规划点是否在 C1 中得到体现
-- 是否存在规划被版本拆没的情况
+- 每个 IT-BIZ 是否都有明确的"业务验收标准"
+- 是否包含"体验验收"标准
 
 **审视结果**:
 <!-- AI 填写 -->
 
 ---
 
-## 四、需求粒度成熟度
+## 四、细节与边界
 
 **审视标准**:
-- 每条需求是否达到版本级、可理解、可评估
-- 是否仍停留在规划语言
+- 是否有状态流转图和异常处理
+- IT-DEV 是否关联了 A2UI 原型
 
 **审视结果**:
 <!-- AI 填写 -->
 
 ---
 
-## 五、进入执行准备度
+## 五、开发就绪状态
 
 **审视标准**:
-- 是否已不再需要产品侧做判断决策
-- 是否只剩实现与执行问题
+- 研发团队拿到这个 IT-DEV，能否直接开始写代码
+- 是否还需要问 PM "这里怎么做"
+
+**审视结果**:
+<!-- AI 填写 -->
+
+---
+
+## 六、用户视角审查
+
+**审视标准**:
+- 用户看到这个 IT，能立即理解它是干什么的吗
+- 这个 IT 真的解决了 A2 中的用户反馈吗
 
 **审视结果**:
 <!-- AI 填写 -->
@@ -348,7 +362,7 @@ ${hasC0 ? '- C0_版本范围声明.md（兼容旧版）' : ''}
 ⚠️ **重要提醒**: 
 - 禁止讨论规划是否正确
 - 禁止提出新增需求
-- 只判断版本是否忠实执行了既定规划
+- 只判断 IT 是否忠实执行了既定规划
 `;
 
     const r2Path = path.join(iterationDir, 'R2_版本审视报告.md');
@@ -364,8 +378,8 @@ ${hasC0 ? '- C0_版本范围声明.md（兼容旧版）' : ''}
     console.log(chalk.cyan('  "请帮我执行 R2 审视，项目路径是 [当前目录]"'));
     console.log('');
     console.log('AI 将会：');
-    console.log('  1. 读取 B3、C1 文档');
-    console.log('  2. 检查版本是否偏离规划');
+    console.log('  1. 读取 B3、IT 文档');
+    console.log('  2. 检查 IT 用户故事是否忠实执行了 B3 规划');
     console.log('  3. 填写 R2 报告');
     console.log('  4. 展示结论让你决策');
     console.log('');
@@ -378,7 +392,7 @@ function getR1Prompt() {
 
 我将提供以下输入:
 - A 类文档(产品现状与基线)
-- B1 / B2(需求规划草案与拆解)
+- B_规划文档(需求规划与拆解)
 
 你的任务不是提出新方案，而是判断:
 【这份规划是否有资格被冻结为 B3】
@@ -418,36 +432,40 @@ function getR2Prompt() {
 
 我将提供以下输入:
 - B3(已冻结的规划文档)
-- C0 / C1(版本范围与版本需求清单)
+- IT 文档(业务需求与技术规格)
 
 你的任务不是评判方向，而是判断:
-【该版本是否忠实执行了既定规划】
+【IT 文档是否忠实执行了既定规划(B3)】
 
-请严格按以下 5 个维度进行审视，并逐条给出判断依据:
+请严格按以下 6 个维度进行审视，并逐条给出判断依据:
 
-1. 版本目标一致性
-   - C0 的版本目标是否能在 B3 中找到明确对应
-   - 是否存在规划外目标
+1. 业务场景闭环（以终为始）
+   - IT-BIZ 场景是否服务于 B3 核心目标
+   - 是否引入了未定义的业务目标
 
-2. 版本范围偏移检查
-   - 版本包含/不包含是否符合 B3 边界
-   - 是否存在隐性扩展或"顺手加戏"
+2. 规划范围一致性
+   - B2 需求项是否都有对应 IT
+   - IT 是否包含 B2 没有的新增需求（Gap 检查）
 
-3. 规划覆盖完整性
-   - B3 中的核心规划点是否在 C1 中得到体现
-   - 是否存在规划被版本拆没的情况
+3. 验收标准完整性
+   - 每个 IT 是否有明确的业务验收标准
+   - 是否包含体验验收标准
 
-4. 需求粒度成熟度
-   - 每条需求是否达到版本级、可理解、可评估
-   - 是否仍停留在规划语言
+4. 细节与边界
+   - 是否有异常处理和状态流转
+   - 技术规格(DEV)是否关联了 A2UI 原型
 
-5. 进入执行准备度
-   - 是否已不再需要产品侧做判断决策
-   - 是否只剩实现与执行问题
+5. 开发就绪状态
+   - 研发是否能直接基于文档开发
+   - 是否存在模棱两可的描述
+
+6. 用户视角审查
+   - 用户能否立即理解该功能
+   - 是否真正解决了用户痛点
 
 最后，请给出唯一结论(三选一):
 - 【通过】允许版本冻结
-- 【有条件通过】需修订的具体需求项
+- 【有条件通过】需修订的具体 IT 文档
 - 【不通过】禁止版本冻结
 
 禁止讨论规划是否正确，禁止提出新增需求。`;

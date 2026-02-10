@@ -1,6 +1,6 @@
 const TestHelper = require('../helpers/test-helper');
 
-describe('Snapshot Tests - 快照测试', () => {
+describe('Snapshot Tests - v2.0.0', () => {
     let testDir;
     let projectDir;
 
@@ -13,34 +13,27 @@ describe('Snapshot Tests - 快照测试', () => {
         await TestHelper.cleanup(testDir);
     });
 
-    describe('文档模板快照', () => {
-        test('R1 启动条件检查模板应匹配快照', async () => {
+    describe('文档模板快照（v2.0.0）', () => {
+        test('需求规划模板应匹配快照', async () => {
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
             await TestHelper.createIteration(projectDir);
+            await TestHelper.createPlan(projectDir);
 
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划启动条件检查.md'
-            );
-
-            // 移除动态内容（时间戳）
-            const normalized = content
-                .replace(/\*\*检查时间\*\*: .*?\n/, '**检查时间**: [TIMESTAMP]\n')
-                .replace(/\*\*迭代轮次\*\*: .*?\n/, '**迭代轮次**: [ITERATION]\n');
-
-            expect(normalized).toMatchSnapshot();
-        });
-
-        test('B1 需求规划草案模板应匹配快照', async () => {
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
-            await TestHelper.createIteration(projectDir);
-            await TestHelper.createPlan(projectDir, 'B1');
-
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/B1_需求规划草案.md'
-            );
+            // 尝试新文件名
+            let content;
+            try {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/需求规划.md'
+                );
+            } catch (e) {
+                content = await TestHelper.readFile(
+                    projectDir,
+                    '02_迭代记录/第01轮迭代/B_规划文档.md'
+                );
+            }
 
             // 移除动态内容
             const normalized = content
@@ -48,41 +41,17 @@ describe('Snapshot Tests - 快照测试', () => {
 
             expect(normalized).toMatchSnapshot();
         });
-
-        test('R1 规划审视报告模板应匹配快照', async () => {
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
-            await TestHelper.createIteration(projectDir);
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
-            await TestHelper.review(projectDir, 'r1');
-
-            const content = await TestHelper.readFile(
-                projectDir,
-                '02_迭代记录/第01轮迭代/R1_规划审视报告.md'
-            );
-
-            // 移除动态内容
-            const normalized = content
-                .replace(/\*\*审视时间\*\*: .*?\n/, '**审视时间**: [TIMESTAMP]\n')
-                .replace(/\*\*日期\*\*: .*?\n/, '**日期**: [DATE]\n');
-
-            expect(normalized).toMatchSnapshot();
-        });
     });
 
-    describe('文档结构快照', () => {
+    describe('文档结构快照（v2.0.0）', () => {
         test('完整项目结构应匹配快照', async () => {
-            // 创建完整流程
-            await TestHelper.createBaseline(projectDir, 'A0');
-            await TestHelper.createBaseline(projectDir, 'A1');
-            await TestHelper.createBaseline(projectDir, 'A2');
-            await TestHelper.createBaseline(projectDir, 'R0');
+            // v2.0.0 简化流程
+            await TestHelper.createBaseline(projectDir, '产品定义');
+            await TestHelper.createBaseline(projectDir, '代码快照');
+            await TestHelper.createBaseline(projectDir, '用户反馈');
+            // R0 已废弃，不再创建
             await TestHelper.createIteration(projectDir);
-            await TestHelper.createPlan(projectDir, 'B1');
-            await TestHelper.createPlan(projectDir, 'B2');
-            await TestHelper.review(projectDir, 'r1');
+            await TestHelper.createPlan(projectDir);
 
             // 获取目录结构
             const structure = await getDirectoryStructure(projectDir);

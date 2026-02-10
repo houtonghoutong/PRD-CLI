@@ -39,86 +39,8 @@ async function createNewIteration(config, configPath) {
     // 创建迭代目录
     await fs.ensureDir(iterationDir);
 
-    // 创建 R1 启动条件检查文档
-    const r1StartTemplate = `# R1_规划启动条件检查
-
-**检查时间**: ${new Date().toLocaleString('zh-CN')}
-**迭代轮次**: ${iterationName}
-
----
-
-## R1 启动条件检查
-
-在开始 B1/B2 规划之前，必须确认以下三个条件全部满足。
-
-### 启动条件一：问题是否被确认真实存在
-
-**检查标准**:
-该问题可以在以下至少一类中被指认:
-- [ ] A1: 已上线功能/用户路径中的明确断点
-- [ ] A2: 真实用户反馈/数据异常/业务投诉
-- [ ] 明确的业务约束或合规要求变化
-
-**检查结果**:
-<!-- 填写检查结果 -->
-
-**问题描述**:
-<!-- 描述具体问题，并指向 A 类文档中的具体章节 -->
-
----
-
-### 启动条件二：问题是否需要"单独一轮规划"来解决
-
-**检查标准**:
-该问题:
-- [ ] 无法通过微调、修补、参数修改解决
-- [ ] 会显著影响核心用户路径/核心目标
-
-**检查结果**:
-<!-- 说明为什么不能作为"顺带改一下" -->
-
----
-
-### 启动条件三：问题是否已经被理解到"可规划"的程度
-
-**检查标准**:
-问题的边界已基本清楚:
-- [ ] 是哪个用户
-- [ ] 发生在哪个场景
-- [ ] 影响到哪一段流程
-
-不存在以下情况:
-- [ ] 核心概念尚未统一
-- [ ] 关键前提仍在争论
-
-**检查结果**:
-<!-- 描述问题的边界和范围 -->
-
----
-
-## 最终判定
-
-**三条条件检查结果**:
-- [ ] 条件一: 通过 / 不通过
-- [ ] 条件二: 通过 / 不通过
-- [ ] 条件三: 通过 / 不通过
-
-**结论**:
-- [ ] ✅ 全部通过 - 允许启动 B1/B2
-- [ ] ❌ 存在不满足 - 禁止创建 B1 文档
-
----
-
-⚠️ **重要提醒**:
-- 只有三条条件全部满足，才允许启动 B1/B2
-- 任意一条不满足，禁止创建 B1 文档
-- 没有"勉强通过"，没有"先写着看"
-`;
-
-    await fs.writeFile(
-        path.join(iterationDir, 'R1_规划启动条件检查.md'),
-        r1StartTemplate
-    );
+    // 创建 IT 目录（用于存放用户故事）
+    await fs.ensureDir(path.join(iterationDir, 'IT'));
 
     // 更新配置
     config.currentIteration = newIteration;
@@ -135,21 +57,15 @@ async function createNewIteration(config, configPath) {
             console.log(chalk.yellow.bold('📌 提醒：A2 中有待下版事项！\n'));
             console.log(chalk.yellow('   请检查 01_产品基线/A2_存量反馈与数据汇总.md'));
             console.log(chalk.yellow('   的"五、待下版事项"章节，'));
-            console.log(chalk.yellow('   将需要处理的事项纳入本轮 B1 规划。\n'));
+            console.log(chalk.yellow('   将需要处理的事项纳入本轮规划。\n'));
         }
     }
 
     console.log(chalk.bold('下一步:'));
-    console.log('1. 检查 A2 的"待下版事项"（如有）');
-    console.log('2. 填写 R1_规划启动条件检查.md');
-    console.log('3. 确认三个条件全部满足');
-    console.log('4. 创建 B1: prd plan create B1');
-    console.log('');
-
-    console.log(chalk.yellow('📌 R1 启动条件快速参考:'));
-    console.log('   条件一: 问题是否真实存在(基于 A 类文档)');
-    console.log('   条件二: 是否值得单独一轮规划');
-    console.log('   条件三: 问题是否已理解清楚');
+    console.log('1. 创建规划文档: prd plan create B');
+    console.log('2. 与 AI 对话填写规划（启动检查 + 需求拆解）');
+    console.log('3. 冻结规划: prd plan freeze');
+    console.log('4. 创建 IT 用户故事: prd it create "需求名称"');
     console.log('');
 }
 

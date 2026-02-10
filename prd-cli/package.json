@@ -1,7 +1,7 @@
 {
   "name": "prd-workflow-cli",
-  "version": "1.4.1",
-  "description": "产品需求管理规范 CLI 工具 - 基于 A→R→B→C 流程，集成 PM 确认机制和对话归档的需求管理命令行工具",
+  "version": "2.0.0",
+  "description": "产品需求管理规范 CLI 工具 - 基于 基线→规划→IT→版本 流程的需求管理命令行工具",
   "main": "index.js",
   "bin": {
     "prd": "./bin/prd-cli.js"
